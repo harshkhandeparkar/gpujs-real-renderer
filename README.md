@@ -1,2 +1,2 @@
-# gpujs-real-renderer
-Graphs updating in real-time? Simulating waves? Anything else? This project has got you covered.
+# GPU.js Real Renderer
+A Real Time 2D Graphical Rendering Engine Made With GPU.js.
