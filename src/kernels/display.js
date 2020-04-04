@@ -1,5 +1,4 @@
 /**
- * 
  * @param {Object} gpu GPU.js Instance
  * @param {Object} dimensions Dimensions of the Output Graph
  */

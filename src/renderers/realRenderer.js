@@ -5,14 +5,15 @@ class RealRenderer {
   constructor(options) {
     this.canvasTag = options.canvasTag;
     this.dimensions = options.dimensions || {x: 1000, y:1000};
-    this.scaleFactor = options.scaleFactor || 1;
-    this.bgColor = options.bgColor || 0;
+    this.xScaleFactor = options.xScaleFactor || 1;
+    this.yScaleFactor = options.yScaleFactor || 1;
+    this.bgColor = options.bgColor || [0, 0, 0];
+    this.axesColor = options.axesColor || [1, 1, 1];
     this.drawsPerFrame = options.drawsPerFrame || 1;
-    this.brushSize = options.brushSize || 0.1;
     this.timeStep = options.timeStep || (1 / 60);
 
-    this.xOffset = options.xOffset;
-    this.yOffset = options.yOffset;
+    this.xOffset = options.xOffset || 50; // %age offset
+    this.yOffset = options.yOffset || 50; // %age offset
 
     if (document.getElementById(this.canvasTag) === undefined) {
       throw 'No Canvas Element Found';
@@ -28,7 +29,7 @@ class RealRenderer {
 
     this.display = getDisplayKernel(this.gpu, this.dimensions);
 
-    this.drawFunc = ''; // Procedurally Generate This
+    this.drawFunc = function() {}; // The child class will define this.
     this.time = options.time || 0;
 
     this.doRender = true;
