@@ -7,9 +7,7 @@
  * @param {Function} drawFunc Draw function
  * @param {Object} extraConstants Any extra constants for the kernel.
  */
-function getDrawKernel(gpu, dimensions, xScaleFactor, yScaleFactor, drawFunc, extraConstants = {}) {
-  gpu.addFunction(drawFunc); // Main Drawing Function
-  
+function getDrawKernel(gpu, dimensions, xScaleFactor, yScaleFactor, drawFunc, extraConstants = {}) {  
   return gpu.createKernel(function(graphPixels, time, data) {
     const x = this.thread.x / this.constants.scaleFactor;
     const y = this.thread.y / this.constants.scaleFactor;
@@ -26,5 +24,7 @@ function getDrawKernel(gpu, dimensions, xScaleFactor, yScaleFactor, drawFunc, ex
       yScaleFactor,
       ...extraConstants
     }
-  })
+  }).setFunctions([
+    drawFunc
+  ])
 }

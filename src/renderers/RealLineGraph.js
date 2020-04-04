@@ -8,10 +8,9 @@ class RealLineGraph extends RealRenderer {
     this.progressiveAxis = options.progressiveAxis.toLowerCase() || 'x'; // Which axis remains static
     this.progressionMode = options.progressionMode || 'overflow'; // overflow -> Only progresses when completely filled; continous -> Always progresses;
     this.progressionRatio = options.progressionRatio || 1; // One time unit = progressionRatio coordinate units
+    this.brushSize = options.brushSize;
 
     this.graphInputFunc = gpu.createKernel(options.graphInputFunc, {output: this.dimensions.x, pipeline: true});
-
-    this.brushSize = options.brushSize;
 
     const drawKernel = getDrawKernel(
       this.gpu,
@@ -32,7 +31,7 @@ class RealLineGraph extends RealRenderer {
     this.drawFunc = (graphPixels, time) => {
       this.data = this.graphInputFunc(time);
 
-      return drawKernel(graphPixels, time, data)
+      return drawKernel(graphPixels, time, data);
     }
   }
 }
