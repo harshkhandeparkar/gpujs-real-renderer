@@ -29,7 +29,6 @@ class RealRenderer {
 
     this.display = getDisplayKernel(this.gpu, this.dimensions);
 
-    this.drawFunc = function() {}; // The child class will define this.
     this.time = options.time || 0;
 
     this.doRender = true;
@@ -37,7 +36,7 @@ class RealRenderer {
 
   _draw() {
     this.time += this.timeStep;
-    this.graphPixels = this.drawFunc(this.graphPixels, this.time);
+    this.graphPixels = this.drawFunc(this.graphPixels, this.time); // drawFunc defined by child class
   }
 
   draw(numDraws) {

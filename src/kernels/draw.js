@@ -10,13 +10,13 @@
 function getDrawKernel(gpu, dimensions, xScaleFactor, yScaleFactor, drawFunc, extraConstants = {}) {
   gpu.addFunction(drawFunc); // Main Drawing Function
   
-  return gpu.createKernel(function(graphPixels, time) {
+  return gpu.createKernel(function(graphPixels, time, data) {
     const x = this.thread.x / this.constants.scaleFactor;
     const y = this.thread.y / this.constants.scaleFactor;
     
     const pix = graphPixels[this.thread.y][this.thread.x]; // Current color value of the pixel
 
-    return drawFunc(x, y, pix, time); // Returns an array of colors
+    return drawFunc(x, y, pix, time, data); // Returns an array of colors
   },
   {
     output: dimensions,
