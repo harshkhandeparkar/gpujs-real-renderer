@@ -8,7 +8,7 @@ class RealLineGraph extends RealRenderer {
     this.progressiveAxis = options.progressiveAxis || 'x'; // Which axis progresses with time
     this.progressiveAxis = this.progressiveAxis.toLowerCase();
     this.progressionMode = options.progressionMode || 'overflow'; // overflow -> Only progresses when completely filled; continous -> Always progresses;
-    this.progressionRatio = options.progressInterval || 1; // Progress once every interval time units; Only works with continous progressionMode
+    this.progressInterval = options.progressInterval || 1; // Progress once every interval time units; Only works with continous progressionMode
     this.brushSize = options.brushSize;
 
     this._progressGraph = getProgressGraphKernel(this.gpu, this.dimensions, this.progressiveAxis);
@@ -18,7 +18,8 @@ class RealLineGraph extends RealRenderer {
 
   _drawFunc(graphPixels, time) {
     if (time - this.lastProgress >= this.progressInterval) {
-      return this._progressGraph(graphPixels, time);
+      this.lastProgress = time;
+      return this._progressGraph(this._cloneTexture(graphPixels));
     }
     else return graphPixels;
   }
