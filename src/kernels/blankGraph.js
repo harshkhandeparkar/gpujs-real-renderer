@@ -11,10 +11,7 @@ function getBlankGraphKernel(gpu, dimensions, xOffset, yOffset, bgColor, axesCol
     const X = Math.floor(this.output.y * (this.constants.xOffset / 100));
     const Y = Math.floor(this.output.x * (this.constants.yOffset / 100));
 
-    if (this.thread.x === Y || this.thread.y === X) return [1, 1, 1];
-    else return [0, 0, 0]; 
-
-    if (this.thread.x === X || this.thread.y === Y) return this.constants.axesColor;
+    if (this.thread.x === Y || this.thread.y === X) return this.constants.axesColor;
     else return this.constants.bgColor; 
   },
   {
@@ -25,6 +22,12 @@ function getBlankGraphKernel(gpu, dimensions, xOffset, yOffset, bgColor, axesCol
       yOffset,
       bgColor,
       axesColor
+    },
+    constantTypes: {
+      bgColor: 'Array(3)',
+      axesColor: 'Array(3)',
+      xOffset: 'Float',
+      yOffset: 'Float'
     }
   })
 }
