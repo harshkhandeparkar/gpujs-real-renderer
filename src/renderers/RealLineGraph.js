@@ -11,7 +11,7 @@ class RealLineGraph extends RealRenderer {
     this.progressInterval = options.progressInterval || 1; // Progress once every interval time units; Only works with continous progressionMode
     this.brushSize = options.brushSize;
 
-    this._progressGraph = getProgressGraphKernel(this.gpu, this.dimensions, this.progressiveAxis);
+    this._progressGraph = getProgressGraphKernel(this.gpu, this.dimensions, this.progressiveAxis, this.xOffset, this.yOffset, this.axesColor, this.bgColor);
 
     this.lastProgress = 0; // Time when the graph last progressed. Internal variable
   }
