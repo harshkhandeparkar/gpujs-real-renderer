@@ -1,5 +1,5 @@
-const { GPU } = require('gpu.js');
-const getDisplayKernel = require('./kernels/display');
+const GPU = window.GPU;
+const getDisplayKernel = require('../kernels/display');
 
 class RealRenderer {
   constructor(options) {

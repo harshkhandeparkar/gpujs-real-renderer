@@ -1,5 +1,5 @@
 const RealRenderer = require('./RealRenderer');
-const getDrawKernel = require('./kernels/draw');
+const getDrawKernel = require('../kernels/draw');
 
 class RealLineGraph extends RealRenderer {
   constructor(options) {
