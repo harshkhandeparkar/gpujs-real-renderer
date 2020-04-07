@@ -9,4 +9,4 @@ const LineGraph = new GPUjsRealRenderer.RealLineGraph({
   progressiveAxis: 'x'
 })
 
-LineGraph.draw();
+LineGraph.startRender();
