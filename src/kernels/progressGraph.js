@@ -5,20 +5,26 @@
  */
 function getProgressGraphKernel(gpu, dimensions, progressiveAxis) {
   return gpu.createKernel(function(graphPixels) {
-    if ((this.thread.x + 1) === this.output.x) {
+    if ((this.thread.x + 1) === this.output.x || (this.thread.y + 1) === this.output.y) {
       // Temporary
       // TODO: Procedurally generate the axes and background
       return [0, 0, 0];
     }
     else {
-      return graphPixels[this.thread.y][this.thread.x + 1]
+      return graphPixels[
+        this.thread.y +
+        1*this.constants.progressiveAxis
+      ][
+        this.thread.x +
+        1*Math.abs(this.constants.progressiveAxis - 1)
+      ]
     }
   },
   {
     output: dimensions,
     pipeline: true,
     constants: {
-      progressiveAxis: progressiveAxis == 'x' ? 0 : 1
+      progressiveAxis: progressiveAxis == 'y' ? 1 : 0
     }
   })
 }
