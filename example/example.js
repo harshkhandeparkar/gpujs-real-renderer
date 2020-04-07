@@ -1,10 +1,12 @@
-const LineGraph = new GPUjsRealRenderer.RealRenderer({
-  canvasTag: 'main-canvas',
+const LineGraph = new GPUjsRealRenderer.RealLineGraph({
+  canvasTag: 'line-canvas',
   dimensions: [1280, 720],
-  xOffset: 10, // 20%
+  xOffset: 30, // 20%
   yOffset: 10,  // 80%
   xScaleFactor: 20,
-  yScaleFactor: 10
+  yScaleFactor: 10,
+  progressInterval: 0.4,
+  progressiveAxis: 'x'
 })
 
-LineGraph.draw(1)
+LineGraph.draw();
