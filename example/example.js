@@ -19,10 +19,10 @@ const LineGraph = new GPUjsRealRenderer.RealLineGraph({
   progressInterval: 0.4, // Axis moves by one pixel every 0.4 internal time units (Only for continous type)
 
   brushSize: 0.1, // The radius of one point of data, in coordinate units
-  brushColor: [1, 0, 0], // Color of the brush
+  brushColor: [0.76, 0, 0], // Color of the brush
 
   lineThickness: 0.03, // Thickness of the line joining points
-  lineColor: [0, 0, 1]
+  lineColor: [0.1, 0.2, 0.8]
 })
 
 LineGraph.draw();
