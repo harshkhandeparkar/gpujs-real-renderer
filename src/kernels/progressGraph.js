@@ -8,10 +8,14 @@
  * @param {Float32Array} bgColor
  */
 function getProgressGraphKernel(gpu, dimensions, progressiveAxis, xOffset, yOffset, axesColor, bgColor) {
-  return gpu.createKernel(function(graphPixels) {
-    if ((this.thread.x + 1)*(this.constants.progressiveAxis - 1) === this.output.x || (this.thread.y + 1)*this.constants.progressiveAxis === this.output.y) {
-      const X = Math.floor(this.output.y * (this.constants.xOffset / 100));
-      const Y = Math.floor(this.output.x * (this.constants.yOffset / 100));
+  return gpu.createKernel(function(graphPixels, numProgress) {
+    const outX = this.output.x, outY = this.output.y;
+    if (
+      (this.thread.x * Math.abs(this.constants.progressiveAxis - 1) >= (outX - numProgress)) || 
+      (this.thread.y * this.constants.progressiveAxis >= (outY + numProgress))
+    ) {
+      const X = Math.floor(outY * (this.constants.xOffset / 100));
+      const Y = Math.floor(outX * (this.constants.yOffset / 100));
 
       if (this.thread.x === Y || this.thread.y === X) return this.constants.axesColor;
       else return this.constants.bgColor; 
@@ -19,10 +23,10 @@ function getProgressGraphKernel(gpu, dimensions, progressiveAxis, xOffset, yOffs
     else {
       return graphPixels[
         this.thread.y +
-        1*this.constants.progressiveAxis
+        numProgress*this.constants.progressiveAxis
       ][
         this.thread.x +
-        1*Math.abs(this.constants.progressiveAxis - 1)
+        numProgress*Math.abs(this.constants.progressiveAxis - 1)
       ]
     }
   },

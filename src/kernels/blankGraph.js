@@ -8,8 +8,10 @@
  */
 function getBlankGraphKernel(gpu, dimensions, xOffset, yOffset, bgColor, axesColor) {
   return gpu.createKernel(function() {
-    const X = Math.floor(this.output.y * (this.constants.xOffset / 100));
-    const Y = Math.floor(this.output.x * (this.constants.yOffset / 100));
+    const outX = this.output.x, outY = this.output.y;
+
+    const X = Math.floor(outY * (this.constants.xOffset / 100));
+    const Y = Math.floor(outX * (this.constants.yOffset / 100));
 
     if (this.thread.x === Y || this.thread.y === X) return this.constants.axesColor;
     else return this.constants.bgColor; 
