@@ -7,7 +7,7 @@ class RealRenderer {
     // *****DEFAULTS*****
     this.canvasTag = options.canvasTag;
     this.dimensions = options.dimensions || {x: 1000, y:1000};
-    this.xScaleFactor = options.xScaleFactor || 1;
+    this.xScaleFactor = options.xScaleFactor || 10;
     this.yScaleFactor = options.yScaleFactor || 1;
     this.bgColor = options.bgColor || [0, 0, 0];
     this.axesColor = options.axesColor || [1, 1, 1];
@@ -34,7 +34,8 @@ class RealRenderer {
 
     this.gpu = new options.GPU({
       canvas: this.canvas,
-      mode: 'gpu'
+      mode: 'gpu',
+      tactic: 'precision'
     })
 
     this._blankGraph = getBlankGraphKernel(this.gpu, this.dimensions, this.xOffset, this.yOffset, this.bgColor, this.axesColor);
