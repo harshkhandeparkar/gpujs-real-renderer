@@ -9,7 +9,7 @@
  */
 function getProgressGraphKernel(gpu, dimensions, progressiveAxis, xOffset, yOffset, axesColor, bgColor) {
   return gpu.createKernel(function(graphPixels) {
-    if ((this.thread.x + 1) === this.output.x || (this.thread.y + 1) === this.output.y) {
+    if ((this.thread.x + 1)*(this.constants.progressiveAxis - 1) === this.output.x || (this.thread.y + 1)*this.constants.progressiveAxis === this.output.y) {
       const X = Math.floor(this.output.y * (this.constants.xOffset / 100));
       const Y = Math.floor(this.output.x * (this.constants.yOffset / 100));
 
