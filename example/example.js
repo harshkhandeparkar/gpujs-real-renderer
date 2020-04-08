@@ -1,9 +1,9 @@
 const LineGraph = new GPUjsRealRenderer.RealLineGraph({
   canvasTag: 'line-canvas',
-  dimensions: [1280, 720],
+  dimensions: [420, 360],
 
-  xScaleFactor: 10,
-  yScaleFactor: 1,
+  xScaleFactor: 20,
+  yScaleFactor: 0.2,
 
   bgColor: [0.2, 0.2, 0.2],
   axesColor: [0.2, 1, 1],
@@ -15,11 +15,14 @@ const LineGraph = new GPUjsRealRenderer.RealLineGraph({
   yOffset: 10, // 10%
   
   progressiveAxis: 'x', // x -> Graph moves along x-axis; y -> Graph moves along y-axis
-  progressionMode: 'continous', // continous -> Axis always moves; overfloa -> Axis only moves when space for new data is inadequate;
+  progressionMode: 'overflow', // continous -> Axis always moves; overfloa -> Axis only moves when space for new data is inadequate;
   progressInterval: 0.4, // Axis moves by one pixel every 0.4 internal time units (Only for continous type)
 
-  brushSize: 1, // The radius of one point of data, in coordinate units
-  brushColor: [1, 0, 0] // Color of the brush
+  brushSize: 0.1, // The radius of one point of data, in coordinate units
+  brushColor: [1, 0, 0], // Color of the brush
+
+  lineThickness: 0.03, // Thickness of the line joining points
+  lineColor: [0, 0, 1]
 })
 
 LineGraph.draw();
