@@ -41,7 +41,9 @@ class RealLineGraph extends RealRenderer {
   }
 
   addData(value) {
-    if (typeof value != 'number') throw 'Data value not a number.'
+    value = parseFloat(value);
+    
+    if (isNaN(value)) throw 'Data value not a number.'
 
     this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress);
     this._lastData = value;
