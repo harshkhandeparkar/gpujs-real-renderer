@@ -4,6 +4,7 @@ const getCloneTextureKernel = require('../kernels/cloneTexture')
 
 class RealRenderer {
   constructor(options) {
+    // *****DEFAULTS*****
     this.canvasTag = options.canvasTag;
     this.dimensions = options.dimensions || {x: 1000, y:1000};
     this.xScaleFactor = options.xScaleFactor || 1;
@@ -23,6 +24,7 @@ class RealRenderer {
 
     this.xOffset = Math.max(0, Math.min(100, this.xOffset)) // Between 0 and 100
     this.yOffset = Math.max(0, Math.min(100, this.yOffset)) // Between 0 and 100
+    // *****DEFAULTS*****
 
     if (document.getElementById(this.canvasTag) === undefined) {
       throw 'No Canvas Element Found';
@@ -73,23 +75,20 @@ class RealRenderer {
   startRender() {
     this.doRender = true;
     this._render();
-
     return this;
   }
 
   stopRender() {
     this.doRender = false;
-
     return this;
   }
 
   resetTime() {
     this.time = 0;
-
     return this;
   }
 
-  clearPixels() {
+  clearPlot() {
     let initialRender = false;
 
     if (this.doRender) {
