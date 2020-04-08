@@ -13,6 +13,7 @@ class RealRenderer {
     this.axesColor = options.axesColor || [1, 1, 1];
     this.drawsPerFrame = options.drawsPerFrame || 1;
     this.timeStep = options.timeStep || (1 / 60);
+    this.time = options.initTime || 0;
 
     this.xOffset = options.xOffset; // %age offset
     this.yOffset = options.yOffset; // %age offset
@@ -30,10 +31,10 @@ class RealRenderer {
       throw 'No Canvas Element Found';
     }
 
-    this.canvas = document.getElementById(this.canvasTag);
+    this._canvas = document.getElementById(this.canvasTag);
 
     this.gpu = new options.GPU({
-      canvas: this.canvas,
+      canvas: this._canvas,
       mode: 'gpu',
       tactic: 'precision'
     })
@@ -45,8 +46,7 @@ class RealRenderer {
 
     this._display = getDisplayKernel(this.gpu, this.dimensions);
 
-    this.time = options.time || 0;
-    this.doRender = false;
+    this._doRender = false;
   }
 
   _drawFunc(graphPixels /*, time*/) { // Can be overridden
@@ -70,17 +70,17 @@ class RealRenderer {
     for (let i = 0; i < this.drawsPerFrame; i++) this._draw();
     this._display(this.graphPixels);
 
-    if (this.doRender) window.requestAnimationFrame(() => {this._render()});
+    if (this._doRender) window.requestAnimationFrame(() => {this._render()});
   }
 
   startRender() {
-    this.doRender = true;
+    this._doRender = true;
     this._render();
     return this;
   }
 
   stopRender() {
-    this.doRender = false;
+    this._doRender = false;
     return this;
   }
 
@@ -92,7 +92,7 @@ class RealRenderer {
   clearPlot() {
     let initialRender = false;
 
-    if (this.doRender) {
+    if (this._doRender) {
       initialRender = true;
       this.stopRender();
     }
