@@ -18,7 +18,7 @@ class RealLineGraph extends RealRenderer {
     this.lineThickness = options.lineThickness || 0.05;
     this.lineColor = options.lineColor || [0, 0.5, 0];
     // *****DEFAULTS*****
-    
+
     this._progressGraph = getProgressGraphKernel(this.gpu, this.dimensions, this.progressiveAxis, this.xOffset, this.yOffset, this.axesColor, this.bgColor);
     this._lastProgress = 0; // Time when the graph last progressed. Internal variable
     this._numProgress = 0; // Number of times the graph has progressed
@@ -41,9 +41,11 @@ class RealLineGraph extends RealRenderer {
   }
 
   addData(value) {
+    if (typeof value != 'number') throw 'Data value not a number.'
+
     this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress);
     this._lastData = value;
-    
+
     // Overflow
     if (this._dataIndex >= this.limits.x[1] && this.progressionMode != 'continous') {
       let progress = Math.ceil(this.progressiveAxis == 'y' ? this.yScaleFactor : this.xScaleFactor);
@@ -52,7 +54,7 @@ class RealLineGraph extends RealRenderer {
         this._cloneTexture(this.graphPixels),
         progress
       )
-      
+
       this._numProgress += progress;
 
       if (this.progressiveAxis == 'y') {
@@ -64,7 +66,7 @@ class RealLineGraph extends RealRenderer {
         this.limits.x[0] += progress / this.xScaleFactor;
       }
     }
-    
+
     this._display(this.graphPixels);
     return this;
   }
