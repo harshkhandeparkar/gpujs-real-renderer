@@ -26,7 +26,7 @@ class RealLineGraph extends RealRenderer {
     this._dataIndex = 1; // Number of plots
     this._lastData = 0; // (Value) To display lines
 
-    this._addData = getAddDataKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
+    this._addData = getAddDataKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor, this.progressiveAxis);
 
     this.limits = { // Final ranges of x and y
       x: [
@@ -46,8 +46,23 @@ class RealLineGraph extends RealRenderer {
     
     // Overflow
     if (this._dataIndex >= this.limits.x[1] && this.progressionMode != 'continous') {
-      this.graphPixels = this._progressGraph(this._cloneTexture(this.graphPixels), Math.ceil(this.xScaleFactor))
-      this._numProgress += Math.ceil(this.xScaleFactor);
+      let progress = Math.ceil(this.progressiveAxis == 'y' ? this.yScaleFactor : this.xScaleFactor);
+
+      this.graphPixels = this._progressGraph(
+        this._cloneTexture(this.graphPixels),
+        progress
+      )
+      
+      this._numProgress += progress;
+
+      if (this.progressiveAxis == 'y') {
+        this.limits.y[0] += progress / this.yScaleFactor;
+        this.limits.y[1] += progress / this.yScaleFactor;
+      }
+      else {
+        this.limits.x[1] += progress / this.xScaleFactor;
+        this.limits.x[0] += progress / this.xScaleFactor;
+      }
     }
     
     this._display(this.graphPixels);
@@ -58,6 +73,16 @@ class RealLineGraph extends RealRenderer {
     if (this.progressionMode == 'continous' && (time - this._lastProgress >= this.progressInterval)) {
       this._lastProgress = time;
       this._numProgress++;
+
+      if (this.progressiveAxis == 'y') {
+        this.limits.y[0] += 1 / this.yScaleFactor;
+        this.limits.y[1] += 1 / this.yScaleFactor;
+      }
+      else {
+        this.limits.x[0] += 1 / this.xScaleFactor;
+        this.limits.x[1] += 1 / this.xScaleFactor;
+      }
+
       return this._progressGraph(this._cloneTexture(graphPixels), 1);
     }
     else return graphPixels;
