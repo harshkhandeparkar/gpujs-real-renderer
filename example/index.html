@@ -7,9 +7,14 @@
 </head>
 <body>
   
-  <h3>Progressive Line Graph(RealLineGraph class)</h3>
-  <button id="line-btn">Start Rendering</button><br /><br />
+  <h3>Progressive Line Graph (ProgressMode: 'overflow')</h3>
+  <!-- <button id="line-btn">Start Rendering</button><br /><br /> -->
   <canvas id="line-canvas"></canvas>
+
+  <form id="input-form">
+    <input type="text" placeholder="Value" id="value" />
+    <button id="add">Add Data</button>
+  </form>
 
   <script src="./gpu-browser.min.js"></script>
   <script src="../dist/gpujs-real-renderer-browser.js"></script>

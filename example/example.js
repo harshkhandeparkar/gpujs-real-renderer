@@ -1,4 +1,4 @@
-const LineGraph = new GPUjsRealRenderer.RealLineGraph({
+const options = {
   canvasTag: 'line-canvas',
   dimensions: [420, 360],
 
@@ -23,19 +23,32 @@ const LineGraph = new GPUjsRealRenderer.RealLineGraph({
 
   lineThickness: 0.03, // Thickness of the line joining points
   lineColor: [0.1, 0.2, 0.8]
-})
+}
+
+const LineGraph = new GPUjsRealRenderer.RealLineGraph(options)
 
 LineGraph.draw();
 
-document.getElementById('line-btn').onclick = e => {
+// if (LineGraph.progressionMode == 'continous') {
+  // document.getElementById('line-btn').onclick = e => {
+  //   e.preventDefault();
+
+  //   if (LineGraph.doRender) {
+  //     LineGraph.stopRender();
+  //     document.getElementById('line-btn').innerText = 'Start Rendering';
+  //   }
+  //   else {
+  //     LineGraph.startRender();
+  //     document.getElementById('line-btn').innerText = 'Stop Rendering';
+  //   }
+  // }
+// }
+// else document.getElementById('line-btn').disabled = true;
+
+document.getElementById('add').onclick = e => {
   e.preventDefault();
 
-  if (LineGraph.doRender) {
-    LineGraph.stopRender();
-    document.getElementById('line-btn').innerText = 'Start Rendering';
-  }
-  else {
-    LineGraph.startRender();
-    document.getElementById('line-btn').innerText = 'Stop Rendering';
+  if (typeof document.getElementById('value').value != 'undefined') {
+    LineGraph.addData(document.getElementById('value').value);
   }
 }
