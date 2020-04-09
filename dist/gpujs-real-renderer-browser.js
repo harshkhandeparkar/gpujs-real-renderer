@@ -163,19 +163,9 @@
       return this;
     }
 
-    clearPlot() {
-      let initialRender = false;
-
-      if (this._doRender) {
-        initialRender = true;
-        this.stopRender();
-      }
-
-      this.graphPixels.delete();
+    reset() {
       this.graphPixels = this._blankGraph();
       this._display(this.graphPixels);
-
-      if (initialRender) this.startRender();
 
       return this;
     }
@@ -261,8 +251,8 @@
       const X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
       const Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
 
-      const xDist = X - dataIndex;
-      const yDist = Y - value;
+      const xDist = (X - dataIndex) * this.constants.xScaleFactor;
+      const yDist = (Y - value) * this.constants.yScaleFactor;
 
       const dist = Math.sqrt(xDist*xDist + yDist*yDist);
 
@@ -319,7 +309,7 @@
       this.progressionMode = options.progressionMode || 'overflow'; // overflow -> Only progresses when completely filled; continous -> Always progresses;
       this.progressInterval = options.progressInterval || 1; // Progress once every interval time units; Only works with continous progressionMode
 
-      this.brushSize = options.brushSize || 2; // 1 unit radius
+      this.brushSize = options.brushSize || 1; // 1 unit radius
       this.brushColor = options.brushColor || [1, 1, 1];
 
       this.lineThickness = options.lineThickness || 0.05;
@@ -397,6 +387,29 @@
         return this._progressGraph(this._cloneTexture(graphPixels), 1);
       }
       else return graphPixels;
+    }
+
+    reset() {
+      super.reset();
+
+      // Reset Inner Variables
+      this._dataIndex = 1;
+      this._lastData = 0;
+      this._lastProgress = 0;
+      this._numProgress = 0;
+
+      this.limits = { // Final ranges of x and y
+        x: [
+          0 - (this.yOffset / 100) * (this.dimensions[0] / this.xScaleFactor), // lower limit
+          this.dimensions[0] / this.xScaleFactor - (this.yOffset / 100) * (this.dimensions[0] / this.xScaleFactor) // upper limit
+        ],
+        y: [
+          0 - (this.xOffset / 100) * (this.dimensions[1] / this.yScaleFactor),
+          this.dimensions[1] / this.yScaleFactor - (this.xOffset / 100) * (this.dimensions[1] / this.yScaleFactor)
+        ]
+      };
+
+      return this;
     }
   }
 
