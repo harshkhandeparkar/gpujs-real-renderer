@@ -12,7 +12,7 @@ class RealLineGraph extends RealRenderer {
     this.progressionMode = options.progressionMode || 'overflow'; // overflow -> Only progresses when completely filled; continous -> Always progresses;
     this.progressInterval = options.progressInterval || 1; // Progress once every interval time units; Only works with continous progressionMode
 
-    this.brushSize = options.brushSize || 2; // 1 unit radius
+    this.brushSize = options.brushSize || 1; // 1 unit radius
     this.brushColor = options.brushColor || [1, 1, 1];
 
     this.lineThickness = options.lineThickness || 0.05;

@@ -18,7 +18,7 @@ const options = {
   progressionMode: 'overflow', // continous -> Axis always moves; overfloa -> Axis only moves when space for new data is inadequate;
   progressInterval: 0.4, // Axis moves by one pixel every 0.4 internal time units (Only for continous type)
 
-  brushSize: 0.1, // The radius of one point of data, in coordinate units
+  brushSize: 2, // The radius of one point of data, in coordinate units
   brushColor: [0.76, 0, 0], // Color of the brush
 
   lineThickness: 0.03, // Thickness of the line joining points
