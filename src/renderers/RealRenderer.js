@@ -89,19 +89,9 @@ class RealRenderer {
     return this;
   }
 
-  clearPlot() {
-    let initialRender = false;
-
-    if (this._doRender) {
-      initialRender = true;
-      this.stopRender();
-    }
-
-    this.graphPixels.delete();
+  reset() {
     this.graphPixels = this._blankGraph();
     this._display(this.graphPixels);
-
-    if (initialRender) this.startRender();
 
     return this;
   }
