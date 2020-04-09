@@ -391,6 +391,10 @@
       else return graphPixels;
     }
 
+    getLimits() {
+      return this.limits;
+    }
+
     reset() {
       super.reset();
 
