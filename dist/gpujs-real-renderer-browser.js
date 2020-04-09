@@ -165,6 +165,8 @@
 
     reset() {
       this.graphPixels = this._blankGraph();
+      this.resetTime();
+
       this._display(this.graphPixels);
 
       return this;
