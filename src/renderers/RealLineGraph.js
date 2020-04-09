@@ -92,6 +92,10 @@ class RealLineGraph extends RealRenderer {
     else return graphPixels;
   }
 
+  getLimits() {
+    return this.limits;
+  }
+
   reset() {
     super.reset();
 
