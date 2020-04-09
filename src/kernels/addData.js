@@ -22,8 +22,8 @@ function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, 
     const X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
     const Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
 
-    const xDist = X - dataIndex;
-    const yDist = Y - value;
+    const xDist = (X - dataIndex) * this.constants.xScaleFactor;
+    const yDist = (Y - value) * this.constants.yScaleFactor;
 
     const dist = Math.sqrt(xDist*xDist + yDist*yDist);
 
