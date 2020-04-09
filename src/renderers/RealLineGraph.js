@@ -91,6 +91,29 @@ class RealLineGraph extends RealRenderer {
     }
     else return graphPixels;
   }
+
+  reset() {
+    super.reset();
+
+    // Reset Inner Variables
+    this._dataIndex = 1;
+    this._lastData = 0;
+    this._lastProgress = 0;
+    this._numProgress = 0;
+
+    this.limits = { // Final ranges of x and y
+      x: [
+        0 - (this.yOffset / 100) * (this.dimensions[0] / this.xScaleFactor), // lower limit
+        this.dimensions[0] / this.xScaleFactor - (this.yOffset / 100) * (this.dimensions[0] / this.xScaleFactor) // upper limit
+      ],
+      y: [
+        0 - (this.xOffset / 100) * (this.dimensions[1] / this.yScaleFactor),
+        this.dimensions[1] / this.yScaleFactor - (this.xOffset / 100) * (this.dimensions[1] / this.yScaleFactor)
+      ]
+    }
+
+    return this;
+  }
 }
 
 module.exports = RealLineGraph;
