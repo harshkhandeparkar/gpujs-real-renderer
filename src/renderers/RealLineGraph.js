@@ -24,7 +24,7 @@ class RealLineGraph extends RealRenderer {
     this._numProgress = 0; // Number of times the graph has progressed
 
     this._dataIndex = 1; // Number of plots
-    this._lastData = 0; // (Value) To display lines
+    this._lastData = [0]; // (Value) To display lines
 
     this._addData = getAddDataKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor, this.progressiveAxis);
 
@@ -41,10 +41,11 @@ class RealLineGraph extends RealRenderer {
   }
 
   addData(value) {
-    value = parseFloat(value);
-    
-    if (isNaN(value)) throw 'Data value not a number.'
+    if (!isNaN(parseFloat(value))) value = [parseFloat(value)];
+    else if (!value.texture) throw 'Input invalid.';
 
+    console.log(value, this._lastData)
+    
     this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress);
     this._lastData = value;
 

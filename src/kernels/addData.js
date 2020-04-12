@@ -16,6 +16,9 @@ function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, 
   return gpu.createKernel(function(graphPixels, value, dataIndex, lastData, numProgress) {
     const x = this.thread.x + numProgress * Math.abs(this.constants.progressiveAxis - 1),
       y = this.thread.y + numProgress * this.constants.progressiveAxis;
+
+    const val = value[0];
+    const last = lastData[0];
       
     const outX = this.output.x, outY = this.output.y;
 
@@ -23,20 +26,20 @@ function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, 
     const Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
 
     const xDist = (X - dataIndex) * this.constants.xScaleFactor;
-    const yDist = (Y - value) * this.constants.yScaleFactor;
+    const yDist = (Y - val) * this.constants.yScaleFactor;
 
     const dist = Math.sqrt(xDist*xDist + yDist*yDist);
 
-    let lineEqn = X * (value - lastData) - Y - dataIndex * (value - lastData) + value;
-    let lineDist = Math.abs(lineEqn) / Math.sqrt((value - lastData)*(value - lastData) + 1)
+    let lineEqn = X * (val - last) - Y - dataIndex * (val - last) + val;
+    let lineDist = Math.abs(lineEqn) / Math.sqrt((val - last)*(val - last) + 1)
 
     if (dist <= this.constants.brushSize) return this.constants.brushColor;
     else if (
       lineDist <= this.constants.lineThickness &&
       X <= dataIndex &&
       X >= dataIndex - 1 &&
-      Y <= Math.max(value, lastData) &&
-      Y >= Math.min(value, lastData)
+      Y <= Math.max(val, last) &&
+      Y >= Math.min(val, last)
     ) return this.constants.lineColor;
     else return graphPixels[this.thread.y][this.thread.x];
   },
