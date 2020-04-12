@@ -133,7 +133,7 @@ A value of `continous` changes the axis in time continously, at fixed intervals.
 Since this is a child class of `RealRenderer`, all the methods of `RealRender` are available here as well.
 Apart from these methods, the following new methods are also available and are chainable too.
 
-- `addData(value)`: Plots the next value on the graph. Takes a single number input `value` as the argument. This method also displays the graph after adding the data.
+- `addData(value)`: Plots the next value on the graph. Takes a single number or a gpu.js [pipelined](https://github.com/gpujs/gpu.js#pipelining) texture (with first element as the y-value) input `value` as the argument. This method also displays the graph after adding the data.
 
 - `getLimits()`: Returns an object containing the final range of x and y axes on the graph, after scaling and setting the x and y axes offsets. It also takes into account the progression of the graph.
 
