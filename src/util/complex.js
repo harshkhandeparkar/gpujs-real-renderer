@@ -1,5 +1,5 @@
 // A Complex class to handle all complex stuff
-const {convertCartesianPolar, convertPolarCartesian} = require('./convert-form');
+const {convertCartesianPolar, convertPolarCartesian} = require('./convertForm');
 
 class Complex {
   /**
@@ -14,11 +14,12 @@ class Complex {
     this.x = convertPolarCartesian(this.r, this.theta)[0];
     this.y = convertPolarCartesian(this.r, this.theta)[1];
 
+
+    this.convertCartesianPolar = convertCartesianPolar;
+    this.convertPolarCartesian = convertPolarCartesian;
+
     return this;
   }
-
-  convertCartesianPolar = convertCartesianPolar;
-  convertPolarCartesian = convertPolarCartesian;
 
   /**
    * @returns {Float32Array} [x, y]
