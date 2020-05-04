@@ -29,6 +29,17 @@ const LineGraph = new GPUjsRealRenderer.RealLineGraph(options)
 
 LineGraph.draw();
 
+const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
+  canvasTag: 'complex-canvas',
+  xScaleFactor: 1,
+  dimensions: [420, 360]
+})
+
+window.ComplexGraph = ComplexGraph;
+window.Complex = ComplexGraph.Complex;
+
+ComplexGraph.draw();
+
 // if (LineGraph.progressionMode == 'continous') {
   // document.getElementById('line-btn').onclick = e => {
   //   e.preventDefault();
