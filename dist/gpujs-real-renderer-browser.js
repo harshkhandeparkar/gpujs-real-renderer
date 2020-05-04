@@ -425,13 +425,265 @@
 
   var RealLineGraph_1 = RealLineGraph;
 
+  /**
+   * @param {Object} gpu 
+   * @param {Float32Array} dimensions 
+   * @param {Number} brushSize 
+   * @param {Float32Array} brushColor
+   * @param {Number} xScaleFactor
+   * @param {Number} yScaleFactor
+   * @param {Number} xOffset
+   * @param {Number} yOffset
+   */
+  function getPlotComplexKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, yScaleFactor, xOffset, yOffset) {
+    return gpu.createKernel(function(graphPixels, valX, valY) {
+      const x = this.thread.x,
+        y = this.thread.y;
+        
+      const outX = this.output.x, outY = this.output.y;
+
+      const X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
+      const Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
+
+      const xDist = (X - valX) * this.constants.xScaleFactor;
+      const yDist = (Y - valY) * this.constants.yScaleFactor;
+
+      const dist = Math.sqrt(xDist*xDist + yDist*yDist);
+
+      if (dist <= this.constants.brushSize) return this.constants.brushColor;
+      else return graphPixels[this.thread.y][this.thread.x];
+    },
+    {
+      output: dimensions,
+      pipeline: true,
+      constants: {
+        brushSize,
+        brushColor,
+        xScaleFactor,
+        yScaleFactor,
+        xOffset,
+        yOffset,
+      },
+      constantTypes: {
+        brushColor: 'Array(3)',
+        brushSize: 'Float',
+        xScaleFactor: 'Float',
+        yScaleFactor: 'Float',
+        xOffset: 'Float',
+        yOffset: 'Float'
+      }
+    })
+  }
+
+  var plotComplex = getPlotComplexKernel;
+
+  /**
+   * Convert polar to Cartesian form.
+   * @param {Number} r Modulus
+   * @param {Number} theta Argument
+   * @returns {Float32Array} [x, y]
+   */
+  function convertPolarCartesian(r, theta) {
+    return [
+      r * Math.cos(theta),
+      r * Math.sin(theta)
+    ]
+  }
+
+  /**
+   * Convert Cartesian to polar form.
+   * @param {Number} x Real Part
+   * @param {Number} theta Complex Part
+   * @returns {Float32Array} [r, theta]
+   */
+  function convertCartesianPolar(x, y) {
+    return [
+      Math.sqrt(x*x + y*y),
+      Math.atan2(y, x)
+    ]
+  }
+
+  var convertForm = {
+    convertPolarCartesian,
+    convertCartesianPolar
+  };
+
+  // A Complex class to handle all complex stuff
+  const {convertCartesianPolar: convertCartesianPolar$1, convertPolarCartesian: convertPolarCartesian$1} = convertForm;
+
+  class Complex {
+    /**
+     * Constructor
+     * @param {Number} r Modulus
+     * @param {Number} theta Argument (radians)
+     */
+    constructor(r, theta) {
+      this.r = r;
+      this.theta = theta;
+
+      this.x = convertPolarCartesian$1(this.r, this.theta)[0];
+      this.y = convertPolarCartesian$1(this.r, this.theta)[1];
+
+
+      this.convertCartesianPolar = convertCartesianPolar$1;
+      this.convertPolarCartesian = convertPolarCartesian$1;
+
+      return this;
+    }
+
+    /**
+     * @returns {Float32Array} [x, y]
+     */
+    getCartesianForm() {
+      return [this.x, this.y];
+    }
+
+    /**
+     * @returns {Float32Array} [r, theta]
+     */
+    getPolarForm() {
+      return [this.r, this.theta];
+    }
+
+    /**
+     * @param {"Complex"} addedNum Complex number (object) to be added.
+     * @returns {"Complex"} this
+     */
+    add(addedNum) {
+      this.x += addedNum.x;
+      this.y += addedNum.y;
+
+      this.r = convertCartesianPolar$1(this.x, this.y)[0];
+      this.theta = convertCartesianPolar$1(this.x, this.y)[1];
+    }
+
+    /**
+     * @param {"Complex"} subtractedNum Complex number (object) to be subtracted.
+     * @returns {"Complex"} this
+     */
+    subtract(subtractedNum) {
+      this.x -= subtractedNum.x;
+      this.y -= subtractedNum.y;
+
+      this.r = convertCartesianPolar$1(this.x, this.y)[0];
+      this.theta = convertCartesianPolar$1(this.x, this.y)[1];
+    }
+
+    /**
+     * @param {"Complex"} multipliedNum Complex number (object) to be multiplied.
+     * @returns {"Complex"} this 
+     */
+    multiply(multipliedNum) {
+      this.r *= multipliedNum.r;
+      this.theta += multipliedNum.theta;
+
+      this.x = convertPolarCartesian$1(this.r, this.theta)[0];
+      this.y = convertPolarCartesian$1(this.r, this.theta)[1];
+
+      return this;
+    }
+
+    /**
+     * @param {"Complex"} dividedNum Complex number (object) to be multiplied.
+     * @returns {"Complex"} this 
+     */
+    divide(dividedNum) {
+      this.r /= dividedNum.r;
+      this.theta -= dividedNum.theta;
+
+      this.x = convertPolarCartesian$1(this.r, this.theta)[0];
+      this.y = convertPolarCartesian$1(this.r, this.theta)[1];
+
+      return this;
+    }
+
+    /**
+     * @returns {"Complex"} The complex conjugate (modified this).
+     */
+    conjugate() {
+      this.theta *= -1;
+      this.x = convertPolarCartesian$1(this.r, this.theta)[0];
+      this.y = convertPolarCartesian$1(this.r, this.theta)[1];
+
+      return this;
+    }
+
+    /**
+     * @returns {"Complex"} The complex reciprocal (modified this).
+     */
+    reciprocal() {
+      this.r = 1 / this.r;
+      this.theta *= -1;
+      this.x = convertPolarCartesian$1(this.r, this.theta)[0];
+      this.y = convertPolarCartesian$1(this.r, this.theta)[1];
+
+      return this;
+    }
+  }
+
+  var complex = Complex;
+
+  class RealComplexSpace extends RealRenderer_1 {
+    constructor(options) {
+      // *****DEFAULTS*****
+      super(options);
+
+      this.brushSize = options.brushSize || 1; // 1 unit radius
+      this.brushColor = options.brushColor || [1, 1, 1];
+
+      this.changeNumbers = options.changeNumbers || function(watchedNumbers, time) {return watchedNumbers};
+      // *****DEFAULTS*****
+
+      this.watchedNumbers = {}; // Numbers that are plotted at all times (to dynamically update the numbers)
+
+      this._plotComplex = plotComplex(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+      this.Complex = complex;
+    }
+
+    /**
+     * Watch a new number
+     * @param {"Complex"} number Complex number to watch
+     * @param {String} name Name for the watched number.
+     * @returns this
+     */
+    watch(number, name) {
+      this.watchedNumbers[name] = number;
+
+      return this;
+    }
+
+    _drawFunc(graphPixels, time) {
+      this.change;
+
+      for (let num in this.watchedNumbers) this.plot(this.watchedNumbers[num]);
+
+      return graphPixels;
+    }
+
+    /**
+     * @param {"Complex"} number Complex number to be plotted.
+     */
+    plot(number) {
+      console.log(number.x, number.y);
+      this.graphPixels = this._plotComplex(this._cloneTexture(this.graphPixels), number.x, number.y);
+      this._display(this.graphPixels);
+
+      return this;
+    }
+  }
+
+  var RealComplexSpace_1 = RealComplexSpace;
+
   var gpujsRealRenderer = {
     RealRenderer: RealRenderer_1,
-    RealLineGraph: RealLineGraph_1
+    RealLineGraph: RealLineGraph_1,
+    RealComplexSpace: RealComplexSpace_1
   };
   var gpujsRealRenderer_1 = gpujsRealRenderer.RealRenderer;
   var gpujsRealRenderer_2 = gpujsRealRenderer.RealLineGraph;
+  var gpujsRealRenderer_3 = gpujsRealRenderer.RealComplexSpace;
 
+  exports.RealComplexSpace = gpujsRealRenderer_3;
   exports.RealLineGraph = gpujsRealRenderer_2;
   exports.RealRenderer = gpujsRealRenderer_1;
   exports.default = gpujsRealRenderer;
