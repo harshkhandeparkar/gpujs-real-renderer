@@ -67,7 +67,6 @@ class RealRenderer {
   }
 
   _render() {
-    console.log(this._doRender)
     if (this._doRender) {
       this._draw(this.drawsPerFrame);
       this._display(this.graphPixels);
