@@ -67,7 +67,7 @@ class RealRenderer {
   }
 
   _render() {
-    for (let i = 0; i < this.drawsPerFrame; i++) this._draw();
+    this._draw(this.drawsPerFrame);
     this._display(this.graphPixels);
 
     if (this._doRender) window.requestAnimationFrame(() => {this._render()});
