@@ -67,20 +67,31 @@ class RealRenderer {
   }
 
   _render() {
-    this._draw(this.drawsPerFrame);
-    this._display(this.graphPixels);
+    console.log(this._doRender)
+    if (this._doRender) {
+      this._draw(this.drawsPerFrame);
+      this._display(this.graphPixels);
 
-    if (this._doRender) window.requestAnimationFrame(() => {this._render()});
+      window.requestAnimationFrame(() => {this._render()});
+    }
   }
 
   startRender() {
-    this._doRender = true;
-    this._render();
-    return this;
+    if (!this._doRender) {
+      this._doRender = true;
+      this._render();
+      return this;
+    }
   }
 
   stopRender() {
     this._doRender = false;
+    return this;
+  }
+
+  toggleRender() {
+    this._doRender = !this._doRender;
+    if (this._doRender) this._render();
     return this;
   }
 
