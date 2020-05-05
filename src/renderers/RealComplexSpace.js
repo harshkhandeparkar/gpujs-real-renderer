@@ -34,17 +34,23 @@ class RealComplexSpace extends RealRenderer {
   _drawFunc(graphPixels, time) {
     this.change
 
-    for (let num in this.watchedNumbers) this.plot(this.watchedNumbers[num])
+    for (let num in this.watchedNumbers) {
+      graphPixels = this._plot(graphPixels, this.watchedNumbers[num]);
+      console.log(this.watchedNumbers[num], num)
+    }
 
     return graphPixels;
+  }
+
+  _plot(graphPixels, number) {
+    return this._plotComplex(this._cloneTexture(graphPixels), number.x, number.y);
   }
 
   /**
    * @param {"Complex"} number Complex number to be plotted.
    */
   plot(number) {
-    console.log(number.x, number.y)
-    this.graphPixels = this._plotComplex(this._cloneTexture(this.graphPixels), number.x, number.y);
+    this.graphPixels = this._plot(this.graphPixels, number);
     this._display(this.graphPixels);
 
     return this;
