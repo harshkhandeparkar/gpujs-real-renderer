@@ -32,13 +32,33 @@ LineGraph.draw();
 const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
   canvasTag: 'complex-canvas',
   xScaleFactor: 1,
-  dimensions: [420, 360]
+  dimensions: [420, 360],
+  changeNumbers: (nums, time) => {
+    for (let num in nums) nums[num] = nums[num].multiply(new Complex(1, 0.01));
+
+    return nums;
+  }
 })
 
 window.ComplexGraph = ComplexGraph;
 window.Complex = ComplexGraph.Complex;
 
-ComplexGraph.draw();
+const k = new Complex(100, Math.PI / 4);
+
+ComplexGraph.draw().watch(k, 'ada');
+document.getElementById('complex-render').onclick = e => {
+  e.preventDefault();
+
+  if (ComplexGraph._doRender) {
+    ComplexGraph.stopRender();
+    document.getElementById('complex-render').innerText = 'Start Rendering';
+  }
+  else {
+    ComplexGraph.startRender();
+    document.getElementById('complex-render').innerText = 'Stop Rendering';
+  }
+}
+
 
 // if (LineGraph.progressionMode == 'continous') {
   // document.getElementById('line-btn').onclick = e => {

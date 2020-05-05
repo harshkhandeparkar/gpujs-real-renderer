@@ -141,20 +141,31 @@
     }
 
     _render() {
-      for (let i = 0; i < this.drawsPerFrame; i++) this._draw();
-      this._display(this.graphPixels);
+      console.log(this._doRender);
+      if (this._doRender) {
+        this._draw(this.drawsPerFrame);
+        this._display(this.graphPixels);
 
-      if (this._doRender) window.requestAnimationFrame(() => {this._render();});
+        window.requestAnimationFrame(() => {this._render();});
+      }
     }
 
     startRender() {
-      this._doRender = true;
-      this._render();
-      return this;
+      if (!this._doRender) {
+        this._doRender = true;
+        this._render();
+        return this;
+      }
     }
 
     stopRender() {
       this._doRender = false;
+      return this;
+    }
+
+    toggleRender() {
+      this._doRender = !this._doRender;
+      if (this._doRender) this._render();
       return this;
     }
 
@@ -653,19 +664,24 @@
     }
 
     _drawFunc(graphPixels, time) {
-      this.change;
+      this.watchedNumbers = this.changeNumbers(this.watchedNumbers, time);
 
-      for (let num in this.watchedNumbers) this.plot(this.watchedNumbers[num]);
+      for (let num in this.watchedNumbers) {
+        this.graphPixels = this._plot(this.graphPixels, this.watchedNumbers[num]);
+      }
 
-      return graphPixels;
+      return this.graphPixels;
+    }
+
+    _plot(graphPixels, number) {
+      return this._plotComplex(this._cloneTexture(graphPixels), number.x, number.y);
     }
 
     /**
      * @param {"Complex"} number Complex number to be plotted.
      */
     plot(number) {
-      console.log(number.x, number.y);
-      this.graphPixels = this._plotComplex(this._cloneTexture(this.graphPixels), number.x, number.y);
+      this.graphPixels = this._plot(this.graphPixels, number);
       this._display(this.graphPixels);
 
       return this;
