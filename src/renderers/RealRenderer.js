@@ -1,6 +1,6 @@
 const getDisplayKernel = require('../kernels/display');
 const getBlankGraphKernel = require('../kernels/blankGraph');
-const getCloneTextureKernel = require('../kernels/cloneTexture')
+const getCloneTextureKernel = require('../kernels/cloneTexture');
 
 class RealRenderer {
   constructor(options) {
@@ -53,23 +53,28 @@ class RealRenderer {
     return graphPixels;
   }
 
+  _overlayFunc(graphPixels) { // Can be overriden
+    return graphPixels;
+  }
+
   _draw() {
     this.time += this.timeStep;
 
     this.graphPixels = this._drawFunc(this.graphPixels, this.time);
+    return this.graphPixels;
   }
 
   draw(numDraws = 1) {
     for (let i = 0; i < numDraws; i++) this._draw();
-    this._display(this.graphPixels);
 
+    this._display(this._overlayFunc(this.graphPixels));
+    
     return this;
   }
 
   _render() {
     if (this._doRender) {
-      this._draw(this.drawsPerFrame);
-      this._display(this.graphPixels);
+      this.draw(this.drawsPerFrame);
 
       window.requestAnimationFrame(() => {this._render()});
     }
