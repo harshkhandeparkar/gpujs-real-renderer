@@ -32,16 +32,38 @@ LineGraph.draw();
 const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
   canvasTag: 'complex-canvas',
   xScaleFactor: 1,
+  brushSize: 2,
+  lineThickness: 1,
   dimensions: [420, 360],
-  changeNumbers: (nums, time) => {
+  changeNumbers: (nums, time, timeStep) => {
     if (nums.final) nums.final.number = new Complex(0, 0);
     
     for (let num in nums) {
       if (num !== 'final') {
         const n = nums[num];
 
-        n.number = n.number.multiply(new Complex(1, n.attributes.period / 100));
+        n.number = n.number.multiply(new Complex(1, n.attributes.period * timeStep));
+
         nums.final.number.add(nums[num].number);
+      }
+    }
+
+    for (let num in nums) {
+      if (num !== 'final') {
+        const n = nums[num];
+        if (nums[n.attributes.period - 1]) {
+          n.interpolate = true;
+          n.interpolateTo = nums[`${n.attributes.period - 1}`].number;
+        }
+        else {
+          n.interpolate = true;
+          n.interpolateTo = new Complex(0, 0);
+        }
+
+        if (!nums[n.attributes.period + 1]) {
+          nums.final.interpolate = true;
+          nums.final.interpolateTo = n.number;
+        }
       }
     }
 
@@ -52,16 +74,18 @@ const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
 window.ComplexGraph = ComplexGraph;
 window.Complex = ComplexGraph.Complex;
 
-const k = new Complex(100, Math.PI / 4);
-const l = new Complex(80, Math.PI / 8);
-const m = new Complex(60, Math.PI / 16);
+const k = new Complex(0, 3 * Math.PI / 5);
+const l = new Complex(50, Math.PI / 8);
+const m = new Complex(50, Math.PI / 16);
+const n = new Complex(50, Math.PI / 2);
 const final = new Complex(0, 0);
 
 ComplexGraph
   .draw()
-  .watch('k', k, false, {period: -1})
-  .watch('l', l, false, {period: 1})
-  .watch('m', m, false, {period: 2})
+  .watch('-1', n, false, false, false, {period: -1})
+  .watch('0', k, false, false, false, {period: 0})
+  .watch('1', l, false, false, false, {period: 1})
+  .watch('2', m, false, false, false, {period: 2})
   .watch('final', final.add(k).add(l).add(m), true);
 
 document.getElementById('complex-render').onclick = e => {
