@@ -45,6 +45,8 @@ class Complex {
 
     this.r = convertCartesianPolar(this.x, this.y)[0];
     this.theta = convertCartesianPolar(this.x, this.y)[1];
+
+    return this;
   }
 
   /**
@@ -57,6 +59,7 @@ class Complex {
 
     this.r = convertCartesianPolar(this.x, this.y)[0];
     this.theta = convertCartesianPolar(this.x, this.y)[1];
+    return this;
   }
 
   /**
