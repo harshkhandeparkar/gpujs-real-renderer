@@ -493,6 +493,68 @@
   var plotComplex = getPlotComplexKernel;
 
   /**
+   * @param {Object} gpu 
+   * @param {Float32Array} dimensions 
+   * @param {Number} xScaleFactor
+   * @param {Number} yScaleFactor
+   * @param {Number} xOffset
+   * @param {Number} yOffset
+   * @param {Number} lineThickness
+   * @param {Number} lineColor
+   */
+  function getInterpolateKernel(gpu, dimensions, xScaleFactor, yScaleFactor, xOffset, yOffset, lineThickness, lineColor) {
+    return gpu.createKernel(function(graphPixels, val1, val2) {
+      const x = this.thread.x,
+        y = this.thread.y;
+
+      const x1 = val1[0];
+      const y1 = val1[1];
+
+      const x2 = val2[0];
+      const y2 = val2[1];
+        
+      const outX = this.output.x, outY = this.output.y;
+
+      const X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
+      const Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
+
+      let lineEqn = X * (y1 - y2) - x1 * (y1 - y2) - Y * (x1 - x2) + y1 * (x1 -x2);
+      let lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2)*(y1 - y2) + (x1 - x2)*(x1 - x2));
+
+      if (
+        lineDist <= this.constants.lineThickness &&
+        X <= Math.max(x1, x2) &&
+        X >= Math.min(x1, x2) &&
+        Y <= Math.max(y1, y2) &&
+        Y >= Math.min(y1, y2)
+      ) return this.constants.lineColor;
+      else return graphPixels[this.thread.y][this.thread.x];
+    },
+    {
+      output: dimensions,
+      pipeline: true,
+      constants: {
+        lineThickness,
+        lineColor,
+        xScaleFactor,
+        yScaleFactor,
+        xOffset,
+        yOffset
+      },
+      constantTypes: {
+        lineThickness: 'Float',
+        lineColor: 'Array(3)',
+        xScaleFactor: 'Float',
+        yScaleFactor: 'Float',
+        xOffset: 'Float',
+        yOffset: 'Float'
+      }
+    })
+  }
+
+  var interpolate = getInterpolateKernel;
+
+  /**
    * Convert polar to Cartesian form.
    * @param {Number} r Modulus
    * @param {Number} theta Argument
@@ -650,6 +712,9 @@
       this.brushColor = options.brushColor || [1, 1, 1];
 
       this.changeNumbers = options.changeNumbers || function(watchedNumbers, time) {return watchedNumbers};
+
+      this.lineThickness = options.lineThickness || 0.5;
+      this.lineColor = options.lineColor || [1, 1, 1];
       // *****DEFAULTS*****
 
       this.watchedNumbers = {}; // Numbers that are plotted at all times (to dynamically update the numbers)
@@ -657,6 +722,8 @@
       this._plotComplex = plotComplex(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
       this._plotComplexPersistent = plotComplex(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
       this.Complex = complex;
+
+      this.interpolate = interpolate(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
     }
 
     /**
@@ -664,31 +731,41 @@
      * @param {String} name Name for the watched number.
      * @param {"Complex"} number Complex number to watch.
      * @param {Boolean} persistent Whether the number should remain at the same place each time.
+     * @param {Boolean} interpolate Whether to interpolate (make a line) between this number and another or not.
+     * @param {"Complex"} interpolateTo The second complex number to interpolate between.
      * @param {Object} attributes optional attributes object.
      * @returns this
      */
-    watch(name, number, persistent = true, attributes = {}) {
+    watch(name, number, persistent = true, interpolate, interpolateTo, attributes = {}) {
       this.watchedNumbers[name] = {
         number,
         persistent,
+        interpolate,
+        interpolateTo,
         attributes
       };
 
       return this;
     }
 
+    _interpolate(graphPixels, n1, n2) {
+      graphPixels = this.interpolate(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]);
+
+      return graphPixels;
+    }
+
     _overlayFunc(graphPixels) {
       for (let num in this.watchedNumbers) {
-        if (!this.watchedNumbers[num].persistent) {
-          graphPixels = this._plot(graphPixels, this.watchedNumbers[num].number);
-        }
+        if (!this.watchedNumbers[num].persistent) graphPixels = this._plot(graphPixels, this.watchedNumbers[num].number);
+
+        if (this.watchedNumbers[num].interpolate) graphPixels = this._interpolate(graphPixels, this.watchedNumbers[num].number, this.watchedNumbers[num].interpolateTo);
       }
 
       return graphPixels;
     }
 
     _drawFunc(graphPixels, time) {
-      this.watchedNumbers = this.changeNumbers(this.watchedNumbers, time);
+      this.watchedNumbers = this.changeNumbers(this.watchedNumbers, time, this.timeStep);
 
       for (let num in this.watchedNumbers) {
         if (this.watchedNumbers[num].persistent) {
