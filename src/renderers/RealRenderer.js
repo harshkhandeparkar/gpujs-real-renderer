@@ -53,7 +53,7 @@ class RealRenderer {
     return graphPixels;
   }
 
-  _overlayFunc(graphPixels) { // Can be overriden
+  _overlayFunc(graphPixels) { // Non-persistent overlays at the end of a frame
     return graphPixels;
   }
 
