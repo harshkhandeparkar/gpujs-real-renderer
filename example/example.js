@@ -80,13 +80,13 @@ function generateRandomSeries(upperBound = 100) {
   anticlockwise = [];
   for (let i =0; i <= Math.random() * upperBound; i++) {
     clockwise.push(
-      new Complex(Math.random() * 10, Math.PI * Math.random())
+      new Complex(Math.random() * 10, 2 * Math.PI * Math.random())
     )
   }
   
   for (let i =0; i <= Math.random() * upperBound; i++) {
     anticlockwise.push(
-      new Complex(Math.random() * 10, Math.PI * Math.random())
+      new Complex(Math.random() * 10, 2 * Math.PI * Math.random())
     )
   }
 }
