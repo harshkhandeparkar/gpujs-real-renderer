@@ -49,6 +49,12 @@ class RealComplexSpace extends RealRenderer {
 
     return this;
   }
+  
+  clearWatched() {
+    this.watchedNumbers = {};
+
+    return this;
+  }
 
   _interpolate(graphPixels, n1, n2) {
     graphPixels = this.interpolate(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]);
