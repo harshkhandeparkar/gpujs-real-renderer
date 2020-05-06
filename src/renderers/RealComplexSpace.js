@@ -36,7 +36,7 @@ class RealComplexSpace extends RealRenderer {
    * @param {Object} attributes optional attributes object.
    * @returns this
    */
-  watch(name, number, persistent = true, interpolate, interpolateTo, attributes = {}) {
+  watch(name, number, persistent = true, interpolate = false, interpolateTo = null, attributes = {}) {
     this.watchedNumbers[name] = {
       number,
       persistent,
