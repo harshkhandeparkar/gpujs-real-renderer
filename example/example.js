@@ -34,8 +34,13 @@ const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
   xScaleFactor: 1,
   dimensions: [420, 360],
   changeNumbers: (nums, time) => {
-    for (let num in nums) nums[num] = nums[num].multiply(new Complex(1, 0.01));
-
+    if (nums.final) nums.final.number = new Complex(0, 0);
+    for (let num in nums) {
+      if (num !== 'final') {
+        nums[num].number = nums[num].number.multiply(new Complex(1, Number(num) / 100));
+        nums.final.number.add(nums[num].number);
+      }
+    }
     return nums;
   }
 })
@@ -44,8 +49,12 @@ window.ComplexGraph = ComplexGraph;
 window.Complex = ComplexGraph.Complex;
 
 const k = new Complex(100, Math.PI / 4);
+const l = new Complex(80, Math.PI / 8);
+const m = new Complex(60, Math.PI / 16);
+const final = new Complex(0, 0);
 
-ComplexGraph.draw().watch(k, 'ada');
+ComplexGraph.draw().watch(k, false, '-1').watch(l, false, '1').watch(m, false, '2').watch(final.add(k).add(l).add(m), true, 'final');
+
 document.getElementById('complex-render').onclick = e => {
   e.preventDefault();
 

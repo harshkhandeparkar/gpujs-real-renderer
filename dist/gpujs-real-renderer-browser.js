@@ -570,6 +570,8 @@
 
       this.r = convertCartesianPolar$1(this.x, this.y)[0];
       this.theta = convertCartesianPolar$1(this.x, this.y)[1];
+
+      return this;
     }
 
     /**
@@ -582,6 +584,7 @@
 
       this.r = convertCartesianPolar$1(this.x, this.y)[0];
       this.theta = convertCartesianPolar$1(this.x, this.y)[1];
+      return this;
     }
 
     /**
