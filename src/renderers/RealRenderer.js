@@ -1,6 +1,6 @@
 const getDisplayKernel = require('../kernels/display');
 const getBlankGraphKernel = require('../kernels/blankGraph');
-const getCloneTextureKernel = require('../kernels/cloneTexture')
+const getCloneTextureKernel = require('../kernels/cloneTexture');
 
 class RealRenderer {
   constructor(options) {
@@ -53,34 +53,49 @@ class RealRenderer {
     return graphPixels;
   }
 
+  _overlayFunc(graphPixels) { // Non-persistent overlays at the end of a frame
+    return graphPixels;
+  }
+
   _draw() {
     this.time += this.timeStep;
 
     this.graphPixels = this._drawFunc(this.graphPixels, this.time);
+    return this.graphPixels;
   }
 
   draw(numDraws = 1) {
     for (let i = 0; i < numDraws; i++) this._draw();
-    this._display(this.graphPixels);
 
+    this._display(this._overlayFunc(this.graphPixels));
+    
     return this;
   }
 
   _render() {
-    for (let i = 0; i < this.drawsPerFrame; i++) this._draw();
-    this._display(this.graphPixels);
+    if (this._doRender) {
+      this.draw(this.drawsPerFrame);
 
-    if (this._doRender) window.requestAnimationFrame(() => {this._render()});
+      window.requestAnimationFrame(() => {this._render()});
+    }
   }
 
   startRender() {
-    this._doRender = true;
-    this._render();
-    return this;
+    if (!this._doRender) {
+      this._doRender = true;
+      this._render();
+      return this;
+    }
   }
 
   stopRender() {
     this._doRender = false;
+    return this;
+  }
+
+  toggleRender() {
+    this._doRender = !this._doRender;
+    if (this._doRender) this._render();
     return this;
   }
 

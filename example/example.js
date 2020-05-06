@@ -29,6 +29,93 @@ const LineGraph = new GPUjsRealRenderer.RealLineGraph(options)
 
 LineGraph.draw();
 
+const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
+  canvasTag: 'complex-canvas',
+  xScaleFactor: 2,
+  yScaleFactor: 2,
+  brushSize: 1.5,
+  timeStep: 1 / 200,
+  lineThickness: 0.8,
+  lineColor: [0.8, 0, 0],
+  dimensions: [420, 360],
+  changeNumbers: (nums, time, timeStep) => {
+    if (nums.final) nums.final.number = new Complex(0, 0);
+
+    for (let i = complexLimits[0]; i <= complexLimits[1]; i++) {
+      if (nums[i]) {
+        const n = nums[i];
+
+        n.number = n.number.multiply(new Complex(1, n.attributes.period * timeStep));
+        nums.final.number.add(n.number);
+      }
+    }
+
+    let partialSum = new Complex(0, 0);
+    for (let i = complexLimits[0]; i <= complexLimits[1]; i++) {
+      if (nums[i]) {
+        nums[`p${i}`] = {
+          number: new Complex(partialSum.r, partialSum.theta),
+          show: true,
+          persistent: false,
+          interpolate: true,
+          interpolateTo: new Complex(partialSum.r, partialSum.theta).add(nums[i].number)
+        }
+
+        partialSum.add(nums[i].number)
+      }
+    }
+    return nums;
+  }
+})
+
+window.ComplexGraph = ComplexGraph;
+window.Complex = ComplexGraph.Complex;
+
+const clockwise = [
+  new Complex(11, Math.PI / 2), // -1
+  new Complex(12, Math.PI / 2), // -2
+  new Complex(13, Math.PI / 2), // -3
+  new Complex(14, Math.PI / 2) // -4
+]
+const anticlockwise = [
+  new Complex(0, 0), // 0
+  new Complex(10, Math.PI / 2), // 1
+  new Complex(15, Math.PI / 2), // 2
+  new Complex(5,  Math.PI / 2), // 3
+  new Complex(10, Math.PI / 2), // 4
+]
+const final = new Complex(0, 0);
+window.complexLimits = [
+  -clockwise.length,
+  anticlockwise.length - 1
+]
+
+ComplexGraph
+  .draw()
+  .watch('final', final, true, true, false, null);
+
+anticlockwise.forEach((num, i) => {
+  ComplexGraph.watch(`${i}`, num, false, false, false, null, {period: i})
+})
+
+clockwise.forEach((num, i) => {
+  ComplexGraph.watch(`${-i - 1}`, num, false, false, false, null, {period: -i - 1})
+})
+
+document.getElementById('complex-render').onclick = e => {
+  e.preventDefault();
+
+  if (ComplexGraph._doRender) {
+    ComplexGraph.stopRender();
+    document.getElementById('complex-render').innerText = 'Start Rendering';
+  }
+  else {
+    ComplexGraph.startRender();
+    document.getElementById('complex-render').innerText = 'Stop Rendering';
+  }
+}
+
+
 // if (LineGraph.progressionMode == 'continous') {
   // document.getElementById('line-btn').onclick = e => {
   //   e.preventDefault();

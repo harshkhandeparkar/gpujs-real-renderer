@@ -7,7 +7,7 @@
 </head>
 <body>
   
-  <h3>Progressive Line Graph (ProgressMode: 'overflow')</h3>
+  <h3>Progressive Line Graph (ProgressMode: 'overflow')(class: RealLineGraph)</h3>
   <!-- <button id="line-btn">Start Rendering</button><br /><br /> -->
   <canvas id="line-canvas"></canvas>
 
@@ -15,6 +15,10 @@
     <input type="text" placeholder="Value" id="value" />
     <button id="add">Add Data</button>
   </form>
+
+  <h3>Fourier Series (class: RealComplexSpace)</h3>
+  <canvas id="complex-canvas"></canvas> <br />
+  <button id="complex-render">Start Rendering</button>
 
   <script src="./gpu-browser.min.js"></script>
   <script src="../dist/gpujs-real-renderer-browser.js"></script>
