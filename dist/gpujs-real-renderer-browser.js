@@ -661,15 +661,17 @@
 
     /**
      * Watch a new number
+     * @param {String} name Name for the watched number.
      * @param {"Complex"} number Complex number to watch.
      * @param {Boolean} persistent Whether the number should remain at the same place each time.
-     * @param {String} name Name for the watched number.
+     * @param {Object} attributes optional attributes object.
      * @returns this
      */
-    watch(number, persistent = true, name) {
+    watch(name, number, persistent = true, attributes = {}) {
       this.watchedNumbers[name] = {
         number,
-        persistent
+        persistent,
+        attributes
       };
 
       return this;
