@@ -31,42 +31,39 @@ LineGraph.draw();
 
 const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
   canvasTag: 'complex-canvas',
-  xScaleFactor: 1,
-  brushSize: 2,
-  lineThickness: 1,
+  xScaleFactor: 2,
+  yScaleFactor: 2,
+  brushSize: 1.5,
+  timeStep: 1 / 200,
+  lineThickness: 0.8,
+  lineColor: [0.8, 0, 0],
   dimensions: [420, 360],
   changeNumbers: (nums, time, timeStep) => {
     if (nums.final) nums.final.number = new Complex(0, 0);
-    
-    for (let num in nums) {
-      if (num !== 'final') {
-        const n = nums[num];
+
+    for (let i = complexLimits[0]; i <= complexLimits[1]; i++) {
+      if (nums[i]) {
+        const n = nums[i];
 
         n.number = n.number.multiply(new Complex(1, n.attributes.period * timeStep));
-
-        nums.final.number.add(nums[num].number);
+        nums.final.number.add(n.number);
       }
     }
 
-    for (let num in nums) {
-      if (num !== 'final') {
-        const n = nums[num];
-        if (nums[n.attributes.period - 1]) {
-          n.interpolate = true;
-          n.interpolateTo = nums[`${n.attributes.period - 1}`].number;
-        }
-        else {
-          n.interpolate = true;
-          n.interpolateTo = new Complex(0, 0);
+    let partialSum = new Complex(0, 0);
+    for (let i = complexLimits[0]; i <= complexLimits[1]; i++) {
+      if (nums[i]) {
+        nums[`p${i}`] = {
+          number: new Complex(partialSum.r, partialSum.theta),
+          show: true,
+          persistent: false,
+          interpolate: true,
+          interpolateTo: new Complex(partialSum.r, partialSum.theta).add(nums[i].number)
         }
 
-        if (!nums[n.attributes.period + 1]) {
-          nums.final.interpolate = true;
-          nums.final.interpolateTo = n.number;
-        }
+        partialSum.add(nums[i].number)
       }
     }
-
     return nums;
   }
 })
@@ -74,19 +71,36 @@ const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
 window.ComplexGraph = ComplexGraph;
 window.Complex = ComplexGraph.Complex;
 
-const k = new Complex(0, 3 * Math.PI / 5);
-const l = new Complex(50, Math.PI / 8);
-const m = new Complex(50, Math.PI / 16);
-const n = new Complex(50, Math.PI / 2);
+const clockwise = [
+  new Complex(11, Math.PI / 2), // -1
+  new Complex(12, Math.PI / 2), // -2
+  new Complex(13, Math.PI / 2), // -3
+  new Complex(14, Math.PI / 2) // -4
+]
+const anticlockwise = [
+  new Complex(0, 0), // 0
+  new Complex(10, Math.PI / 2), // 1
+  new Complex(15, Math.PI / 2), // 2
+  new Complex(5,  Math.PI / 2), // 3
+  new Complex(10, Math.PI / 2), // 4
+]
 const final = new Complex(0, 0);
+window.complexLimits = [
+  -clockwise.length,
+  anticlockwise.length - 1
+]
 
 ComplexGraph
   .draw()
-  .watch('-1', n, false, false, false, {period: -1})
-  .watch('0', k, false, false, false, {period: 0})
-  .watch('1', l, false, false, false, {period: 1})
-  .watch('2', m, false, false, false, {period: 2})
-  .watch('final', final.add(k).add(l).add(m), true);
+  .watch('final', final, true, true, false, null);
+
+anticlockwise.forEach((num, i) => {
+  ComplexGraph.watch(`${i}`, num, false, false, false, null, {period: i})
+})
+
+clockwise.forEach((num, i) => {
+  ComplexGraph.watch(`${-i - 1}`, num, false, false, false, null, {period: -i - 1})
+})
 
 document.getElementById('complex-render').onclick = e => {
   e.preventDefault();
