@@ -30,15 +30,17 @@ class RealComplexSpace extends RealRenderer {
    * Watch a new number
    * @param {String} name Name for the watched number.
    * @param {"Complex"} number Complex number to watch.
+   * @param {Boolean} show Whether to display the number or not.
    * @param {Boolean} persistent Whether the number should remain at the same place each time.
    * @param {Boolean} interpolate Whether to interpolate (make a line) between this number and another or not.
    * @param {"Complex"} interpolateTo The second complex number to interpolate between.
    * @param {Object} attributes optional attributes object.
    * @returns this
    */
-  watch(name, number, persistent = true, interpolate = false, interpolateTo = null, attributes = {}) {
+  watch(name, number, show = true, persistent = true, interpolate = false, interpolateTo = null, attributes = {}) {
     this.watchedNumbers[name] = {
       number,
+      show,
       persistent,
       interpolate,
       interpolateTo,
@@ -56,7 +58,7 @@ class RealComplexSpace extends RealRenderer {
 
   _overlayFunc(graphPixels) {
     for (let num in this.watchedNumbers) {
-      if (!this.watchedNumbers[num].persistent) graphPixels = this._plot(graphPixels, this.watchedNumbers[num].number);
+      if (!this.watchedNumbers[num].persistent && this.watchedNumbers[num].show) graphPixels = this._plot(graphPixels, this.watchedNumbers[num].number);
 
       if (this.watchedNumbers[num].interpolate) graphPixels = this._interpolate(graphPixels, this.watchedNumbers[num].number, this.watchedNumbers[num].interpolateTo);
     }
@@ -68,7 +70,7 @@ class RealComplexSpace extends RealRenderer {
     this.watchedNumbers = this.changeNumbers(this.watchedNumbers, time, this.timeStep);
 
     for (let num in this.watchedNumbers) {
-      if (this.watchedNumbers[num].persistent) {
+      if (this.watchedNumbers[num].persistent && this.watchedNumbers[num].show) {
         graphPixels = this._plotPersistent(graphPixels, this.watchedNumbers[num].number);
       }
     }
