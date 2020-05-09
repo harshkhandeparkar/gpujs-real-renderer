@@ -34,7 +34,8 @@ const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
   xScaleFactor: 2,
   yScaleFactor: 2,
   brushSize: 1.5,
-  timeStep: 1 / 200,
+  timeStep: 1 / 1000,
+  drawsPerFrame: 5,
   lineThickness: 0.8,
   lineColor: [0.8, 0, 0],
   dimensions: [420, 360],
@@ -75,23 +76,23 @@ window.Complex = ComplexGraph.Complex;
 let clockwise = [];
 let anticlockwise = [];
 
-function generateRandomSeries(upperBound = 100) {
+function generateRandomSeries(upperBound = 10) {
   clockwise = [];
   anticlockwise = [];
-  for (let i =0; i <= Math.random() * upperBound; i++) {
+  for (let i = 0; i <= upperBound; i++) {
     clockwise.push(
-      new Complex(Math.random() * 10, 2 * Math.PI * Math.random())
+      new Complex(Math.random() * 100 / upperBound, Math.PI / 2/* * 2 * Math.random()*/)
     )
   }
   
-  for (let i =0; i <= Math.random() * upperBound; i++) {
+  for (let i = 0; i <= upperBound; i++) {
     anticlockwise.push(
-      new Complex(Math.random() * 10, 2 * Math.PI * Math.random())
+      new Complex(Math.random() * 100 / upperBound, Math.PI / 2 /* * 2 * Math.random()*/)
     )
   }
 }
 
-generateRandomSeries(80);
+generateRandomSeries();
 
 const final = new Complex(0, 0);
 window.complexLimits = [
@@ -127,10 +128,9 @@ document.getElementById('complex-render').onclick = e => {
 document.getElementById('complex-randomize').onclick = e => {
   e.preventDefault();
 
-  ComplexGraph.stopRender();
-  ComplexGraph.clearWatched().reset();
+  ComplexGraph.stopRender().clearWatched().reset();
 
-  generateRandomSeries(80);
+  generateRandomSeries();
 
   const final = new Complex(0, 0);
 
@@ -151,7 +151,11 @@ document.getElementById('complex-randomize').onclick = e => {
     ComplexGraph.watch(`${-i - 1}`, num, false, false, false, null, {period: -i - 1})
   })
 
-  ComplexGraph.startRender();
+  setTimeout(() => {
+    ComplexGraph.startRender();
+    document.getElementById('complex-render').innerText = 'Stop Rendering';
+  }, 1000)
+
 }
 
 
