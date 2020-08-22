@@ -12,8 +12,8 @@
  * @param {Number} lineColor
  * @param {String} progressiveAxis
  */
-function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, yScaleFactor, xOffset, yOffset, lineThickness, lineColor, progressiveAxis) {
-  return gpu.createKernel(function(graphPixels, value, dataIndex, lastData, numProgress) {
+function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xOffset, yOffset, lineThickness, lineColor, progressiveAxis) {
+  return gpu.createKernel(function(graphPixels, value, dataIndex, lastData, numProgress, xScaleFactor, yScaleFactor) {
     const x = this.thread.x + numProgress * Math.abs(this.constants.progressiveAxis - 1),
       y = this.thread.y + numProgress * this.constants.progressiveAxis;
 
@@ -22,11 +22,11 @@ function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, 
       
     const outX = this.output.x, outY = this.output.y;
 
-    const X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
-    const Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
+    const X = x / xScaleFactor - (outX * (this.constants.yOffset / 100)) / xScaleFactor;
+    const Y = y / yScaleFactor - (outY * (this.constants.xOffset / 100)) / yScaleFactor;
 
-    const xDist = (X - dataIndex) * this.constants.xScaleFactor;
-    const yDist = (Y - val) * this.constants.yScaleFactor;
+    const xDist = (X - dataIndex) * xScaleFactor;
+    const yDist = (Y - val) * yScaleFactor;
 
     const dist = Math.sqrt(xDist*xDist + yDist*yDist);
 
@@ -51,8 +51,6 @@ function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, 
       brushColor,
       lineThickness,
       lineColor,
-      xScaleFactor,
-      yScaleFactor,
       xOffset,
       yOffset,
       progressiveAxis: progressiveAxis == 'y' ? 1 : 0
@@ -62,8 +60,6 @@ function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, 
       brushSize: 'Float',
       lineThickness: 'Float',
       lineColor: 'Array(3)',
-      xScaleFactor: 'Float',
-      yScaleFactor: 'Float',
       xOffset: 'Float',
       yOffset: 'Float',
       progressiveAxis: 'Integer'

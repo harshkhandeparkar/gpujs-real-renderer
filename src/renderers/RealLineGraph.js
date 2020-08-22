@@ -1,5 +1,6 @@
 const RealRenderer = require('./RealRenderer');
 const getProgressGraphKernel = require('../kernels/progressGraph');
+const getSqueezeGraphKernel = require('../kernels/squeezeGraph');
 const getAddDataKernel = require('../kernels/addData');
 
 class RealLineGraph extends RealRenderer {
@@ -20,13 +21,14 @@ class RealLineGraph extends RealRenderer {
     // *****DEFAULTS*****
 
     this._progressGraph = getProgressGraphKernel(this.gpu, this.dimensions, this.progressiveAxis, this.xOffset, this.yOffset, this.axesColor, this.bgColor);
+    this._squeezeGraph = getSqueezeGraphKernel(this.gpu, this.dimensions, this.progressiveAxis, this.xOffset, this.yOffset, this.axesColor, this.bgColor);
     this._lastProgress = 0; // Time when the graph last progressed. Internal variable
     this._numProgress = 0; // Number of times the graph has progressed
 
     this._dataIndex = 1; // Number of plots
     this._lastData = [0]; // (Value) To display lines
 
-    this._addData = getAddDataKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor, this.progressiveAxis);
+    this._addData = getAddDataKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor, this.progressiveAxis);
 
     this.limits = { // Final ranges of x and y
       x: [
@@ -44,11 +46,11 @@ class RealLineGraph extends RealRenderer {
     if (!isNaN(parseFloat(value))) value = [parseFloat(value)];
     else if (!value.texture) throw 'Input invalid.';
     
-    this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress);
+    this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress, this.xScaleFactor, this.yScaleFactor);
     this._lastData = value;
 
     // Overflow
-    if (this._dataIndex >= this.limits.x[1] && this.progressionMode != 'continous') {
+    if (this._dataIndex >= this.limits.x[1] && this.progressionMode == 'overflow') {
       let progress = Math.ceil(this.progressiveAxis == 'y' ? this.yScaleFactor : this.xScaleFactor);
 
       this.graphPixels = this._progressGraph(
@@ -65,6 +67,26 @@ class RealLineGraph extends RealRenderer {
       else {
         this.limits.x[1] += progress / this.xScaleFactor;
         this.limits.x[0] += progress / this.xScaleFactor;
+      }
+    }
+
+    // Squeeze
+    if (this._dataIndex >= this.limits.x[1] && this.progressionMode == 'squeeze') {
+      const scalingFactor = (this._dataIndex / (this._dataIndex + 1));
+
+      this.graphPixels = this._squeezeGraph(
+        this._cloneTexture(this.graphPixels),
+        scalingFactor
+      )
+
+
+      if (this.progressiveAxis == 'x') {
+        this.xScaleFactor *= scalingFactor;
+        this.limits.x[1] /= scalingFactor;
+      }
+      else {
+        this.yScaleFactor *= scalingFactor;
+        this.limits.y[1] /= scalingFactor;
       }
     }
 
