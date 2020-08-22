@@ -23,7 +23,7 @@ class RealComplexSpace extends RealRenderer {
     this._plotComplexPersistent = getPlotComplexKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
     this.Complex = Complex;
 
-    this.interpolate = getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
+    this._interpolateKernel = getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
   }
 
   /**
@@ -57,7 +57,7 @@ class RealComplexSpace extends RealRenderer {
   }
 
   _interpolate(graphPixels, n1, n2) {
-    graphPixels = this.interpolate(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]);
+    graphPixels = this._interpolateKernel(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]);
 
     return graphPixels;
   }
