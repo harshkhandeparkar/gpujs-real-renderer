@@ -95,6 +95,8 @@ e.g.: `RealRenderer.draw().reset().startRender()`
 
 - `stopRender()`: Stops the rendering.
 
+- `toggleRender()`: Toggles the rendering.
+
 - `resetTime()`: Resets the internal time value to `0`.
 
 - `reset()`: Resets the pixels on the graph to a blank graph with the coordinate axes.
