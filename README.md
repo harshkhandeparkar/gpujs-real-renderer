@@ -45,6 +45,7 @@ A *Real Renderer* is a fancy name for a class that is exported by this package. 
 #### List of Real Renderers
 - [`RealRenderer`](#realrenderer)
 - [`RealLineGraph`](#reallinegraph)
+- [`RealComplexSpace`](#realcomplexspace)
 
 #### `RealRenderer`
 This is the base class. It does not have any specific use. It can only display a blank graph with coordinate axes on it. See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
@@ -98,7 +99,7 @@ e.g.: `RealRenderer.draw().reset().startRender()`
 
 - `reset()`: Resets the pixels on the graph to a blank graph with the coordinate axes.
 
-#### RealLineGraph
+#### `RealLineGraph`
 This Real Renderer extends the `RealRenderer` class and can be used to plot generated data in real-time as the data is obtained. This can be used to analyze data that changes over time.
 
 This is a generic line graph with straight lines joining points. (The first point connects to the origin)
@@ -143,6 +144,65 @@ The returned object contains two properties `x` and `y` each of which are arrays
 
 - `reset()`: This is the same method as that of `RealRenderer` but it also resets the axes and the plots.
 
+#### `RealComplexSpace`
+This Real Renderer extends the `RealRenderer` class and can be used to plot changing complex numbers. A few watched numbers are plotted every time the renderer renders. A callback is fired just before the render, to change the numbers.
+
+This class provides another class, `Complex`, to define, manipulate, add, subtract, multiply etc. complex numbers.
+
+See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
+
+##### Properties (Read-Only)
+- `Complex` (*Class*): A class for defining and manipulating complex numbers. Has the following methods.
+  - `constructor(r, theta)`: Default constructor with r(modulus) and theta(argument) (polar form of a complex number).
+  - `getCartesianForm()`: A method that returns the x and y coordinates of the same complex number in cartesian form, as an array of the form `[x, y]`.
+  - `getPolarForm()`: A method that returns the r(modulus) and theta(argument) of the same complex number in polar form, as an array of the form `[r, theta]`.
+  - `add(addedNum)`: Adds another number `addedNum` which is another object of `Complex` class to itself and returns the output. Also edits itself.
+  - `subtract(subtractedNum)`: Subtracts another number `subtractedNum` which is another object of `Complex` class from itself and returns the output. Also edits itself.
+  - `multiply(multipliedNum)`: Multiplies another number `multipliedNum` which is another object of `Complex` class to itself and returns the output. Also edits itself.
+  - `divide(dividedNum)`: Divides itself by another number `dividedNum` which is another object of `Complex` class and returns the output. Also edits itself.
+  - `conjugate()`: Modifies itself to be its own complex conjugate and returns itself.
+  - `reciprocal()`: Modifies itself to be its own reciprocal and returns itself.
+  NOTE: All of the above methods except `getCartesianForm` and `getPolarForm` are chainable.
+
+- `watchedNumbers`(*Object*): An object that stores all the *watched* complex numbers, ie the ones that are plotted during each render. This object is of the form
+```js
+{
+  name1: { // Here, `name` is any arbitrary name, the property does not matter
+    number: Complex(), // The complex number
+    show: boolean, // Whether to show/plot the number or not
+    persistent: boolean, // Whether the number's older locations will persist on the graph or disappear in the next render (see example)
+    interpolate: boolean, // Whether to interpolate (ie draw a line between this number and another number, see example for use cases)
+    interpolateTo: Complex(), // Draws a line between this number and the watched number
+    attributes: Object // optional user-defined attributes
+  },
+  name2: {...same}
+}
+```
+
+##### Options
+Since this is a child class of `RealRenderer`, all the options of `RealRender` are applicable here as well.
+Apart from those, the following are additional options that can be passed on to the constructor.
+
+- `brushSize`(*Number*) (Default: `1`): Determines the size of the brush, i.e. the radius of the plotted points, in pixels.
+
+- `brushColor`(*Array*) (Default: `[1, 1, 1]`): The color of the brush, i.e. the plotted points.
+
+- `lineThickness`(*Number*) (Default: `0.05`): The thickness of the line joining the different plotted points, in coordinate units with scaleFactors.
+
+- `lineColor`(*Array*) (Default: `[0, 0.5, 0]`): The color of the line joining different points.
+
+- `changeNumbers(watchedNumbers, time)`(*Function*) (Default: `function(watchedNumbers) {return watchedNumbers}`): A callback that is fired at the start of every render. The first argument is the object of watched numbers (see above properties), the second argument is the internal `time` variable which can be used to keep track of render time.
+The expected return type is a similar object(but can be changed).
+
+##### Methods
+Since this is a child class of `RealRenderer`, all the methods of `RealRender` are available here as well.
+Apart from these methods, the following new methods are also available and are chainable too.
+
+- `watch(name, number, show = true, persistent = true, interpolate = false, interpolateTo = null, attributes = {})`: Add a new number to the `watchedNumbers`, see properties above.
+
+- `clearWatched()`: Clears all watched numbers.
+
+- `plot(number)`: Plots a single `number`, an instance of `Complex` class.
 
 ****
 ### Thank You!
