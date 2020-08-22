@@ -113,11 +113,13 @@ Apart from those, the following are additional options that can be passed on to 
 
 - `progressiveAxis`(*String<'x'|'y'>*) (Default: `x`): This string determines which axis should be changing to accomodate incoming data.
 
-- `progressionMode`(*String<'overflow'|'continous'>*) (Default: `overflow`): Determines how the axis should change. NOTE: `.startRender()` is not necessary if using this option with `overflow` mode.
+- `progressionMode`(*String<'overflow'|'continous'|'squeeze'>*) (Default: `overflow`): Determines how the axis should change. NOTE: `.startRender()` is necessary only if using this option with `continous` mode.
 
 A value of `overflow` only moves the axis when there is no space to accomodate new data.
 
-A value of `continous` changes the axis in time continously, at fixed intervals.
+A value of `continous` changes the axis in time continously, at fixed intervals (after starting render).
+
+A value of `squeeze` squeezes the graph to fit all the data.
 
 - `progressInterval`(*Number*) (Default: `1`): This options only works with `continous` progressionMode. This determines the interval between the progression of the graph, in internal `time` units.
 
