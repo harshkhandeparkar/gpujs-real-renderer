@@ -43,8 +43,6 @@ class RealLineGraph extends RealRenderer {
   addData(value) {
     if (!isNaN(parseFloat(value))) value = [parseFloat(value)];
     else if (!value.texture) throw 'Input invalid.';
-
-    console.log(value, this._lastData)
     
     this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress);
     this._lastData = value;
