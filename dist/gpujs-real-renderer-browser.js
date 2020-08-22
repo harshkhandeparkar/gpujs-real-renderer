@@ -245,6 +245,57 @@
   var progressGraph = getProgressGraphKernel;
 
   /**
+   * @param {Object} gpu GPU.js instance
+   * @param {Object} dimensions Dimensions of Graph
+   * @param {String} progressiveAxis The axis which progresses.
+   * @param {Number} xOffset
+   * @param {Number} yOffset
+   * @param {Float32Array} axesColor
+   * @param {Float32Array} bgColor
+   */
+  function getSqueezeGraphKernel(gpu, dimensions, progressiveAxis, xOffset, yOffset, axesColor, bgColor) {
+    return gpu.createKernel(function(graphPixels, scalingFactor) {
+      const outX = this.output.x, outY = this.output.y;
+      const X = Math.floor(outY * (this.constants.xOffset / 100));
+      const Y = Math.floor(outX * (this.constants.yOffset / 100));
+      
+      if (
+        (Math.floor(this.thread.x * (1 - this.constants.progressiveAxis) / scalingFactor) >= outX) || 
+        (Math.floor(this.thread.y * this.constants.progressiveAxis / scalingFactor)  >= outY)
+      ) {
+        if (this.thread.x === Y || this.thread.y === X) return this.constants.axesColor;
+        else return this.constants.bgColor; 
+      }
+      else {
+        const newY = this.constants.progressiveAxis == 1 ? Math.floor(this.thread.y / scalingFactor) : Math.floor(this.thread.y);
+        const newX = this.constants.progressiveAxis == 0 ? Math.floor(this.thread.x / scalingFactor) : Math.floor(this.thread.x);
+
+        return graphPixels[newY][newX];
+      }
+    },
+    {
+      output: dimensions,
+      pipeline: true,
+      constants: {
+        progressiveAxis: progressiveAxis == 'y' ? 1 : 0,
+        xOffset,
+        yOffset,
+        axesColor,
+        bgColor
+      },
+      constantTypes: {
+        progressiveAxis: 'Integer',
+        xOffset: 'Float',
+        yOffset: 'Float',
+        axesColor: 'Array(3)',
+        bgColor: 'Array(3)'
+      }
+    })
+  }
+
+  var squeezeGraph = getSqueezeGraphKernel;
+
+  /**
    * 
    * @param {Object} gpu 
    * @param {Float32Array} dimensions 
@@ -258,8 +309,8 @@
    * @param {Number} lineColor
    * @param {String} progressiveAxis
    */
-  function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, yScaleFactor, xOffset, yOffset, lineThickness, lineColor, progressiveAxis) {
-    return gpu.createKernel(function(graphPixels, value, dataIndex, lastData, numProgress) {
+  function getAddDataKernel(gpu, dimensions, brushSize, brushColor, xOffset, yOffset, lineThickness, lineColor, progressiveAxis) {
+    return gpu.createKernel(function(graphPixels, value, dataIndex, lastData, numProgress, xScaleFactor, yScaleFactor) {
       const x = this.thread.x + numProgress * Math.abs(this.constants.progressiveAxis - 1),
         y = this.thread.y + numProgress * this.constants.progressiveAxis;
 
@@ -268,11 +319,11 @@
         
       const outX = this.output.x, outY = this.output.y;
 
-      const X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
-      const Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
+      const X = x / xScaleFactor - (outX * (this.constants.yOffset / 100)) / xScaleFactor;
+      const Y = y / yScaleFactor - (outY * (this.constants.xOffset / 100)) / yScaleFactor;
 
-      const xDist = (X - dataIndex) * this.constants.xScaleFactor;
-      const yDist = (Y - val) * this.constants.yScaleFactor;
+      const xDist = (X - dataIndex) * xScaleFactor;
+      const yDist = (Y - val) * yScaleFactor;
 
       const dist = Math.sqrt(xDist*xDist + yDist*yDist);
 
@@ -297,8 +348,6 @@
         brushColor,
         lineThickness,
         lineColor,
-        xScaleFactor,
-        yScaleFactor,
         xOffset,
         yOffset,
         progressiveAxis: progressiveAxis == 'y' ? 1 : 0
@@ -308,8 +357,6 @@
         brushSize: 'Float',
         lineThickness: 'Float',
         lineColor: 'Array(3)',
-        xScaleFactor: 'Float',
-        yScaleFactor: 'Float',
         xOffset: 'Float',
         yOffset: 'Float',
         progressiveAxis: 'Integer'
@@ -337,13 +384,14 @@
       // *****DEFAULTS*****
 
       this._progressGraph = progressGraph(this.gpu, this.dimensions, this.progressiveAxis, this.xOffset, this.yOffset, this.axesColor, this.bgColor);
+      this._squeezeGraph = squeezeGraph(this.gpu, this.dimensions, this.progressiveAxis, this.xOffset, this.yOffset, this.axesColor, this.bgColor);
       this._lastProgress = 0; // Time when the graph last progressed. Internal variable
       this._numProgress = 0; // Number of times the graph has progressed
 
       this._dataIndex = 1; // Number of plots
       this._lastData = [0]; // (Value) To display lines
 
-      this._addData = addData(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor, this.progressiveAxis);
+      this._addData = addData(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor, this.progressiveAxis);
 
       this.limits = { // Final ranges of x and y
         x: [
@@ -360,14 +408,12 @@
     addData(value) {
       if (!isNaN(parseFloat(value))) value = [parseFloat(value)];
       else if (!value.texture) throw 'Input invalid.';
-
-      console.log(value, this._lastData);
       
-      this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress);
+      this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress, this.xScaleFactor, this.yScaleFactor);
       this._lastData = value;
 
       // Overflow
-      if (this._dataIndex >= this.limits.x[1] && this.progressionMode != 'continous') {
+      if (this._dataIndex >= this.limits.x[1] && this.progressionMode == 'overflow') {
         let progress = Math.ceil(this.progressiveAxis == 'y' ? this.yScaleFactor : this.xScaleFactor);
 
         this.graphPixels = this._progressGraph(
@@ -384,6 +430,26 @@
         else {
           this.limits.x[1] += progress / this.xScaleFactor;
           this.limits.x[0] += progress / this.xScaleFactor;
+        }
+      }
+
+      // Squeeze
+      if (this._dataIndex >= this.limits.x[1] && this.progressionMode == 'squeeze') {
+        const scalingFactor = (this._dataIndex / (this._dataIndex + 1));
+
+        this.graphPixels = this._squeezeGraph(
+          this._cloneTexture(this.graphPixels),
+          scalingFactor
+        );
+
+
+        if (this.progressiveAxis == 'x') {
+          this.xScaleFactor *= scalingFactor;
+          this.limits.x[1] /= scalingFactor;
+        }
+        else {
+          this.yScaleFactor *= scalingFactor;
+          this.limits.y[1] /= scalingFactor;
         }
       }
 
@@ -422,6 +488,9 @@
       this._lastData = 0;
       this._lastProgress = 0;
       this._numProgress = 0;
+
+      this.xScaleFactor = options.xScaleFactor || 10;
+      this.yScaleFactor = options.yScaleFactor || 1;
 
       this.limits = { // Final ranges of x and y
         x: [
@@ -723,7 +792,7 @@
       this._plotComplexPersistent = plotComplex(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
       this.Complex = complex;
 
-      this.interpolate = interpolate(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
+      this._interpolateKernel = interpolate(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
     }
 
     /**
@@ -757,7 +826,7 @@
     }
 
     _interpolate(graphPixels, n1, n2) {
-      graphPixels = this.interpolate(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]);
+      graphPixels = this._interpolateKernel(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]);
 
       return graphPixels;
     }
