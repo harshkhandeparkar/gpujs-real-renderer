@@ -126,6 +126,9 @@ class RealLineGraph extends RealRenderer {
     this._lastProgress = 0;
     this._numProgress = 0;
 
+    this.xScaleFactor = options.xScaleFactor || 10;
+    this.yScaleFactor = options.yScaleFactor || 1;
+
     this.limits = { // Final ranges of x and y
       x: [
         0 - (this.yOffset / 100) * (this.dimensions[0] / this.xScaleFactor), // lower limit
