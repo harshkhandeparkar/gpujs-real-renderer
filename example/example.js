@@ -1,3 +1,4 @@
+// Line Graph
 const options = {
   canvasTag: 'line-canvas',
   dimensions: [420, 360],
@@ -15,7 +16,7 @@ const options = {
   yOffset: 10, // 10%
   
   progressiveAxis: 'x', // x -> Graph moves along x-axis; y -> Graph moves along y-axis
-  progressionMode: 'overflow', // continous -> Axis always moves; overfloa -> Axis only moves when space for new data is inadequate;
+  progressionMode: 'squeeze', // continous -> Axis always moves; overflow -> Axis only moves when space for new data is inadequate;
   progressInterval: 0.4, // Axis moves by one pixel every 0.4 internal time units (Only for continous type)
 
   brushSize: 2, // The radius of one point of data, in coordinate units
@@ -25,10 +26,27 @@ const options = {
   lineColor: [0.1, 0.2, 0.8]
 }
 
-const LineGraph = new GPUjsRealRenderer.RealLineGraph(options)
+const LineGraph = new GPUjsRealRenderer.RealLineGraph(options);
+const progressModeSelector = document.querySelector('#progress-mode');
+// progressModeSelector.oninput = e => {
+//   e.preventDefault();
+//   options.progressionMode = progressModeSelector.value;
+//   LineGraph.progressionMode = options.progressionMode;
+//   LineGraph.reset();
+// }
 
-LineGraph.draw();
+LineGraph.draw(); // To draw the initial axes
 
+
+document.getElementById('add').onclick = e => {
+  e.preventDefault();
+
+  if (typeof document.getElementById('value').value != 'undefined') {
+    LineGraph.addData(document.getElementById('value').value);
+  }
+}
+
+// Fourier Series
 const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
   canvasTag: 'complex-canvas',
   xScaleFactor: 2,
@@ -156,29 +174,4 @@ document.getElementById('complex-randomize').onclick = e => {
     document.getElementById('complex-render').innerText = 'Stop Rendering';
   }, 1000)
 
-}
-
-
-// if (LineGraph.progressionMode == 'continous') {
-  // document.getElementById('line-btn').onclick = e => {
-  //   e.preventDefault();
-
-  //   if (LineGraph.doRender) {
-  //     LineGraph.stopRender();
-  //     document.getElementById('line-btn').innerText = 'Start Rendering';
-  //   }
-  //   else {
-  //     LineGraph.startRender();
-  //     document.getElementById('line-btn').innerText = 'Stop Rendering';
-  //   }
-  // }
-// }
-// else document.getElementById('line-btn').disabled = true;
-
-document.getElementById('add').onclick = e => {
-  e.preventDefault();
-
-  if (typeof document.getElementById('value').value != 'undefined') {
-    LineGraph.addData(document.getElementById('value').value);
-  }
 }

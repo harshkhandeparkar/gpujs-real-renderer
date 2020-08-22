@@ -4,22 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GPUjs Real Renderer Example</title>
+  <link rel="stylesheet" href="index.css" />
 </head>
 <body>
-  
-  <h3>Progressive Line Graph (ProgressMode: 'overflow')(class: RealLineGraph)</h3>
-  <!-- <button id="line-btn">Start Rendering</button><br /><br /> -->
-  <canvas id="line-canvas"></canvas>
+  <div class="container">
+    <ul class="examples">
+      <li class="example">
+        <h3 class="example-name"># Progressive Line Graph</h3>
+        <p class="desc">
+          Adds a new value to graph in real time and interpolates (makes a line) joining the value. Can be used to monitor real time data.<br />
+          Accommodates more data by moving behind (continously or on overflow) or squeezing the graph.
+        </p>
+        <p>Class: <a href="https://github.com/HarshKhandeparkar/gpujs-real-renderer#reallinegraph" class="class-name">RealLineGraph</a></p>
+        <canvas id="line-canvas"></canvas>
+        
+        <form id="input-form">
+          <label for="value">Data:  </label>
+          <input type="text" placeholder="Value" id="value" />
+          <br />
 
-  <form id="input-form">
-    <input type="text" placeholder="Value" id="value" />
-    <button id="add">Add Data</button>
-  </form>
+          <label for="progress-mode">Progress Mode: </label>
+          <select name="progress-mode" disabled id="progress-mode" value="squeeze">
+            <option value="overflow">Overflow</option>
+            <option value="continous">Continous</option>
+            <option value="overflow" selected>Squeeze</option>
+          </select>
+          <br />
+          <button id="add">Add Data</button>
+          <!-- <button id="line-btn">Start Rendering</button><br /><br /> -->
+        </form>
+      </li>
 
-  <h3>Random Symmetric Fourier Series (class: RealComplexSpace)</h3>
-  <canvas id="complex-canvas"></canvas> <br />
-  <button id="complex-render">Start Rendering</button>
-  <button id="complex-randomize">Randomize</button>
+      <li class="example">
+        <h3># Random Symmetric Fourier Series</h3>
+        <p class="desc">
+          Plot the sum of a randomly generated (symmetric) fourier series (10 numbers) using the RealComplexSpace class which can track, plot and interpolate (make a line between)
+          complex numbers. This class also exports a util class named `Complex` for handling complex numbers.
+        </p>
+        <p>Class: <a href="https://github.com/HarshKhandeparkar/gpujs-real-renderer#realcomplexspace" class="class-name">RealComplexSpace</a></p>
+
+        <canvas id="complex-canvas"></canvas> <br />
+        <button id="complex-render">Start Rendering</button>
+        <button id="complex-randomize">Randomize</button>
+      </li>
+    </ol>
+  </div>
+
+  <hr />
+  <footer>
+    <a href="https://github.com/HarshKhandeparkar/gpujs-real-renderer">Github</a> |
+    <a href="https://github.com/HarshKhandeparkar/gpujs-real-renderer/releases/latest">Latest Release</a>
+  </footer>
 
   <script src="./gpu-browser.min.js"></script>
   <script src="../dist/gpujs-real-renderer-browser.js"></script>
