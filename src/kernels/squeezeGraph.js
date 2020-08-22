@@ -8,21 +8,21 @@
  * @param {Float32Array} bgColor
  */
 function getSqueezeGraphKernel(gpu, dimensions, progressiveAxis, xOffset, yOffset, axesColor, bgColor) {
-  return gpu.createKernel(function(graphPixels, scalingFactor) {
+  return gpu.createKernel(function(graphPixels, squeezingFactor) {
     const outX = this.output.x, outY = this.output.y;
     const X = Math.floor(outY * (this.constants.xOffset / 100));
     const Y = Math.floor(outX * (this.constants.yOffset / 100));
     
     if (
-      (Math.floor(this.thread.x * (1 - this.constants.progressiveAxis) / scalingFactor) >= outX) || 
-      (Math.floor(this.thread.y * this.constants.progressiveAxis / scalingFactor)  >= outY)
+      (Math.floor(this.thread.x * (1 - this.constants.progressiveAxis) / squeezingFactor) >= outX) || 
+      (Math.floor(this.thread.y * this.constants.progressiveAxis / squeezingFactor)  >= outY)
     ) {
       if (this.thread.x === Y || this.thread.y === X) return this.constants.axesColor;
       else return this.constants.bgColor; 
     }
     else {
-      const newY = this.constants.progressiveAxis == 1 ? Math.floor(this.thread.y / scalingFactor) : Math.floor(this.thread.y);
-      const newX = this.constants.progressiveAxis == 0 ? Math.floor(this.thread.x / scalingFactor) : Math.floor(this.thread.x);
+      const newY = this.constants.progressiveAxis == 1 ? Math.floor(this.thread.y / squeezingFactor) : Math.floor(this.thread.y);
+      const newX = this.constants.progressiveAxis == 0 ? Math.floor(this.thread.x / squeezingFactor) : Math.floor(this.thread.x);
 
       return graphPixels[newY][newX];
     }
