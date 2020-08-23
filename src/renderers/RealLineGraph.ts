@@ -134,7 +134,10 @@ export class RealLineGraph extends RealRenderer {
     return this;
   }
 
-  _drawFunc(graphPixels, time) {
+  _drawFunc(
+    graphPixels: Texture,
+    time: number
+  ) {
     if (this.progressionMode == 'continous' && (time - this._lastProgress >= this.progressInterval)) {
       this._lastProgress = time;
       this._numProgress++;
@@ -148,7 +151,7 @@ export class RealLineGraph extends RealRenderer {
         this.limits.x[1] += 1 / this.xScaleFactor;
       }
 
-      return this._progressGraph(this._cloneTexture(graphPixels), 1);
+      return this._progressGraph(this._cloneTexture(graphPixels), 1) as Texture;
     }
     else return graphPixels;
   }

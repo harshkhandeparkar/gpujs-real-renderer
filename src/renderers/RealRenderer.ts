@@ -1,6 +1,6 @@
-import getDisplayKernel from '../kernels/display';
+import { getDisplayKernel } from '../kernels/display';
 import { getBlankGraphKernel } from '../kernels/blankGraph';
-import getCloneTextureKernel from '../kernels/cloneTexture';
+import { getCloneTextureKernel } from '../kernels/cloneTexture';
 
 import { GraphDimensions, Color, RealRendererOptions } from '../types/RealRendererTypes';
 export * from '../types/RealRendererTypes';
