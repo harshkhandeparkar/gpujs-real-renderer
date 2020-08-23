@@ -1,4 +1,4 @@
-import { RealLineGraphOptions } from '../../renderers/RealLineGraph';
+import { RealLineGraphOptions } from '../../types/RealLineGraphTypes';
 
 export const RealLineGraphDefaults: RealLineGraphOptions = {
   canvas: new HTMLCanvasElement(),

@@ -1,5 +1,5 @@
 import { GPU } from 'gpu.js';
-import { GraphDimensions, Color } from '../renderers/RealRenderer';
+import { GraphDimensions, Color } from '../types/RealRendererTypes';
 
 /**
  * @param gpu 

@@ -1,6 +1,6 @@
 import { GPU } from 'gpu.js';
-import { GraphDimensions, Color } from '../renderers/RealRenderer';
-import { Axis } from '../renderers/RealLineGraph';
+import { GraphDimensions, Color } from '../types/RealRendererTypes';
+import { Axis } from '../types/RealLineGraphTypes';
 
 /**
  * 

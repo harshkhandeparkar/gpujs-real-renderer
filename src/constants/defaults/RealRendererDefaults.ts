@@ -1,4 +1,4 @@
-import { RealRendererOptions } from '../../renderers/RealRenderer';
+import { RealRendererOptions } from '../../types/RealRendererTypes';
 import { GPU } from 'gpu.js';
 
 export const RealRendererDefaults: RealRendererOptions = {

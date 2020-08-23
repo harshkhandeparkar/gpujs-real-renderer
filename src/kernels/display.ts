@@ -1,4 +1,5 @@
 import { GPU } from 'gpu.js';
+import { GraphDimensions } from '../types/RealRendererTypes';
 
 /**
  * @param gpu GPU.js Instance
@@ -6,7 +7,7 @@ import { GPU } from 'gpu.js';
  */
 export function getDisplayKernel(
   gpu: GPU,
-  dimensions: import('../renderers/RealRenderer').GraphDimensions
+  dimensions: GraphDimensions
 ) {
   return gpu.createKernel(function(graphPixels) {
     const color = graphPixels[this.thread.y][this.thread.x];
