@@ -4,12 +4,16 @@ import { getSqueezeGraphKernel } from '../kernels/squeezeGraph';
 import { getAddDataKernel } from '../kernels/addData';
 
 import { Color } from '../types/RealRendererTypes';
-import { Axis, ProgressionMode, GraphLimits } from '../types/RealLineGraphTypes';
+import { Axis, ProgressionMode, GraphLimits, RealLineGraphOptions } from '../types/RealLineGraphTypes';
 import { IKernelRunShortcut, Texture } from 'gpu.js';
 export * from '../types/RealRendererTypes';
 export * from '../types/RealLineGraphTypes';
 
+import { RealLineGraphDefaults } from '../constants/defaults/RealLineGraphDefaults';
+export * from '../constants/defaults/RealLineGraphDefaults';
+
 export class RealLineGraph extends RealRenderer {
+  options: RealLineGraphOptions;
   progressiveAxis: Axis;
   progressionMode: ProgressionMode;
   progressInterval: number;
@@ -26,19 +30,26 @@ export class RealLineGraph extends RealRenderer {
   _addData: IKernelRunShortcut;
   limits: GraphLimits;
 
-  constructor(options) {
+  constructor(options: RealLineGraphOptions) {
     // *****DEFAULTS*****
     super(options);
 
-    this.progressiveAxis = options.progressiveAxis || 'x'; // Which axis progresses with time
-    this.progressionMode = options.progressionMode || 'overflow'; // overflow -> Only progresses when completely filled; continous -> Always progresses;
-    this.progressInterval = options.progressInterval || 1; // Progress once every interval time units; Only works with continous progressionMode
+    options = {
+      ...RealLineGraphDefaults,
+      ...options
+    }
 
-    this.brushSize = options.brushSize || 1; // 1 unit radius
-    this.brushColor = options.brushColor || [1, 1, 1];
+    this.options = options;
 
-    this.lineThickness = options.lineThickness || 0.05;
-    this.lineColor = options.lineColor || [0, 0.5, 0];
+    this.progressiveAxis = options.progressiveAxis; // Which axis progresses with time
+    this.progressionMode = options.progressionMode; // overflow -> Only progresses when completely filled; continous -> Always progresses;
+    this.progressInterval = options.progressInterval; // Progress once every interval time units; Only works with continous progressionMode
+
+    this.brushSize = options.brushSize; // 1 unit radius
+    this.brushColor = options.brushColor;
+
+    this.lineThickness = options.lineThickness;
+    this.lineColor = options.lineColor;
     // *****DEFAULTS*****
 
     this._progressGraph = getProgressGraphKernel(this.gpu, this.dimensions, this.progressiveAxis, this.xOffset, this.yOffset, this.axesColor, this.bgColor);
@@ -155,8 +166,8 @@ export class RealLineGraph extends RealRenderer {
     this._lastProgress = 0;
     this._numProgress = 0;
 
-    this.xScaleFactor = options.xScaleFactor || 10;
-    this.yScaleFactor = options.yScaleFactor || 1;
+    this.xScaleFactor = this.options.xScaleFactor;
+    this.yScaleFactor = this.options.yScaleFactor;
 
     this.limits = { // Final ranges of x and y
       x: [
