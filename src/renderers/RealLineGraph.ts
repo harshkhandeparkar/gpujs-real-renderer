@@ -1,7 +1,7 @@
 import { RealRenderer } from './RealRenderer';
-import getProgressGraphKernel from '../kernels/progressGraph';
-import getSqueezeGraphKernel from '../kernels/squeezeGraph';
-import getAddDataKernel from '../kernels/addData';
+import { getProgressGraphKernel } from '../kernels/progressGraph';
+import { getSqueezeGraphKernel } from '../kernels/squeezeGraph';
+import { getAddDataKernel } from '../kernels/addData';
 
 import { Color } from '../types/RealRendererTypes';
 import { Axis, ProgressionMode, GraphLimits } from '../types/RealLineGraphTypes';
