@@ -61,5 +61,3 @@ export function getPlotComplexKernel(
     }
   )
 }
-
-module.exports = getPlotComplexKernel;
