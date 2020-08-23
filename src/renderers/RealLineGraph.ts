@@ -75,7 +75,7 @@ export class RealLineGraph extends RealRenderer {
   }
 
   addData(value: [number] | number | Texture) {
-    if (typeof value == 'number') value = [value];
+    if (!isNaN(Number(value))) value = [Number(value)]; // convert all forms to [number] or Texture
     
     this.graphPixels = this._addData(
       this._cloneTexture(this.graphPixels),
@@ -87,7 +87,7 @@ export class RealLineGraph extends RealRenderer {
       this.yScaleFactor
     ) as Texture;
 
-    this._lastData = value;
+    this._lastData = value as [number] | Texture;
 
     // Overflow
     if (this._dataIndex >= this.limits.x[1] && this.progressionMode == 'overflow') {

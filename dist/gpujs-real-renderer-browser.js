@@ -510,8 +510,8 @@
 	        return _this;
 	    }
 	    RealLineGraph.prototype.addData = function (value) {
-	        if (typeof value == 'number')
-	            value = [value];
+	        if (!isNaN(Number(value)))
+	            value = [Number(value)]; // convert all forms to [number] or Texture
 	        this.graphPixels = this._addData(this._cloneTexture(this.graphPixels), value, this._dataIndex++, this._lastData, this._numProgress, this.xScaleFactor, this.yScaleFactor);
 	        this._lastData = value;
 	        // Overflow
