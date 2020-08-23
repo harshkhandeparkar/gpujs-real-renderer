@@ -11,7 +11,7 @@ import { Axis } from '../renderers/RealLineGraph';
  * @param axesColor
  * @param bgColor
  */
-function getProgressGraphKernel(
+export function getProgressGraphKernel(
   gpu: GPU,
   dimensions: GraphDimensions,
   progressiveAxis: Axis,
@@ -66,5 +66,3 @@ function getProgressGraphKernel(
     }
   )
 }
-
-module.exports = getProgressGraphKernel;
