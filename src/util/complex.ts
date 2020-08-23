@@ -1,45 +1,41 @@
 // A Complex class to handle all complex stuff
-const {convertCartesianPolar, convertPolarCartesian} = require('./convertForm');
+import { convertCartesianPolar, convertPolarCartesian } from './convertForm';
 
-class Complex {
+export class Complex {
+  r: number;
+  theta: number;
+  x: number;
+  y: number;
+  convertCartesianPolar = convertCartesianPolar;
+  convertPolarCartesian = convertPolarCartesian;
+
   /**
    * Constructor
-   * @param {Number} r Modulus
-   * @param {Number} theta Argument (radians)
+   * @param r Modulus
+   * @param theta Argument (radians)
    */
-  constructor(r, theta) {
+  constructor(r: number, theta: number) {
     this.r = r;
     this.theta = theta;
 
     this.x = convertPolarCartesian(this.r, this.theta)[0];
     this.y = convertPolarCartesian(this.r, this.theta)[1];
 
-
-    this.convertCartesianPolar = convertCartesianPolar;
-    this.convertPolarCartesian = convertPolarCartesian;
-
     return this;
   }
 
-  /**
-   * @returns {Float32Array} [x, y]
-   */
   getCartesianForm() {
     return [this.x, this.y];
   }
 
-  /**
-   * @returns {Float32Array} [r, theta]
-   */
   getPolarForm() {
     return [this.r, this.theta];
   }
 
   /**
-   * @param {"Complex"} addedNum Complex number (object) to be added.
-   * @returns {"Complex"} this
+   * @param addedNum Complex number (object) to be added.
    */
-  add(addedNum) {
+  add(addedNum: Complex) {
     this.x += addedNum.x;
     this.y += addedNum.y;
 
@@ -50,10 +46,9 @@ class Complex {
   }
 
   /**
-   * @param {"Complex"} subtractedNum Complex number (object) to be subtracted.
-   * @returns {"Complex"} this
+   * @param subtractedNum Complex number (object) to be subtracted.
    */
-  subtract(subtractedNum) {
+  subtract(subtractedNum: Complex) {
     this.x -= subtractedNum.x;
     this.y -= subtractedNum.y;
 
@@ -63,10 +58,9 @@ class Complex {
   }
 
   /**
-   * @param {"Complex"} multipliedNum Complex number (object) to be multiplied.
-   * @returns {"Complex"} this 
+   * @param multipliedNum Complex number (object) to be multiplied. 
    */
-  multiply(multipliedNum) {
+  multiply(multipliedNum: Complex) {
     this.r *= multipliedNum.r;
     this.theta += multipliedNum.theta;
 
@@ -77,10 +71,9 @@ class Complex {
   }
 
   /**
-   * @param {"Complex"} dividedNum Complex number (object) to be multiplied.
-   * @returns {"Complex"} this 
+   * @param dividedNum Complex number (object) to be multiplied.
    */
-  divide(dividedNum) {
+  divide(dividedNum: Complex) {
     this.r /= dividedNum.r;
     this.theta -= dividedNum.theta;
 
@@ -91,7 +84,7 @@ class Complex {
   }
 
   /**
-   * @returns {"Complex"} The complex conjugate (modified this).
+   * @returns The complex conjugate (modified this).
    */
   conjugate() {
     this.theta *= -1;
@@ -102,7 +95,7 @@ class Complex {
   }
 
   /**
-   * @returns {"Complex"} The complex reciprocal (modified this).
+   * @returns The complex reciprocal (modified this).
    */
   reciprocal() {
     this.r = 1 / this.r;
@@ -113,5 +106,3 @@ class Complex {
     return this;
   }
 }
-
-module.exports = Complex;
