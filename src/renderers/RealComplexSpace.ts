@@ -5,7 +5,7 @@ import { Complex } from '../util/complex';
 
 import { Color } from '../types/RealRendererTypes';
 import { IKernelRunShortcut, Texture } from 'gpu.js';
-export * from '../types/RealRendererTypes';
+export * as RealRendererTypes from '../types/RealRendererTypes';
 
 import { WatchedNumbers, RealComplexSpaceOptions } from '../types/RealComplexSpaceTypes';
 export * as RealComplexSpaceTypes from '../types/RealComplexSpaceTypes';

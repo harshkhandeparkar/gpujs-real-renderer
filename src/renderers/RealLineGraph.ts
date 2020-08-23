@@ -6,8 +6,8 @@ import { getAddDataKernel } from '../kernels/addData';
 import { Color } from '../types/RealRendererTypes';
 import { Axis, ProgressionMode, GraphLimits, RealLineGraphOptions } from '../types/RealLineGraphTypes';
 import { IKernelRunShortcut, Texture } from 'gpu.js';
-export * from '../types/RealRendererTypes';
-export * from '../types/RealLineGraphTypes';
+export * as RealRendererTypes from '../types/RealRendererTypes';
+export * as RealLineGraphTypes from '../types/RealLineGraphTypes';
 
 import { RealLineGraphDefaults } from '../constants/defaults/RealLineGraphDefaults';
 export * from '../constants/defaults/RealLineGraphDefaults';

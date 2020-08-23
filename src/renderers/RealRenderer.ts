@@ -3,7 +3,7 @@ import { getBlankGraphKernel } from '../kernels/blankGraph';
 import { getCloneTextureKernel } from '../kernels/cloneTexture';
 
 import { GraphDimensions, Color, RealRendererOptions } from '../types/RealRendererTypes';
-export * from '../types/RealRendererTypes';
+export * as RealRendererTypes from '../types/RealRendererTypes';
 
 import { RealRendererDefaults } from '../constants/defaults/RealRendererDefaults';
 export * from '../constants/defaults/RealRendererDefaults';
