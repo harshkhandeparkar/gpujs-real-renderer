@@ -166,10 +166,11 @@ See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
   - `reciprocal()`: Modifies itself to be its own reciprocal and returns itself.
   NOTE: All of the above methods except `getCartesianForm` and `getPolarForm` are chainable.
 
-- `watchedNumbers`(*Object*): An object that stores all the *watched* complex numbers, ie the ones that are plotted during each render. This object is of the form
+- `watchedNumbers`(*Array*): An object that stores all the *watched* complex numbers, ie the ones that are plotted during each render. This object is of the form
 ```js
-{
-  name1: { // Here, `name` is any arbitrary name, the property does not matter
+[
+  { 
+    name: 'name1', // Here, `name1` is any arbitrary name, the property does not matter
     number: Complex(), // The complex number
     show: boolean, // Whether to show/plot the number or not
     persistent: boolean, // Whether the number's older locations will persist on the graph or disappear in the next render (see example)
@@ -177,8 +178,8 @@ See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
     interpolateTo: Complex(), // Draws a line between this number and the watched number
     attributes: Object // optional user-defined attributes
   },
-  name2: {...same}
-}
+  {...same}
+]
 ```
 
 ##### Options
