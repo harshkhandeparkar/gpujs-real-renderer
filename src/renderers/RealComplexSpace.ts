@@ -7,7 +7,7 @@ import { Color } from '../types/RealRendererTypes';
 import { IKernelRunShortcut, Texture } from 'gpu.js';
 export * from '../types/RealRendererTypes';
 
-import { WatchedNumbers } from '../types/RealComplexSpaceTypes';
+import { WatchedNumbers, RealComplexSpaceOptions } from '../types/RealComplexSpaceTypes';
 
 export class RealComplexSpace extends RealRenderer {
   brushSize: number;
@@ -22,7 +22,7 @@ export class RealComplexSpace extends RealRenderer {
   _interpolateKernel: IKernelRunShortcut;
   _persistentGraphPixels: Texture;
 
-  constructor(options) {
+  constructor(options: RealComplexSpaceOptions) {
     // *****DEFAULTS*****
     super(options);
 
