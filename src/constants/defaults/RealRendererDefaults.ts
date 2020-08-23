@@ -2,7 +2,6 @@ import { RealRendererOptions } from '../../types/RealRendererTypes';
 import { GPU } from 'gpu.js';
 
 export const RealRendererDefaults: RealRendererOptions = {
-  canvas: new HTMLCanvasElement(),
   dimensions: {x: 1000, y: 1000},
   xScaleFactor: 10,
   yScaleFactor: 1,

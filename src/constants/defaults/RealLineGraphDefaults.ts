@@ -1,7 +1,6 @@
 import { RealLineGraphOptions } from '../../types/RealLineGraphTypes';
 
 export const RealLineGraphDefaults: RealLineGraphOptions = {
-  canvas: new HTMLCanvasElement(),
   progressiveAxis: 'x',
   progressionMode: 'overflow',
   progressInterval: 1,
