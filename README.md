@@ -193,7 +193,7 @@ Apart from those, the following are additional options that can be passed on to 
 
 - `lineColor`(*Array*) (Default: `[0, 0.5, 0]`): The color of the line joining different points.
 
-- `changeNumbers(watchedNumbers, time)`(*Function*) (Default: `function(watchedNumbers) {return watchedNumbers}`): A callback that is fired at the start of every render. The first argument is the object of watched numbers (see above properties), the second argument is the internal `time` variable which can be used to keep track of render time.
+- `changeNumbers(watchedNumbers, time, timeStep)`(*Function*) (Default: `function(watchedNumbers) {return watchedNumbers}`): A callback that is fired at the start of every render. The first argument is the object of watched numbers (see above properties), the second argument is the internal `time` variable which can be used to keep track of render time. `timeStep` is the timeStep.
 The expected return type is a similar object(but can be changed).
 
 ##### Methods
