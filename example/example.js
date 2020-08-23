@@ -58,35 +58,33 @@ const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
   lineColor: [0.8, 0, 0],
   dimensions: [420, 360],
   changeNumbers: (nums, time, timeStep) => {
-    if (nums.find(num => num.name == 'final')) nums.find(num => num.name == 'final').number = new Complex(0, 0);
+    if (nums.find(num => num.name == 'final')) nums[nums.findIndex(num => num.name == 'final')].number = new Complex(0, 0);
 
     for (let i = complexLimits[0]; i <= complexLimits[1]; i++) {
-      if (nums[i]) {
-        const n = nums[i];
-
+      if (nums.find(num => num.name == i)) {
+        const n = nums.find(num => num.name == i);
+        
         n.number = n.number.multiply(new Complex(1, n.attributes.period * timeStep));
-        nums.find(num => num.name == 'final').number.add(n.number);
+        nums[nums.findIndex(num => num.name == 'final')].number.add(n.number);
       }
     }
 
     let partialSum = new Complex(0, 0);
     for (let i = complexLimits[0]; i <= complexLimits[1]; i++) {
-      if (nums[i]) {
+      if (nums.find(num => num.name == i)) {
         const newPartial = {
           name: `p${i}`,
           number: new Complex(partialSum.r, partialSum.theta),
           show: true,
           persistent: false,
           interpolate: true,
-          interpolateTo: new Complex(partialSum.r, partialSum.theta).add(nums[i].number)
-        };
+          interpolateTo: new Complex(partialSum.r, partialSum.theta).add(nums.find(num => num.name == i).number)
+        }
 
-        if (nums.find(num => num.name == `p${i}`)) nums.find(num => num.name == `p${i}`) = newPartial;
+        if (nums.find(num => num.name == `p${i}`)) nums[nums.findIndex(num => num.name == `p${i}`)] = newPartial;
         else nums.push(newPartial);
 
-        nums.push()
-
-        partialSum.add(nums[i].number)
+        partialSum.add(nums.find(num => num.name == i).number);
       }
     }
     return nums;
