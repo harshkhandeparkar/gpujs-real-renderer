@@ -638,7 +638,6 @@
 	    });
 	}
 	exports.getPlotComplexKernel = getPlotComplexKernel;
-	module.exports = getPlotComplexKernel;
 	});
 
 	var interpolate = createCommonjsModule(function (module, exports) {
