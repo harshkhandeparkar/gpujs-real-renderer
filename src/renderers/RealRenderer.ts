@@ -5,6 +5,9 @@ import getCloneTextureKernel from '../kernels/cloneTexture';
 import { GraphDimensions, Color, RealRendererOptions } from '../types/RealRendererTypes';
 export * from '../types/RealRendererTypes';
 
+import { RealRendererDefaults } from '../constants/defaults/RealRendererDefaults';
+export * from '../constants/defaults/RealRendererDefaults';
+
 import { GPU, Texture, IKernelRunShortcut } from 'gpu.js';
 
 export class RealRenderer {
@@ -30,20 +33,25 @@ export class RealRenderer {
 
   constructor(options: RealRendererOptions) {
     // *****DEFAULTS*****
+    options = {
+      ...RealRendererDefaults,
+      ...options
+    }
+
     this.canvas = this._canvas = options.canvas;
-    this.dimensions = options.dimensions || {x: 1000, y:1000};
-    this.xScaleFactor = options.xScaleFactor || 10;
-    this.yScaleFactor = options.yScaleFactor || 1;
-    this.bgColor = options.bgColor || [0, 0, 0];
-    this.axesColor = options.axesColor || [1, 1, 1];
-    this.drawsPerFrame = options.drawsPerFrame || 1;
-    this.timeStep = options.timeStep || (1 / 60);
-    this.time = options.initTime || 0;
+    this.dimensions = options.dimensions;
+    this.xScaleFactor = options.xScaleFactor;
+    this.yScaleFactor = options.yScaleFactor;
+    this.bgColor = options.bgColor;
+    this.axesColor = options.axesColor;
+    this.drawsPerFrame = options.drawsPerFrame;
+    this.timeStep = options.timeStep;
+    this.time = options.initTime;
 
-    this.xOffset = options.xOffset || 50; // %age offset
-    this.yOffset = options.yOffset || 50; // %age offset
+    this.xOffset = options.xOffset; // %age offset
+    this.yOffset = options.yOffset; // %age offset
 
-    options.GPU = options.GPU || (<any>window).GPU as GPU;
+    options.GPU = options.GPU;
 
     this.xOffset = Math.max(0, Math.min(100, this.xOffset)) // Between 0 and 100
     this.yOffset = Math.max(0, Math.min(100, this.yOffset)) // Between 0 and 100
