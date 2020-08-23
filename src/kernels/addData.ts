@@ -90,5 +90,3 @@ export function getAddDataKernel(
     }
   )
 }
-
-module.exports = getAddDataKernel;
