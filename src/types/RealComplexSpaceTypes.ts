@@ -17,6 +17,6 @@ export interface RealComplexSpaceOptions extends RealRendererOptions {
   brushSize?: number,
   brushColor?: [1, 1, 1],
   changeNumbers?: (WatchedNumbers: WatchedNumbers, time: number, timeStep: number) => WatchedNumbers,
-  lineThickness: number,
-  lineColor: Color
+  lineThickness?: number,
+  lineColor?: Color
 }

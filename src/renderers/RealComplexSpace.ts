@@ -8,6 +8,10 @@ import { IKernelRunShortcut, Texture } from 'gpu.js';
 export * from '../types/RealRendererTypes';
 
 import { WatchedNumbers, RealComplexSpaceOptions } from '../types/RealComplexSpaceTypes';
+export * as RealComplexSpaceTypes from '../types/RealComplexSpaceTypes';
+
+import { RealComplexSpaceDefaults } from '../constants/defaults/RealComplexSpaceDefaults';
+export * from '../constants/defaults/RealComplexSpaceDefaults';
 
 export class RealComplexSpace extends RealRenderer {
   brushSize: number;
@@ -25,6 +29,11 @@ export class RealComplexSpace extends RealRenderer {
   constructor(options: RealComplexSpaceOptions) {
     // *****DEFAULTS*****
     super(options);
+
+    options = {
+      ...RealComplexSpaceDefaults,
+      ...options
+    }
 
     this.brushSize = options.brushSize || 1; // 1 unit radius
     this.brushColor = options.brushColor || [1, 1, 1];
