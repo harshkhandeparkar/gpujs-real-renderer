@@ -2,13 +2,13 @@
   "name": "gpujs-real-renderer",
   "version": "0.3.0",
   "description": "A Real Time 2D Graphical Rendering Engine Made With GPU.js",
-  "main": "index.js",
+  "main": "index.ts",
   "repository": "https://github.com/HarshKhandeparkar/gpujs-real-renderer.git",
   "author": "Harsh Khandeparkar",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "",
+    "build": "tsc",
     "npm-publish": "yarn build && git add dist && yarn publish"
   },
   "dependencies": {},
@@ -16,8 +16,5 @@
     "@types/node": "^14.6.0",
     "gpu.js": "^2.9.5",
     "typescript": "^4.0.2"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }
