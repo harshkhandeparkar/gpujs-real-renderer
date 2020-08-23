@@ -7,6 +7,8 @@ import { Color } from '../types/RealRendererTypes';
 import { IKernelRunShortcut, Texture } from 'gpu.js';
 export * from '../types/RealRendererTypes';
 
+import { WatchedNumbers } from '../types/RealComplexSpaceTypes';
+
 export class RealComplexSpace extends RealRenderer {
   brushSize: number;
   brushColor: Color;
@@ -33,7 +35,7 @@ export class RealComplexSpace extends RealRenderer {
     this.lineColor = options.lineColor || [1, 1, 1];
     // *****DEFAULTS*****
 
-    this.watchedNumbers = {}; // Numbers that are plotted at all times (to dynamically update the numbers)
+    this.watchedNumbers = []; // Numbers that are plotted at all times (to dynamically update the numbers)
 
     this._plotComplex = getPlotComplexKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
     this._plotComplexPersistent = getPlotComplexKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
@@ -61,20 +63,21 @@ export class RealComplexSpace extends RealRenderer {
     interpolateTo = null,
     attributes: any = {}
   ) {
-    this.watchedNumbers[name] = {
+    this.watchedNumbers.push({
+      name,
       number,
       show,
       persistent,
       interpolate,
       interpolateTo,
       attributes
-    };
+    })
 
     return this;
   }
   
   clearWatched() {
-    this.watchedNumbers = {};
+    this.watchedNumbers = [];
 
     return this;
   }
