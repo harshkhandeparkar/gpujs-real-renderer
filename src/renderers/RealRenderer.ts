@@ -1,8 +1,29 @@
-const getDisplayKernel = require('../kernels/display');
-const getBlankGraphKernel = require('../kernels/blankGraph');
-const getCloneTextureKernel = require('../kernels/cloneTexture');
+import getDisplayKernel from '../kernels/display';
+import getBlankGraphKernel from '../kernels/blankGraph';
+import getCloneTextureKernel from '../kernels/cloneTexture';
+import { GPU, Texture, IKernelRunShortcut } from 'gpu.js';
 
-class RealRenderer {
+export class RealRenderer {
+  canvas: HTMLCanvasElement;
+  _canvas: HTMLCanvasElement;
+  dimensions: [number, number] | {x: number, y: number};
+  xScaleFactor: number;
+  yScaleFactor: number;
+  bgColor: [number, number, number];
+  axesColor: [number, number, number];
+  drawsPerFrame: number;
+  timeStep: number;
+  time: number;
+  xOffset: number;
+  yOffset: number;
+  gpu: GPU;
+  graphPixels: Texture;
+  _blankGraph: IKernelRunShortcut;
+  _cloneTexture: IKernelRunShortcut;
+  _display: IKernelRunShortcut;
+  _doRender: boolean;
+  
+
   constructor(options) {
     // *****DEFAULTS*****
     this.canvas = this._canvas = options.canvas;
@@ -18,7 +39,7 @@ class RealRenderer {
     this.xOffset = options.xOffset; // %age offset
     this.yOffset = options.yOffset; // %age offset
 
-    options.GPU = options.GPU || window.GPU;
+    options.GPU = options.GPU || (<any>window).GPU;
 
     if (typeof this.xOffset != 'number') this.xOffset = 50;
     if (typeof this.yOffset != 'number') this.yOffset = 50;
@@ -40,18 +61,18 @@ class RealRenderer {
     this._blankGraph = getBlankGraphKernel(this.gpu, this.dimensions, this.xOffset, this.yOffset, this.bgColor, this.axesColor);
     this._cloneTexture = getCloneTextureKernel(this.gpu, this.dimensions);
 
-    this.graphPixels = this._blankGraph();
+    this.graphPixels = this._blankGraph() as Texture;
 
     this._display = getDisplayKernel(this.gpu, this.dimensions);
 
     this._doRender = false;
   }
 
-  _drawFunc(graphPixels /*, time*/) { // Can be overridden
+  _drawFunc(graphPixels: Texture, time: number) { // Can be overridden
     return graphPixels;
   }
 
-  _overlayFunc(graphPixels) { // Non-persistent overlays at the end of a frame
+  _overlayFunc(graphPixels: Texture) { // Non-persistent overlays at the end of a frame
     return graphPixels;
   }
 
@@ -62,11 +83,11 @@ class RealRenderer {
     return this.graphPixels;
   }
 
-  draw(numDraws = 1) {
+  draw(numDraws: number = 1) {
     for (let i = 0; i < numDraws; i++) this._draw();
 
     this._display(this._overlayFunc(this.graphPixels));
-    
+
     return this;
   }
 
@@ -103,7 +124,7 @@ class RealRenderer {
   }
 
   reset() {
-    this.graphPixels = this._blankGraph();
+    this.graphPixels = this._blankGraph() as Texture;
     this.resetTime();
 
     this._display(this.graphPixels);
@@ -111,5 +132,3 @@ class RealRenderer {
     return this;
   }
 }
-
-module.exports = RealRenderer;
