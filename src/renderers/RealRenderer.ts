@@ -2,7 +2,8 @@ import getDisplayKernel from '../kernels/display';
 import { getBlankGraphKernel } from '../kernels/blankGraph';
 import getCloneTextureKernel from '../kernels/cloneTexture';
 
-import { GraphDimensions, Color } from '../types/RealRendererTypes';
+import { GraphDimensions, Color, RealRendererOptions } from '../types/RealRendererTypes';
+export * from '../types/RealRendererTypes';
 
 import { GPU, Texture, IKernelRunShortcut } from 'gpu.js';
 
@@ -27,7 +28,7 @@ export class RealRenderer {
   _doRender: boolean;
   
 
-  constructor(options) {
+  constructor(options: RealRendererOptions) {
     // *****DEFAULTS*****
     this.canvas = this._canvas = options.canvas;
     this.dimensions = options.dimensions || {x: 1000, y:1000};
@@ -39,13 +40,10 @@ export class RealRenderer {
     this.timeStep = options.timeStep || (1 / 60);
     this.time = options.initTime || 0;
 
-    this.xOffset = options.xOffset; // %age offset
-    this.yOffset = options.yOffset; // %age offset
+    this.xOffset = options.xOffset || 50; // %age offset
+    this.yOffset = options.yOffset || 50; // %age offset
 
-    options.GPU = options.GPU || (<any>window).GPU;
-
-    if (typeof this.xOffset != 'number') this.xOffset = 50;
-    if (typeof this.yOffset != 'number') this.yOffset = 50;
+    options.GPU = options.GPU || (<any>window).GPU as GPU;
 
     this.xOffset = Math.max(0, Math.min(100, this.xOffset)) // Between 0 and 100
     this.yOffset = Math.max(0, Math.min(100, this.yOffset)) // Between 0 and 100
@@ -55,11 +53,10 @@ export class RealRenderer {
       throw 'No Canvas Element Found';
     }
 
-    this.gpu = new options.GPU({
+    this.gpu = new (options.GPU as any)({
       canvas: this._canvas,
-      mode: 'gpu',
-      tactic: 'precision'
-    })
+      mode: 'gpu'
+    })  
 
     this._blankGraph = getBlankGraphKernel(this.gpu, this.dimensions, this.xOffset, this.yOffset, this.bgColor, this.axesColor);
     this._cloneTexture = getCloneTextureKernel(this.gpu, this.dimensions);
