@@ -1,16 +1,19 @@
 import getDisplayKernel from '../kernels/display';
-import getBlankGraphKernel from '../kernels/blankGraph';
+import { getBlankGraphKernel } from '../kernels/blankGraph';
 import getCloneTextureKernel from '../kernels/cloneTexture';
+
+import { GraphDimensions, Color } from '../types/RealRendererTypes';
+
 import { GPU, Texture, IKernelRunShortcut } from 'gpu.js';
 
 export class RealRenderer {
   canvas: HTMLCanvasElement;
   _canvas: HTMLCanvasElement;
-  dimensions: [number, number] | {x: number, y: number};
+  dimensions: GraphDimensions;
   xScaleFactor: number;
   yScaleFactor: number;
-  bgColor: [number, number, number];
-  axesColor: [number, number, number];
+  bgColor: Color;
+  axesColor: Color;
   drawsPerFrame: number;
   timeStep: number;
   time: number;
