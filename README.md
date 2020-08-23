@@ -39,6 +39,8 @@ const GPU = require('gpu.js').GPU;
 const LineGraph = new require('gpujs-real-renderer').RealLineGraph({GPU: GPU /**The most important part*/, canvas: document.getElementById('canvas-id')}) // LineGraph is an example.
 ```
 
+NOTE: It works with typescript
+
 ### Real Renderers
 A *Real Renderer* is a fancy name for a class that is exported by this package. Each of these classes can be used to render, manipulate and display specific things on a graph for specific purposes.
 
