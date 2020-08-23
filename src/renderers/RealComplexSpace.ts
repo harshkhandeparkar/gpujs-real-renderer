@@ -1,7 +1,7 @@
 import { RealRenderer } from './RealRenderer';
-import getPlotComplexKernel from '../kernels/plotComplex';
-import getInterpolateKernel from '../kernels/interpolate';
-import Complex from '../util/complex';
+import { getPlotComplexKernel } from '../kernels/plotComplex';
+import { getInterpolateKernel } from '../kernels/interpolate';
+import { Complex } from '../util/complex';
 
 import { Color } from '../types/RealRendererTypes';
 import { IKernelRunShortcut, Texture } from 'gpu.js';
@@ -14,7 +14,7 @@ export class RealComplexSpace extends RealRenderer {
   lineThickness: number;
   lineColor: Color;
   watchedNumbers: WatchedNumbers;
-  Complex: Object;
+  Complex = Complex;
   _plotComplex: IKernelRunShortcut;
   _plotComplexPersistent: IKernelRunShortcut;
   _interpolateKernel: IKernelRunShortcut;
@@ -37,7 +37,6 @@ export class RealComplexSpace extends RealRenderer {
 
     this._plotComplex = getPlotComplexKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
     this._plotComplexPersistent = getPlotComplexKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
-    this.Complex = Complex;
 
     this._interpolateKernel = getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
   }
