@@ -36,7 +36,7 @@ The `GPU` class of GPU.js has to be explicitly provided to all of the [Real Rend
 
 ```js
 const GPU = require('gpu.js').GPU;
-const LineGraph = new require('gpujs-real-renderer').RealLineGraph({GPU: GPU /**The most important part*/, canvasTag: 'canvas-id'}) // LineGraph is an example.
+const LineGraph = new require('gpujs-real-renderer').RealLineGraph({GPU: GPU /**The most important part*/, canvas: document.getElementById('canvas-id')}) // LineGraph is an example.
 ```
 
 ### Real Renderers
@@ -57,7 +57,7 @@ const renderer = GPUjsRealRenderer.RealRenderer(options); // options is an objec
 ##### Options
 The constructor of the class takes an options javascript object as the only argument. The object can have the following properties.
 
-- `canvasTag`(*String*) (Required, No default): The DOM id of the `canvas` element on which the graph should be rendered.
+- `canvas`(*HTMLCanvasElement*) (Required, No default):  The `canvas` element on which the graph should be rendered.
 - `dimensions`(*Object*) (Default: `{x: 1000, y: 1000}`): An object which contains the dimensions(in pixels) of graph.
 - `xScaleFactor`(*Number) (Default: `10`): This is a number that determines the scaling of the x-axis. A greater value zooms into the x-axis. Greater values provide more precision and lower values increase the limits of the x-axis.
 
