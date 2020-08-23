@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "target": "es5",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "declaration": true,
+    "module": "UMD",
+    "allowJs": true
+  },
+  "include": [
+    "index.ts",
+    "./src/**/*"
+  ]
+}
