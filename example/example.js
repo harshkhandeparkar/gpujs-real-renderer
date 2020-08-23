@@ -1,6 +1,6 @@
 // Line Graph
 const options = {
-  canvasTag: 'line-canvas',
+  canvas: document.getElementById('line-canvas'),
   dimensions: [420, 360],
 
   xScaleFactor: 20,
@@ -48,7 +48,7 @@ document.getElementById('add').onclick = e => {
 
 // Fourier Series
 const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
-  canvasTag: 'complex-canvas',
+  canvas: document.getElementById('complex-canvas'),
   xScaleFactor: 2,
   yScaleFactor: 2,
   brushSize: 1.5,
