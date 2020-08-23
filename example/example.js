@@ -65,7 +65,7 @@ const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
         const n = nums[i];
 
         n.number = n.number.multiply(new Complex(1, n.attributes.period * timeStep));
-        nums.final.number.add(n.number);
+        nums.find(num => num.name == 'final').number.add(n.number);
       }
     }
 
