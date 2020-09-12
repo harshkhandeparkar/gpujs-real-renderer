@@ -128,7 +128,7 @@ export class RealComplexSpace extends RealRenderer {
   }
 
   /**
-   * @param {"Complex"} number Complex number to be plotted.
+   * @param number Complex number to be plotted.
    */
   plot(number: Complex) {
     this._persistentGraphPixels = this._plot(this._persistentGraphPixels, number) as Texture;
