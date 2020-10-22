@@ -656,20 +656,21 @@
 	function getInterpolateKernel(gpu, dimensions, xScaleFactor, yScaleFactor, xOffset, yOffset, lineThickness, lineColor) {
 	    return gpu.createKernel(function (graphPixels, val1, val2) {
 	        var x = this.thread.x, y = this.thread.y;
+	        var lineHalfThickness = this.constants.lineThickness / 2;
 	        var x1 = val1[0];
 	        var y1 = val1[1];
 	        var x2 = val2[0];
 	        var y2 = val2[1];
 	        var outX = this.output.x, outY = this.output.y;
-	        var X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
-	        var Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
+	        var X = x / (this.constants.xScaleFactor) - (outX * (this.constants.yOffset / 100)) / (this.constants.xScaleFactor);
+	        var Y = y / (this.constants.yScaleFactor) - (outY * (this.constants.xOffset / 100)) / (this.constants.yScaleFactor);
 	        var lineEqn = X * (y1 - y2) - x1 * (y1 - y2) - Y * (x1 - x2) + y1 * (x1 - x2);
 	        var lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
-	        if (lineDist <= this.constants.lineThickness &&
-	            X <= Math.max(x1, x2) &&
-	            X >= Math.min(x1, x2) &&
-	            Y <= Math.max(y1, y2) &&
-	            Y >= Math.min(y1, y2))
+	        if (lineDist <= lineHalfThickness &&
+	            X <= Math.max(x1, x2) + lineHalfThickness &&
+	            X >= Math.min(x1, x2) - lineHalfThickness &&
+	            Y <= Math.max(y1, y2) + lineHalfThickness &&
+	            Y >= Math.min(y1, y2) - lineHalfThickness)
 	            return this.constants.lineColor;
 	        else
 	            return graphPixels[this.thread.y][this.thread.x];
@@ -958,7 +959,7 @@
 	        return this._plotComplexPersistent(this._cloneTexture(graphPixels), number.x, number.y);
 	    };
 	    /**
-	     * @param {"Complex"} number Complex number to be plotted.
+	     * @param number Complex number to be plotted.
 	     */
 	    RealComplexSpace.prototype.plot = function (number) {
 	        this._persistentGraphPixels = this._plot(this._persistentGraphPixels, number);
