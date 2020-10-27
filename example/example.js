@@ -14,7 +14,7 @@ const options = {
 
   xOffset: 20, // 20%
   yOffset: 10, // 10%
-  
+
   progressiveAxis: 'x', // x -> Graph moves along x-axis; y -> Graph moves along y-axis
   progressionMode: 'squeeze', // continous -> Axis always moves; overflow -> Axis only moves when space for new data is inadequate;
   progressInterval: 0.4, // Axis moves by one pixel every 0.4 internal time units (Only for continous type)
@@ -63,7 +63,7 @@ const ComplexGraph = new GPUjsRealRenderer.RealComplexSpace({
     for (let i = complexLimits[0]; i <= complexLimits[1]; i++) {
       if (nums.find(num => num.name == i)) {
         const n = nums.find(num => num.name == i);
-        
+
         n.number = n.number.multiply(new Complex(1, n.attributes.period * timeStep));
         nums[nums.findIndex(num => num.name == 'final')].number.add(n.number);
       }
@@ -106,7 +106,7 @@ function generateRandomSeries(upperBound = 10) {
       new Complex(Math.random() * 100 / upperBound, Math.PI / 2/* * 2 * Math.random()*/)
     )
   }
-  
+
   for (let i = 0; i <= upperBound; i++) {
     anticlockwise.push(
       new Complex(Math.random() * 100 / upperBound, Math.PI / 2 /* * 2 * Math.random()*/)
@@ -179,3 +179,14 @@ document.getElementById('complex-randomize').onclick = e => {
   }, 1000)
 
 }
+
+
+document.querySelector('#complex-canvas').addEventListener('click', e => {
+  console.log(e.offsetX, e.offsetY)
+
+  console.log(new Complex(...Complex.convertCartesianPolar(e.offsetX, e.offsetY)))
+
+  ComplexGraph.plot(new Complex(...Complex.convertCartesianPolar(e.offsetX, e.offsetY)))
+})
+
+ComplexGraph.plot(new Complex(1, 2))

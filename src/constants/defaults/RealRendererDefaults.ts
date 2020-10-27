@@ -12,6 +12,5 @@ export const RealRendererDefaults: RealRendererOptions = {
   initTime: 0,
   xOffset: 50,
   yOffset: 50,
-  GPU: (<any>window).GPU as GPU,
-
+  GPU: (<any>window).GPU as GPU
 }

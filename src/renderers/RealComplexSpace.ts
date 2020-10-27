@@ -84,7 +84,7 @@ export class RealComplexSpace extends RealRenderer {
 
     return this;
   }
-  
+
   clearWatched() {
     this.watchedNumbers = [];
 
@@ -131,7 +131,7 @@ export class RealComplexSpace extends RealRenderer {
    * @param number Complex number to be plotted.
    */
   plot(number: Complex) {
-    this._persistentGraphPixels = this._plot(this._persistentGraphPixels, number) as Texture;
+    this._persistentGraphPixels = this._plotPersistent(this._persistentGraphPixels, number) as Texture;
     this.graphPixels = this._cloneTexture(this._persistentGraphPixels) as Texture;
     this._display(this.graphPixels);
 
