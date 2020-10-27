@@ -16,6 +16,7 @@ export class RealDrawBoard extends RealRenderer {
   options: RealDrawBoardOptions;
   brushSize: number;
   brushColor: Color;
+  eraserSize: number;
   mode: DrawMode;
   _plot: IKernelRunShortcut;
   _paint: IKernelRunShortcut;
@@ -34,8 +35,10 @@ export class RealDrawBoard extends RealRenderer {
 
     this.options = options;
 
-    this.brushSize = options.brushSize; // 1 unit radius
+    this.brushSize = options.brushSize;
     this.brushColor = options.brushColor;
+
+    this.eraserSize = options.eraserSize;
 
     this.mode = options.mode;
     // *****DEFAULTS*****
@@ -43,7 +46,7 @@ export class RealDrawBoard extends RealRenderer {
     this._initializeKernels();
   }
 
-  _initializeKernels() {
+  _initializePaintKernels() {
     this._plot = getPlotKernel(
       this.gpu,
       this.dimensions,
@@ -65,7 +68,9 @@ export class RealDrawBoard extends RealRenderer {
       this.brushSize,
       this.brushColor
     )
+  }
 
+  _initializeEraserKernels() {
     this._erase = getInterpolateKernel(
       this.gpu,
       this.dimensions,
@@ -73,9 +78,14 @@ export class RealDrawBoard extends RealRenderer {
       this.yScaleFactor,
       this.xOffset,
       this.yOffset,
-      this.brushSize,
+      this.eraserSize,
       this.bgColor
     )
+  }
+
+  _initializeKernels() {
+    this._initializePaintKernels();
+    this._initializeEraserKernels();
   }
 
   _getCoords = (e: MouseEvent): [number, number] => [e.offsetX, this.dimensions[1] - e.offsetY];
@@ -169,7 +179,19 @@ export class RealDrawBoard extends RealRenderer {
   changeBrushColor(color: Color) {
     this.brushColor = color;
 
-    this._initializeKernels();
+    this._initializePaintKernels();
+  }
+
+  changeBrushSize(newSize: number) {
+    this.brushSize = newSize;
+
+    this._initializePaintKernels();
+  }
+
+  changeEraserSize(newSize: number) {
+    this.eraserSize = newSize;
+
+    this._initializeEraserKernels();
   }
 
   changeMode(newMode: DrawMode) {

@@ -977,6 +977,7 @@
 	exports.RealDrawBoardDefaults = void 0;
 	exports.RealDrawBoardDefaults = {
 	    brushSize: 1,
+	    eraserSize: 2,
 	    brushColor: [1, 1, 1],
 	    mode: 'paint'
 	};
@@ -1068,17 +1069,24 @@
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;
-	        _this.brushSize = options.brushSize; // 1 unit radius
+	        _this.brushSize = options.brushSize;
 	        _this.brushColor = options.brushColor;
+	        _this.eraserSize = options.eraserSize;
 	        _this.mode = options.mode;
 	        // *****DEFAULTS*****
 	        _this._initializeKernels();
 	        return _this;
 	    }
-	    RealDrawBoard.prototype._initializeKernels = function () {
+	    RealDrawBoard.prototype._initializePaintKernels = function () {
 	        this._plot = plot.getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
 	        this._paint = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.brushSize, this.brushColor);
-	        this._erase = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.brushSize, this.bgColor);
+	    };
+	    RealDrawBoard.prototype._initializeEraserKernels = function () {
+	        this._erase = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.eraserSize, this.bgColor);
+	    };
+	    RealDrawBoard.prototype._initializeKernels = function () {
+	        this._initializePaintKernels();
+	        this._initializeEraserKernels();
 	    };
 	    RealDrawBoard.prototype._addMouseEvents = function () {
 	        document.addEventListener('mousedown', this._mouseDownEventListener);
@@ -1112,7 +1120,15 @@
 	    };
 	    RealDrawBoard.prototype.changeBrushColor = function (color) {
 	        this.brushColor = color;
-	        this._initializeKernels();
+	        this._initializePaintKernels();
+	    };
+	    RealDrawBoard.prototype.changeBrushSize = function (newSize) {
+	        this.brushSize = newSize;
+	        this._initializePaintKernels();
+	    };
+	    RealDrawBoard.prototype.changeEraserSize = function (newSize) {
+	        this.eraserSize = newSize;
+	        this._initializeEraserKernels();
 	    };
 	    RealDrawBoard.prototype.changeMode = function (newMode) {
 	        this.mode = newMode;
