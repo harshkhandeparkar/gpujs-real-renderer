@@ -6,8 +6,8 @@ const drawBoardOptions = {
   xScaleFactor: 1,
   yScaleFactor: 1,
 
-  bgColor: [0, 0, 0],
-  axesColor: [0, 0, 0],
+  bgColor: [0.960784314, 0.870588235, 0.701960784], // CSS wheat color
+  axesColor: [0.98, 0.9, 0.8],
 
   drawsPerFrame: 2, // Draws twice before displaying the pixels (every browser frame)
   timeStep: 1 / 120, // Increases internal time count by 1 / 120 every *draw*
@@ -16,11 +16,11 @@ const drawBoardOptions = {
   yOffset: 0, // 100%
 
   brushSize: 5, // The radius of one point of data, in coordinate units
-  brushColor: [1, 1, 1], // Color of the brush
+  brushColor: [0, 0, 0], // Color of the brush
 }
 
 const DrawBoard = new GPUjsRealRenderer.RealDrawBoard(drawBoardOptions);
-DrawBoard.startRender();
+DrawBoard.draw().startRender();
 
 const colorWheel = new iro.ColorPicker("#drawboard-colorwheel", {
   width: 100,
