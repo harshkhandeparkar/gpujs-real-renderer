@@ -36,6 +36,10 @@ export class RealDrawBoard extends RealRenderer {
     this.brushColor = options.brushColor;
     // *****DEFAULTS*****
 
+    this._initializeKernels();
+  }
+
+  _initializeKernels() {
     this._plot = getPlotKernel(
       this.gpu,
       this.dimensions,
@@ -107,13 +111,6 @@ export class RealDrawBoard extends RealRenderer {
     this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
   }
 
-  _drawFunc(
-    graphPixels: Texture,
-    time: number
-  ) {
-    return graphPixels;
-  }
-
   stroke(x: number, y: number) {
     if (this._lastCoords === null) this._lastCoords = [x, y];
 
@@ -149,6 +146,9 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   changeBrushColor(color: Color) {
+    this.brushColor = color;
+
+    this._initializeKernels();
   }
 
   reset() {

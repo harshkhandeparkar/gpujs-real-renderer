@@ -1070,10 +1070,13 @@
 	        _this.brushSize = options.brushSize; // 1 unit radius
 	        _this.brushColor = options.brushColor;
 	        // *****DEFAULTS*****
-	        _this._plot = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
-	        _this._interpolate = interpolate.getInterpolateKernel(_this.gpu, _this.dimensions, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset, _this.brushSize, _this.brushColor);
+	        _this._initializeKernels();
 	        return _this;
 	    }
+	    RealDrawBoard.prototype._initializeKernels = function () {
+	        this._plot = plot.getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+	        this._interpolate = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.brushSize, this.brushColor);
+	    };
 	    RealDrawBoard.prototype._addMouseEvents = function () {
 	        document.addEventListener('mousedown', this._mouseDownEventListener);
 	        document.addEventListener('mouseup', this._mouseUpEventListener);
@@ -1083,9 +1086,6 @@
 	        document.removeEventListener('mousedown', this._mouseDownEventListener);
 	        document.removeEventListener('mouseup', this._mouseUpEventListener);
 	        this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
-	    };
-	    RealDrawBoard.prototype._drawFunc = function (graphPixels, time) {
-	        return graphPixels;
 	    };
 	    RealDrawBoard.prototype.stroke = function (x, y) {
 	        if (this._lastCoords === null)
@@ -1106,6 +1106,8 @@
 	        return this;
 	    };
 	    RealDrawBoard.prototype.changeBrushColor = function (color) {
+	        this.brushColor = color;
+	        this._initializeKernels();
 	    };
 	    RealDrawBoard.prototype.reset = function () {
 	        _super.prototype.reset.call(this);
