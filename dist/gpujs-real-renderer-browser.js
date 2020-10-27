@@ -1049,8 +1049,8 @@
 	                _this._lastCoords = null;
 	            }
 	        };
-	        _this._mouseLeaveEventListener = function (e) {
-	            _this._lastCoords = null;
+	        _this._mouseEnterEventListener = function (e) {
+	            _this._lastCoords = [e.offsetX, _this.dimensions[1] - e.offsetY];
 	        };
 	        _this._drawEventListener = function (e) {
 	            var x = e.offsetX;
@@ -1070,21 +1070,20 @@
 	    RealDrawBoard.prototype._addMouseEvents = function () {
 	        document.addEventListener('mousedown', this._mouseDownEventListener);
 	        document.addEventListener('mouseup', this._mouseUpEventListener);
-	        this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
+	        this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
 	    };
 	    RealDrawBoard.prototype._removeMouseEvents = function () {
 	        document.removeEventListener('mousedown', this._mouseDownEventListener);
 	        document.removeEventListener('mouseup', this._mouseUpEventListener);
-	        this.canvas.removeEventListener('mouseleave', this._mouseLeaveEventListener);
+	        this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
 	    };
 	    RealDrawBoard.prototype._drawFunc = function (graphPixels, time) {
 	        return graphPixels;
 	    };
 	    RealDrawBoard.prototype.plot = function (x, y) {
 	        if (this._lastCoords === null)
-	            this.graphPixels = this._plot(this._cloneTexture(this.graphPixels), x, y);
-	        else
-	            this.graphPixels = this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
+	            this._lastCoords = [x, y];
+	        this.graphPixels = this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
 	        this._display(this.graphPixels);
 	    };
 	    RealDrawBoard.prototype.startRender = function () {

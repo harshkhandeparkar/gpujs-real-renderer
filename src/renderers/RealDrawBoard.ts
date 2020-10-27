@@ -73,20 +73,20 @@ export class RealDrawBoard extends RealRenderer {
     }
   }
 
-  _mouseLeaveEventListener = (e: MouseEvent) => {
-    this._lastCoords = null;
+  _mouseEnterEventListener = (e: MouseEvent) => {
+    this._lastCoords = [e.offsetX, this.dimensions[1] - e.offsetY];
   }
 
   _addMouseEvents() {
     document.addEventListener('mousedown', this._mouseDownEventListener);
     document.addEventListener('mouseup', this._mouseUpEventListener);
-    this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
+    this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
   }
 
   _removeMouseEvents() {
     document.removeEventListener('mousedown', this._mouseDownEventListener);
     document.removeEventListener('mouseup', this._mouseUpEventListener);
-    this.canvas.removeEventListener('mouseleave', this._mouseLeaveEventListener);
+    this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
   }
 
   _drawFunc(
@@ -97,8 +97,9 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   plot(x: number, y: number) {
-    if (this._lastCoords === null) this.graphPixels = <Texture>this._plot(this._cloneTexture(this.graphPixels), x, y);
-    else this.graphPixels = <Texture>this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
+    if (this._lastCoords === null) this._lastCoords = [x, y];
+
+    this.graphPixels = <Texture>this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
 
     this._display(this.graphPixels);
   }
