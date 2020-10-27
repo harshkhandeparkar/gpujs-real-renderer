@@ -88,7 +88,15 @@ export class RealDrawBoard extends RealRenderer {
     this._initializeEraserKernels();
   }
 
-  _getCoords = (e: MouseEvent): [number, number] => [e.offsetX, this.dimensions[1] - e.offsetY];
+  _getCoords = (e: MouseEvent): [number, number] => {
+    let x = e.offsetX; // in pixels
+    let y = this.dimensions[1] - e.offsetY // in pixels
+
+    x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
+    y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
+
+    return [x, y]; // In graph coordinates
+  }
 
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0) {

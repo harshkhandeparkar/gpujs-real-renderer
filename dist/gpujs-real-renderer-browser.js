@@ -1043,7 +1043,13 @@
 	        _super.call(this, options) || this;
 	        _this._lastCoords = null;
 	        _this._clickStartCoords = null;
-	        _this._getCoords = function (e) { return [e.offsetX, _this.dimensions[1] - e.offsetY]; };
+	        _this._getCoords = function (e) {
+	            var x = e.offsetX; // in pixels
+	            var y = _this.dimensions[1] - e.offsetY; // in pixels
+	            x = x / _this.xScaleFactor - (_this.dimensions[0] * (_this.yOffset / 100)) / _this.xScaleFactor;
+	            y = y / _this.yScaleFactor - (_this.dimensions[1] * (_this.xOffset / 100)) / _this.yScaleFactor;
+	            return [x, y]; // In graph coordinates
+	        };
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0) {
 	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
