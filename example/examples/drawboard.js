@@ -22,6 +22,20 @@ const drawBoardOptions = {
 const DrawBoard = new GPUjsRealRenderer.RealDrawBoard(drawBoardOptions);
 DrawBoard.startRender();
 
+const colorWheel = new iro.ColorPicker("#drawboard-colorwheel", {
+  width: 100,
+  initialColor: '#fff',
+  handleRadius: 4
+})
+
+colorWheel.on('input:change', color => {
+  DrawBoard.changeBrushColor([
+    color.red / 255,
+    color.green / 255,
+    color.blue / 255
+  ])
+})
+
 const drawModeSelector = document.querySelector('#draw-mode');
 drawModeSelector.addEventListener('change', e => {
   e.preventDefault();
