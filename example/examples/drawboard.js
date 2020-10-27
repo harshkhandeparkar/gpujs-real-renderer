@@ -41,3 +41,15 @@ drawModeSelector.addEventListener('change', e => {
   e.preventDefault();
   DrawBoard.changeMode(drawModeSelector.value);
 })
+
+const brushSizeRange = document.querySelector('#brush-size');
+brushSizeRange.addEventListener('input', e => {
+  e.preventDefault();
+  DrawBoard.changeBrushSize(Number(brushSizeRange.value))
+})
+
+const eraserSizeRange = document.querySelector('#eraser-size');
+eraserSizeRange.addEventListener('input', e => {
+  e.preventDefault();
+  DrawBoard.changeEraserSize(Number(eraserSizeRange.value))
+})
