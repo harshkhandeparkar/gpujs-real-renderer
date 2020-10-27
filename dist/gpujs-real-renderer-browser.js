@@ -739,8 +739,6 @@
 	     * @param theta Argument (radians)
 	     */
 	    function Complex(r, theta) {
-	        this.convertCartesianPolar = convertForm.convertCartesianPolar;
-	        this.convertPolarCartesian = convertForm.convertPolarCartesian;
 	        this.r = r;
 	        this.theta = theta;
 	        this.x = convertForm.convertPolarCartesian(this.r, this.theta)[0];
@@ -812,6 +810,8 @@
 	        this.y = convertForm.convertPolarCartesian(this.r, this.theta)[1];
 	        return this;
 	    };
+	    Complex.convertCartesianPolar = convertForm.convertCartesianPolar;
+	    Complex.convertPolarCartesian = convertForm.convertPolarCartesian;
 	    return Complex;
 	}());
 	exports.Complex = Complex;
@@ -962,7 +962,7 @@
 	     * @param number Complex number to be plotted.
 	     */
 	    RealComplexSpace.prototype.plot = function (number) {
-	        this._persistentGraphPixels = this._plot(this._persistentGraphPixels, number);
+	        this._persistentGraphPixels = this._plotPersistent(this._persistentGraphPixels, number);
 	        this.graphPixels = this._cloneTexture(this._persistentGraphPixels);
 	        this._display(this.graphPixels);
 	        return this;

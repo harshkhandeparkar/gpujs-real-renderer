@@ -6,8 +6,8 @@ export class Complex {
   theta: number;
   x: number;
   y: number;
-  convertCartesianPolar = convertCartesianPolar;
-  convertPolarCartesian = convertPolarCartesian;
+  static convertCartesianPolar = convertCartesianPolar;
+  static convertPolarCartesian = convertPolarCartesian;
 
   /**
    * Constructor
@@ -58,7 +58,7 @@ export class Complex {
   }
 
   /**
-   * @param multipliedNum Complex number (object) to be multiplied. 
+   * @param multipliedNum Complex number (object) to be multiplied.
    */
   multiply(multipliedNum: Complex) {
     this.r *= multipliedNum.r;
