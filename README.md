@@ -71,6 +71,8 @@ Technically, each coordinate on the y-axis is divided by this number.
 
 - `bgColor`(*Array*) (Default: `[0, 0, 0]`): This is an array with three numbers between `0` and `1`. The numbers represent the red, green and blue color values of the background color of the graph.
 
+- `drawAxes`(*boolean*) (Default: `true`): Whether to draw the x and y axes or not.
+
 - `axesColor`(*Array*) (Default: `[1, 1, 1]`): Same as `bgColor` but defines the color of the x and y axes.
 
 - `xOffset`(*Number*) (Default: `50`): Percentage offset on the graph for the x-axis.
@@ -171,7 +173,7 @@ See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 - `watchedNumbers`(*Array*): An object that stores all the *watched* complex numbers, ie the ones that are plotted during each render. This object is of the form
 ```js
 [
-  { 
+  {
     name: 'name1', // Here, `name1` is any arbitrary name, the property does not matter
     number: Complex(), // The complex number
     show: boolean, // Whether to show/plot the number or not
