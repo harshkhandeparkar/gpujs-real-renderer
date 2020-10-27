@@ -7,7 +7,7 @@ const drawBoardOptions = {
   yScaleFactor: 1,
 
   bgColor: [0.960784314, 0.870588235, 0.701960784], // CSS wheat color
-  axesColor: [0.98, 0.9, 0.8],
+  drawAxes: false,
 
   drawsPerFrame: 2, // Draws twice before displaying the pixels (every browser frame)
   timeStep: 1 / 120, // Increases internal time count by 1 / 120 every *draw*
