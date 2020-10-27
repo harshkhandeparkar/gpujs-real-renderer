@@ -1,5 +1,6 @@
 import { RealRenderer } from './RealRenderer';
 import { getPlotKernel } from '../kernels/plot';
+import { getInterpolateKernel } from '../kernels/interpolate';
 
 import { Color } from '../types/RealRendererTypes';
 import { RealDrawBoardOptions } from '../types/RealDrawBoardTypes';
@@ -16,6 +17,9 @@ export class RealDrawBoard extends RealRenderer {
   brushSize: number;
   brushColor: Color;
   _plot: IKernelRunShortcut;
+  _interpolate: IKernelRunShortcut;
+  _isDrawing: boolean = false;
+  _lastCoords: null | [number, number] = null;
 
   constructor(options: RealDrawBoardOptions) {
     // *****DEFAULTS*****
@@ -32,7 +36,57 @@ export class RealDrawBoard extends RealRenderer {
     this.brushColor = options.brushColor;
     // *****DEFAULTS*****
 
-    this._plot = getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+    this._plot = getPlotKernel(
+      this.gpu,
+      this.dimensions,
+      this.brushSize,
+      this.brushColor,
+      this.xScaleFactor,
+      this.yScaleFactor,
+      this.xOffset,
+      this.yOffset
+    )
+
+    this._interpolate = getInterpolateKernel(
+      this.gpu,
+      this.dimensions,
+      this.xScaleFactor,
+      this.yScaleFactor,
+      this.xOffset,
+      this.yOffset,
+      this.brushSize,
+      this.brushColor
+    )
+  }
+
+  _mouseDownEventListener = (e: MouseEvent) => {
+    if (e.button === 0) {
+      this.canvas.addEventListener('mousemove', this._drawEventListener);
+      this._lastCoords = [e.offsetX, this.dimensions[1] - e.offsetY];
+    }
+  }
+
+  _mouseUpEventListener = (e: MouseEvent) => {
+    if (e.button === 0) {
+      this.canvas.removeEventListener('mousemove', this._drawEventListener);
+      this._lastCoords = null;
+    }
+  }
+
+  _mouseLeaveEventListener = (e: MouseEvent) => {
+    this._lastCoords = null;
+  }
+
+  _addMouseEvents() {
+    document.addEventListener('mousedown', this._mouseDownEventListener);
+    document.addEventListener('mouseup', this._mouseUpEventListener);
+    this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
+  }
+
+  _removeMouseEvents() {
+    document.removeEventListener('mousedown', this._mouseDownEventListener);
+    document.removeEventListener('mouseup', this._mouseUpEventListener);
+    this.canvas.removeEventListener('mouseleave', this._mouseLeaveEventListener);
   }
 
   _drawFunc(
@@ -43,9 +97,30 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   plot(x: number, y: number) {
-    this.graphPixels = <Texture>this._plot(this._cloneTexture(this.graphPixels), x, y);
+    if (this._lastCoords === null) this.graphPixels = <Texture>this._plot(this._cloneTexture(this.graphPixels), x, y);
+    else this.graphPixels = <Texture>this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
 
     this._display(this.graphPixels);
+  }
+
+  _drawEventListener = (e: MouseEvent) => {
+    const x = e.offsetX;
+    const y = this.dimensions[1] - e.offsetY;
+
+    this.plot(x, y);
+    this._lastCoords = [x, y];
+  }
+
+  startRender() {
+    this._addMouseEvents();
+
+    return this;
+  }
+
+  stopRender() {
+    this._removeMouseEvents();
+
+    return this;
   }
 
   reset() {

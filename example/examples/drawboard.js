@@ -15,9 +15,9 @@ const drawBoardOptions = {
   xOffset: 0, // 100%
   yOffset: 0, // 100%
 
-  brushSize: 2, // The radius of one point of data, in coordinate units
+  brushSize: 5, // The radius of one point of data, in coordinate units
   brushColor: [1, 1, 1], // Color of the brush
 }
 
 const DrawBoard = new GPUjsRealRenderer.RealDrawBoard(drawBoardOptions);
-DrawBoard.draw();
+DrawBoard.startRender();

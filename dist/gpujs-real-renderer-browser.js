@@ -1025,6 +1025,7 @@
 
 
 
+
 	exports.RealRendererTypes = RealRendererTypes;
 	exports.RealDrawBoardTypes = RealDrawBoardTypes;
 	__exportStar(RealDrawBoardDefaults, exports);
@@ -1034,20 +1035,65 @@
 	        var _this = 
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
+	        _this._isDrawing = false;
+	        _this._lastCoords = null;
+	        _this._mouseDownEventListener = function (e) {
+	            if (e.button === 0) {
+	                _this.canvas.addEventListener('mousemove', _this._drawEventListener);
+	                _this._lastCoords = [e.offsetX, _this.dimensions[1] - e.offsetY];
+	            }
+	        };
+	        _this._mouseUpEventListener = function (e) {
+	            if (e.button === 0) {
+	                _this.canvas.removeEventListener('mousemove', _this._drawEventListener);
+	                _this._lastCoords = null;
+	            }
+	        };
+	        _this._mouseLeaveEventListener = function (e) {
+	            _this._lastCoords = null;
+	        };
+	        _this._drawEventListener = function (e) {
+	            var x = e.offsetX;
+	            var y = _this.dimensions[1] - e.offsetY;
+	            _this.plot(x, y);
+	            _this._lastCoords = [x, y];
+	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;
 	        _this.brushSize = options.brushSize; // 1 unit radius
 	        _this.brushColor = options.brushColor;
 	        // *****DEFAULTS*****
 	        _this._plot = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
+	        _this._interpolate = interpolate.getInterpolateKernel(_this.gpu, _this.dimensions, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset, _this.brushSize, _this.brushColor);
 	        return _this;
 	    }
+	    RealDrawBoard.prototype._addMouseEvents = function () {
+	        document.addEventListener('mousedown', this._mouseDownEventListener);
+	        document.addEventListener('mouseup', this._mouseUpEventListener);
+	        this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
+	    };
+	    RealDrawBoard.prototype._removeMouseEvents = function () {
+	        document.removeEventListener('mousedown', this._mouseDownEventListener);
+	        document.removeEventListener('mouseup', this._mouseUpEventListener);
+	        this.canvas.removeEventListener('mouseleave', this._mouseLeaveEventListener);
+	    };
 	    RealDrawBoard.prototype._drawFunc = function (graphPixels, time) {
 	        return graphPixels;
 	    };
 	    RealDrawBoard.prototype.plot = function (x, y) {
-	        this.graphPixels = this._plot(this._cloneTexture(this.graphPixels), x, y);
+	        if (this._lastCoords === null)
+	            this.graphPixels = this._plot(this._cloneTexture(this.graphPixels), x, y);
+	        else
+	            this.graphPixels = this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
 	        this._display(this.graphPixels);
+	    };
+	    RealDrawBoard.prototype.startRender = function () {
+	        this._addMouseEvents();
+	        return this;
+	    };
+	    RealDrawBoard.prototype.stopRender = function () {
+	        this._removeMouseEvents();
+	        return this;
 	    };
 	    RealDrawBoard.prototype.reset = function () {
 	        _super.prototype.reset.call(this);
