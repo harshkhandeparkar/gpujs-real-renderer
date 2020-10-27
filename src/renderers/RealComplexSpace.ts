@@ -46,10 +46,38 @@ export class RealComplexSpace extends RealRenderer {
 
     this.watchedNumbers = []; // Numbers that are plotted at all times (to dynamically update the numbers)
 
-    this._plotComplex = getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
-    this._plotComplexPersistent = getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+    this._plotComplex = getPlotKernel(
+      this.gpu,
+      this.dimensions,
+      this.brushSize,
+      this.brushColor,
+      this.xScaleFactor,
+      this.yScaleFactor,
+      this.xOffset,
+      this.yOffset
+    )
 
-    this._interpolateKernel = getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
+    this._plotComplexPersistent = getPlotKernel(
+      this.gpu,
+      this.dimensions,
+      this.brushSize,
+      this.brushColor,
+      this.xScaleFactor,
+      this.yScaleFactor,
+      this.xOffset,
+      this.yOffset
+    )
+
+    this._interpolateKernel = getInterpolateKernel(
+      this.gpu,
+      this.dimensions,
+      this.xScaleFactor,
+      this.yScaleFactor,
+      this.xOffset,
+      this.yOffset,
+      this.lineThickness,
+      this.lineColor
+    )
   }
 
   /**
@@ -92,7 +120,11 @@ export class RealComplexSpace extends RealRenderer {
   }
 
   _interpolate(graphPixels: Texture, n1: Complex, n2: Complex) {
-    graphPixels = this._interpolateKernel(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]) as Texture;
+    graphPixels = <Texture>this._interpolateKernel(
+      this._cloneTexture(graphPixels),
+      [n1.x, n1.y],
+      [n2.x, n2.y]
+    )
 
     return graphPixels;
   }
@@ -120,11 +152,19 @@ export class RealComplexSpace extends RealRenderer {
   }
 
   _plot(graphPixels: Texture, number: Complex) {
-    return this._plotComplex(this._cloneTexture(graphPixels), number.x, number.y);
+    return this._plotComplex(
+      this._cloneTexture(graphPixels),
+      number.x,
+      number.y
+    )
   }
 
   _plotPersistent(graphPixels: Texture, number: Complex) {
-    return this._plotComplexPersistent(this._cloneTexture(graphPixels), number.x, number.y);
+    return this._plotComplexPersistent(
+      this._cloneTexture(graphPixels),
+      number.x,
+      number.y
+    )
   }
 
   /**

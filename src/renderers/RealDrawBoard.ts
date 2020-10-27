@@ -99,7 +99,11 @@ export class RealDrawBoard extends RealRenderer {
   plot(x: number, y: number) {
     if (this._lastCoords === null) this._lastCoords = [x, y];
 
-    this.graphPixels = <Texture>this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
+    this.graphPixels = <Texture>this._interpolate(
+      this._cloneTexture(this.graphPixels),
+      this._lastCoords,
+      [x, y]
+    )
 
     this._display(this.graphPixels);
   }
