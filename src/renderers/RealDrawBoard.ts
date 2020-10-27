@@ -18,8 +18,8 @@ export class RealDrawBoard extends RealRenderer {
   brushColor: Color;
   _plot: IKernelRunShortcut;
   _interpolate: IKernelRunShortcut;
-  _isDrawing: boolean = false;
   _lastCoords: null | [number, number] = null;
+  _clickStartCoords: null | [number, number] = null;
 
   constructor(options: RealDrawBoardOptions) {
     // *****DEFAULTS*****
@@ -59,22 +59,40 @@ export class RealDrawBoard extends RealRenderer {
     )
   }
 
+  _getCoords = (e: MouseEvent): [number, number] => [e.offsetX, this.dimensions[1] - e.offsetY];
+
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0) {
-      this.canvas.addEventListener('mousemove', this._drawEventListener);
-      this._lastCoords = [e.offsetX, this.dimensions[1] - e.offsetY];
+      this.canvas.addEventListener('mousemove', this._strokeEventListener);
+      this._lastCoords = this._getCoords(e);
+      this._clickStartCoords = this._getCoords(e);
     }
   }
 
   _mouseUpEventListener = (e: MouseEvent) => {
     if (e.button === 0) {
-      this.canvas.removeEventListener('mousemove', this._drawEventListener);
+      this.canvas.removeEventListener('mousemove', this._strokeEventListener);
       this._lastCoords = null;
+      const currentCoords = this._getCoords(e);
+
+      if (
+        this._clickStartCoords[0] === currentCoords[0] &&
+        this._clickStartCoords[1] === currentCoords[1]
+      ) { // A single point instead of a stroke
+        this.plot(...this._getCoords(e));
+      }
     }
   }
 
   _mouseEnterEventListener = (e: MouseEvent) => {
-    this._lastCoords = [e.offsetX, this.dimensions[1] - e.offsetY];
+    this._lastCoords = this._getCoords(e);
+  }
+
+  _strokeEventListener = (e: MouseEvent) => {
+    const coords = this._getCoords(e);
+
+    this.stroke(...coords);
+    this._lastCoords = coords;
   }
 
   _addMouseEvents() {
@@ -96,7 +114,7 @@ export class RealDrawBoard extends RealRenderer {
     return graphPixels;
   }
 
-  plot(x: number, y: number) {
+  stroke(x: number, y: number) {
     if (this._lastCoords === null) this._lastCoords = [x, y];
 
     this.graphPixels = <Texture>this._interpolate(
@@ -108,12 +126,14 @@ export class RealDrawBoard extends RealRenderer {
     this._display(this.graphPixels);
   }
 
-  _drawEventListener = (e: MouseEvent) => {
-    const x = e.offsetX;
-    const y = this.dimensions[1] - e.offsetY;
+  plot(x: number, y: number) {
+    this.graphPixels = <Texture>this._plot(
+      this._cloneTexture(this.graphPixels),
+      x,
+      y
+    )
 
-    this.plot(x, y);
-    this._lastCoords = [x, y];
+    this._display(this.graphPixels);
   }
 
   startRender() {
@@ -126,6 +146,9 @@ export class RealDrawBoard extends RealRenderer {
     this._removeMouseEvents();
 
     return this;
+  }
+
+  changeBrushColor(color: Color) {
   }
 
   reset() {

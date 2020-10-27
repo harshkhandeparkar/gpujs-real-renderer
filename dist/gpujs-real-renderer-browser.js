@@ -1035,28 +1035,35 @@
 	        var _this = 
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
-	        _this._isDrawing = false;
 	        _this._lastCoords = null;
+	        _this._clickStartCoords = null;
+	        _this._getCoords = function (e) { return [e.offsetX, _this.dimensions[1] - e.offsetY]; };
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0) {
-	                _this.canvas.addEventListener('mousemove', _this._drawEventListener);
-	                _this._lastCoords = [e.offsetX, _this.dimensions[1] - e.offsetY];
+	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
+	                _this._lastCoords = _this._getCoords(e);
+	                _this._clickStartCoords = _this._getCoords(e);
 	            }
 	        };
 	        _this._mouseUpEventListener = function (e) {
 	            if (e.button === 0) {
-	                _this.canvas.removeEventListener('mousemove', _this._drawEventListener);
+	                _this.canvas.removeEventListener('mousemove', _this._strokeEventListener);
 	                _this._lastCoords = null;
+	                var currentCoords = _this._getCoords(e);
+	                if (_this._clickStartCoords[0] === currentCoords[0] &&
+	                    _this._clickStartCoords[1] === currentCoords[1]) { // A single point instead of a stroke
+	                    _this.plot.apply(// A single point instead of a stroke
+	                    _this, _this._getCoords(e));
+	                }
 	            }
 	        };
 	        _this._mouseEnterEventListener = function (e) {
-	            _this._lastCoords = [e.offsetX, _this.dimensions[1] - e.offsetY];
+	            _this._lastCoords = _this._getCoords(e);
 	        };
-	        _this._drawEventListener = function (e) {
-	            var x = e.offsetX;
-	            var y = _this.dimensions[1] - e.offsetY;
-	            _this.plot(x, y);
-	            _this._lastCoords = [x, y];
+	        _this._strokeEventListener = function (e) {
+	            var coords = _this._getCoords(e);
+	            _this.stroke.apply(_this, coords);
+	            _this._lastCoords = coords;
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;
@@ -1080,10 +1087,14 @@
 	    RealDrawBoard.prototype._drawFunc = function (graphPixels, time) {
 	        return graphPixels;
 	    };
-	    RealDrawBoard.prototype.plot = function (x, y) {
+	    RealDrawBoard.prototype.stroke = function (x, y) {
 	        if (this._lastCoords === null)
 	            this._lastCoords = [x, y];
 	        this.graphPixels = this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
+	        this._display(this.graphPixels);
+	    };
+	    RealDrawBoard.prototype.plot = function (x, y) {
+	        this.graphPixels = this._plot(this._cloneTexture(this.graphPixels), x, y);
 	        this._display(this.graphPixels);
 	    };
 	    RealDrawBoard.prototype.startRender = function () {
@@ -1093,6 +1104,8 @@
 	    RealDrawBoard.prototype.stopRender = function () {
 	        this._removeMouseEvents();
 	        return this;
+	    };
+	    RealDrawBoard.prototype.changeBrushColor = function (color) {
 	    };
 	    RealDrawBoard.prototype.reset = function () {
 	        _super.prototype.reset.call(this);
