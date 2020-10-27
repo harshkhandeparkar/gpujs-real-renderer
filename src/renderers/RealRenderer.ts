@@ -17,6 +17,7 @@ export class RealRenderer {
   xScaleFactor: number;
   yScaleFactor: number;
   bgColor: Color;
+  drawAxes: boolean;
   axesColor: Color;
   drawsPerFrame: number;
   timeStep: number;
@@ -29,7 +30,7 @@ export class RealRenderer {
   _cloneTexture: IKernelRunShortcut;
   _display: IKernelRunShortcut;
   _doRender: boolean;
-  
+
 
   constructor(options: RealRendererOptions) {
     // *****DEFAULTS*****
@@ -43,6 +44,7 @@ export class RealRenderer {
     this.xScaleFactor = options.xScaleFactor;
     this.yScaleFactor = options.yScaleFactor;
     this.bgColor = options.bgColor;
+    this.drawAxes = options.drawAxes;
     this.axesColor = options.axesColor;
     this.drawsPerFrame = options.drawsPerFrame;
     this.timeStep = options.timeStep;
@@ -64,9 +66,17 @@ export class RealRenderer {
     this.gpu = new (options.GPU as any)({
       canvas: this._canvas,
       mode: 'gpu'
-    })  
+    })
 
-    this._blankGraph = getBlankGraphKernel(this.gpu, this.dimensions, this.xOffset, this.yOffset, this.bgColor, this.axesColor);
+    this._blankGraph = getBlankGraphKernel(
+      this.gpu,
+      this.dimensions,
+      this.xOffset,
+      this.yOffset,
+      this.bgColor,
+      this.axesColor,
+      this.drawAxes
+    )
     this._cloneTexture = getCloneTextureKernel(this.gpu, this.dimensions);
 
     this.graphPixels = this._blankGraph() as Texture;

@@ -6,6 +6,7 @@ export const RealRendererDefaults: RealRendererOptions = {
   xScaleFactor: 10,
   yScaleFactor: 1,
   bgColor: [0, 0, 0],
+  drawAxes: true,
   axesColor: [1, 1, 1],
   drawsPerFrame: 1,
   timeStep: 1 / 60,

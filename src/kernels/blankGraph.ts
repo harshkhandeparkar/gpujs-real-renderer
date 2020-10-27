@@ -4,10 +4,10 @@ import { GraphDimensions, Color } from "../types/RealRendererTypes";
 /**
  * @param gpu GPU.js instance
  * @param dimensions Dimensions of Graph
- * @param xOffset 
- * @param yOffset 
- * @param bgColor 
- * @param axesColor 
+ * @param xOffset
+ * @param yOffset
+ * @param bgColor
+ * @param axesColor
  */
 export function getBlankGraphKernel(
   gpu: GPU,
@@ -15,7 +15,8 @@ export function getBlankGraphKernel(
   xOffset: number,
   yOffset: number,
   bgColor: Color,
-  axesColor: Color
+  axesColor: Color,
+  drawAxes: boolean
 ): IKernelRunShortcut {
   return gpu.createKernel(
     function() {
@@ -24,8 +25,8 @@ export function getBlankGraphKernel(
       const X = Math.floor(outY * (this.constants.xOffset as number / 100));
       const Y = Math.floor(outX * (this.constants.yOffset as number / 100));
 
-      if (this.thread.x === Y || this.thread.y === X) return this.constants.axesColor as Color;
-      else return this.constants.bgColor as Color; 
+      if ((this.thread.x === Y || this.thread.y === X) && this.constants.drawAxes) return this.constants.axesColor as Color;
+      else return this.constants.bgColor as Color;
     },
     {
       output: dimensions,
@@ -34,13 +35,15 @@ export function getBlankGraphKernel(
         xOffset,
         yOffset,
         bgColor,
-        axesColor
+        axesColor,
+        drawAxes
       },
       constantTypes: {
         bgColor: 'Array(3)',
         axesColor: 'Array(3)',
         xOffset: 'Float',
-        yOffset: 'Float'
+        yOffset: 'Float',
+        drawAxes: 'Boolean'
       }
     }
   )

@@ -54,12 +54,12 @@
 	 * @param bgColor
 	 * @param axesColor
 	 */
-	function getBlankGraphKernel(gpu, dimensions, xOffset, yOffset, bgColor, axesColor) {
+	function getBlankGraphKernel(gpu, dimensions, xOffset, yOffset, bgColor, axesColor, drawAxes) {
 	    return gpu.createKernel(function () {
 	        var outX = this.output.x, outY = this.output.y;
 	        var X = Math.floor(outY * (this.constants.xOffset / 100));
 	        var Y = Math.floor(outX * (this.constants.yOffset / 100));
-	        if (this.thread.x === Y || this.thread.y === X)
+	        if ((this.thread.x === Y || this.thread.y === X) && this.constants.drawAxes)
 	            return this.constants.axesColor;
 	        else
 	            return this.constants.bgColor;
@@ -70,13 +70,15 @@
 	            xOffset: xOffset,
 	            yOffset: yOffset,
 	            bgColor: bgColor,
-	            axesColor: axesColor
+	            axesColor: axesColor,
+	            drawAxes: drawAxes
 	        },
 	        constantTypes: {
 	            bgColor: 'Array(3)',
 	            axesColor: 'Array(3)',
 	            xOffset: 'Float',
-	            yOffset: 'Float'
+	            yOffset: 'Float',
+	            drawAxes: 'Boolean'
 	        }
 	    });
 	}
@@ -113,6 +115,7 @@
 	    xScaleFactor: 10,
 	    yScaleFactor: 1,
 	    bgColor: [0, 0, 0],
+	    drawAxes: true,
 	    axesColor: [1, 1, 1],
 	    drawsPerFrame: 1,
 	    timeStep: 1 / 60,
@@ -162,6 +165,7 @@
 	        this.xScaleFactor = options.xScaleFactor;
 	        this.yScaleFactor = options.yScaleFactor;
 	        this.bgColor = options.bgColor;
+	        this.drawAxes = options.drawAxes;
 	        this.axesColor = options.axesColor;
 	        this.drawsPerFrame = options.drawsPerFrame;
 	        this.timeStep = options.timeStep;
@@ -179,7 +183,7 @@
 	            canvas: this._canvas,
 	            mode: 'gpu'
 	        });
-	        this._blankGraph = blankGraph.getBlankGraphKernel(this.gpu, this.dimensions, this.xOffset, this.yOffset, this.bgColor, this.axesColor);
+	        this._blankGraph = blankGraph.getBlankGraphKernel(this.gpu, this.dimensions, this.xOffset, this.yOffset, this.bgColor, this.axesColor, this.drawAxes);
 	        this._cloneTexture = cloneTexture.getCloneTextureKernel(this.gpu, this.dimensions);
 	        this.graphPixels = this._blankGraph();
 	        this._display = display.getDisplayKernel(this.gpu, this.dimensions);

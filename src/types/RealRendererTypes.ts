@@ -9,6 +9,7 @@ export interface RealRendererOptions {
   xScaleFactor?: number,
   yScaleFactor?: number,
   bgColor?: Color,
+  drawAxes?: boolean,
   axesColor?: Color,
   drawsPerFrame?: number,
   timeStep?: number,
