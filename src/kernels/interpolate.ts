@@ -42,7 +42,7 @@ export function getInterpolateKernel(
       const x = this.thread.x,
         y = this.thread.y;
 
-      const lineHalfThickness = this.constants.lineThickness / 2;
+      const lineHalfThickness = this.constants.lineThickness;
 
       const x1 = val1[0];
       const y1 = val1[1];
@@ -58,12 +58,29 @@ export function getInterpolateKernel(
       let lineEqn = X * (y1 - y2) - x1 * (y1 - y2) - Y * (x1 - x2) + y1 * (x1 -x2);
       let lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2)*(y1 - y2) + (x1 - x2)*(x1 - x2));
 
+      const lineSine = Math.abs(
+        (y2 - y1) /
+        Math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+      )
+
+      const lineCosine = Math.abs(
+        (x2 - x1) /
+        Math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+      )
+
       if (
-        lineDist <= lineHalfThickness &&
-        X <= Math.max(x1, x2) + lineHalfThickness &&
-        X >= Math.min(x1, x2) - lineHalfThickness &&
-        Y <= Math.max(y1, y2) + lineHalfThickness &&
-        Y >= Math.min(y1, y2) - lineHalfThickness
+        (
+          lineDist <= lineHalfThickness &&
+          X <= Math.max(x1, x2) + lineHalfThickness * lineSine &&
+          X >= Math.min(x1, x2) - lineHalfThickness * lineSine &&
+          Y <= Math.max(y1, y2) + lineHalfThickness * lineCosine &&
+          Y >= Math.min(y1, y2) - lineHalfThickness * lineCosine
+        )
+        ||
+        (
+          (X - x1) ** 2 + (Y - y1) ** 2 <= lineHalfThickness ** 2 ||
+          (X - x2) ** 2 + (Y - y2) ** 2 <= lineHalfThickness ** 2
+        )
       ) return this.constants.lineColor;
       else return graphPixels[this.thread.y][this.thread.x];
     },
