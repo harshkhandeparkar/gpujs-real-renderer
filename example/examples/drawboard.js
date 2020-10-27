@@ -24,7 +24,7 @@ DrawBoard.draw().startRender();
 
 const colorWheel = new iro.ColorPicker("#drawboard-colorwheel", {
   width: 100,
-  initialColor: '#000',
+  color: '#000',
   handleRadius: 4
 })
 
