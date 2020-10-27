@@ -17,7 +17,7 @@
         </p>
         <p>Class: <a href="https://github.com/HarshKhandeparkar/gpujs-real-renderer#reallinegraph" class="class-name">RealLineGraph</a></p>
         <canvas id="line-canvas"></canvas>
-        
+
         <form id="input-form">
           <label for="value">Data:  </label>
           <input type="text" placeholder="Value" id="value" />
@@ -33,6 +33,16 @@
           <button id="add">Add Data</button>
           <!-- <button id="line-btn">Start Rendering</button><br /><br /> -->
         </form>
+      </li>
+
+      <li class="example">
+        <h3># Drawing Board</h3>
+        <p class="desc">
+          A general purpose whiteboard/blackboard/[whichever color you want]board.
+        </p>
+        <p>Class: <a href="https://github.com/HarshKhandeparkar/gpujs-real-renderer#realdrawboard" class="class-name">RealDrawBoard</a></p>
+
+        <canvas id="drawboard-canvas"></canvas> <br />
       </li>
 
       <li class="example">
@@ -59,6 +69,8 @@
   <script src="./gpu-browser.min.js"></script>
   <script src="../dist/gpujs-real-renderer-browser.js"></script>
 
-  <script src="./example.js"></script>
+  <script src="./examples/linegraph.js"></script>
+  <script src="./examples/fourier.js"></script>
+  <script src="./examples/drawboard.js"></script>
 </body>
 </html>

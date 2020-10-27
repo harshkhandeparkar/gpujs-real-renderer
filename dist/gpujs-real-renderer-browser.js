@@ -119,7 +119,7 @@
 	    initTime: 0,
 	    xOffset: 50,
 	    yOffset: 50,
-	    GPU: window.GPU,
+	    GPU: window.GPU
 	};
 	});
 
@@ -590,9 +590,9 @@
 	exports.RealLineGraph = RealLineGraph;
 	});
 
-	var plotComplex = createCommonjsModule(function (module, exports) {
+	var plot = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.getPlotComplexKernel = void 0;
+	exports.getPlotKernel = void 0;
 	/**
 	 * @param gpu
 	 * @param dimensions
@@ -603,7 +603,7 @@
 	 * @param xOffset
 	 * @param yOffset
 	 */
-	function getPlotComplexKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, yScaleFactor, xOffset, yOffset) {
+	function getPlotKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, yScaleFactor, xOffset, yOffset) {
 	    return gpu.createKernel(function (graphPixels, valX, valY) {
 	        var x = this.thread.x, y = this.thread.y;
 	        var outX = this.output.x, outY = this.output.y;
@@ -625,7 +625,7 @@
 	            xScaleFactor: xScaleFactor,
 	            yScaleFactor: yScaleFactor,
 	            xOffset: xOffset,
-	            yOffset: yOffset,
+	            yOffset: yOffset
 	        },
 	        constantTypes: {
 	            brushColor: 'Array(3)',
@@ -637,7 +637,7 @@
 	        }
 	    });
 	}
-	exports.getPlotComplexKernel = getPlotComplexKernel;
+	exports.getPlotKernel = getPlotKernel;
 	});
 
 	var interpolate = createCommonjsModule(function (module, exports) {
@@ -893,8 +893,8 @@
 	        _this.lineColor = options.lineColor || [1, 1, 1];
 	        // *****DEFAULTS*****
 	        _this.watchedNumbers = []; // Numbers that are plotted at all times (to dynamically update the numbers)
-	        _this._plotComplex = plotComplex.getPlotComplexKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
-	        _this._plotComplexPersistent = plotComplex.getPlotComplexKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
+	        _this._plotComplex = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
+	        _this._plotComplexPersistent = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
 	        _this._interpolateKernel = interpolate.getInterpolateKernel(_this.gpu, _this.dimensions, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset, _this.lineThickness, _this.lineColor);
 	        return _this;
 	    }
@@ -972,15 +972,105 @@
 	exports.RealComplexSpace = RealComplexSpace;
 	});
 
+	var RealDrawBoardDefaults = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.RealDrawBoardDefaults = void 0;
+	exports.RealDrawBoardDefaults = {
+	    brushSize: 1,
+	    brushColor: [1, 1, 1]
+	};
+	});
+
+	var RealDrawBoardTypes = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	});
+
+	var RealDrawBoard_1 = createCommonjsModule(function (module, exports) {
+	var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
+	    var extendStatics = function (d, b) {
+	        extendStatics = Object.setPrototypeOf ||
+	            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+	            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+	        return extendStatics(d, b);
+	    };
+	    return function (d, b) {
+	        extendStatics(d, b);
+	        function __() { this.constructor = d; }
+	        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	    };
+	})();
+	var __assign = (commonjsGlobal && commonjsGlobal.__assign) || function () {
+	    __assign = Object.assign || function(t) {
+	        for (var s, i = 1, n = arguments.length; i < n; i++) {
+	            s = arguments[i];
+	            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+	                t[p] = s[p];
+	        }
+	        return t;
+	    };
+	    return __assign.apply(this, arguments);
+	};
+	var __createBinding = (commonjsGlobal && commonjsGlobal.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+	    if (k2 === undefined) k2 = k;
+	    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+	}) : (function(o, m, k, k2) {
+	    if (k2 === undefined) k2 = k;
+	    o[k2] = m[k];
+	}));
+	var __exportStar = (commonjsGlobal && commonjsGlobal.__exportStar) || function(m, exports) {
+	    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.RealDrawBoard = exports.RealDrawBoardTypes = exports.RealRendererTypes = void 0;
+
+
+
+	exports.RealRendererTypes = RealRendererTypes;
+	exports.RealDrawBoardTypes = RealDrawBoardTypes;
+	__exportStar(RealDrawBoardDefaults, exports);
+	var RealDrawBoard = /** @class */ (function (_super) {
+	    __extends(RealDrawBoard, _super);
+	    function RealDrawBoard(options) {
+	        var _this = 
+	        // *****DEFAULTS*****
+	        _super.call(this, options) || this;
+	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
+	        _this.options = options;
+	        _this.brushSize = options.brushSize; // 1 unit radius
+	        _this.brushColor = options.brushColor;
+	        // *****DEFAULTS*****
+	        _this._plot = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
+	        return _this;
+	    }
+	    RealDrawBoard.prototype._drawFunc = function (graphPixels, time) {
+	        return graphPixels;
+	    };
+	    RealDrawBoard.prototype.plot = function (x, y) {
+	        this.graphPixels = this._plot(this._cloneTexture(this.graphPixels), x, y);
+	        this._display(this.graphPixels);
+	    };
+	    RealDrawBoard.prototype.reset = function () {
+	        _super.prototype.reset.call(this);
+	        this.xScaleFactor = this.options.xScaleFactor;
+	        this.yScaleFactor = this.options.yScaleFactor;
+	        return this;
+	    };
+	    return RealDrawBoard;
+	}(RealRenderer_1.RealRenderer));
+	exports.RealDrawBoard = RealDrawBoard;
+	});
+
 	var build = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.RealComplexSpace = exports.RealLineGraph = exports.RealRenderer = void 0;
+	exports.RealDrawBoard = exports.RealComplexSpace = exports.RealLineGraph = exports.RealRenderer = void 0;
 
 	Object.defineProperty(exports, "RealRenderer", { enumerable: true, get: function () { return RealRenderer_1.RealRenderer; } });
 
 	Object.defineProperty(exports, "RealLineGraph", { enumerable: true, get: function () { return RealLineGraph_1.RealLineGraph; } });
 
 	Object.defineProperty(exports, "RealComplexSpace", { enumerable: true, get: function () { return RealComplexSpace_1.RealComplexSpace; } });
+
+	Object.defineProperty(exports, "RealDrawBoard", { enumerable: true, get: function () { return RealDrawBoard_1.RealDrawBoard; } });
 	});
 
 	var index = /*@__PURE__*/getDefaultExportFromCjs(build);
