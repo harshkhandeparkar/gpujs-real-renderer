@@ -48,6 +48,7 @@ A *Real Renderer* is a fancy name for a class that is exported by this package. 
 - [`RealRenderer`](#realrenderer)
 - [`RealLineGraph`](#reallinegraph)
 - [`RealComplexSpace`](#realcomplexspace)
+- [`RealDrawBoard`](#realdrawboard)
 
 #### `RealRenderer`
 This is the base class. It does not have any specific use. It can only display a blank graph with coordinate axes on it. See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
@@ -158,7 +159,7 @@ This class provides another class, `Complex`, to define, manipulate, add, subtra
 See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 
 ##### Properties (Read-Only)
-- `Complex` (*Class*): A class for defining and manipulating complex numbers. Has the following methods.
+- `Complex` (Static) (*Class*): A class for defining and manipulating complex numbers. Has the following methods.
   - `constructor(r, theta)`: Default constructor with r(modulus) and theta(argument) (polar form of a complex number).
   - `getCartesianForm()`: A method that returns the x and y coordinates of the same complex number in cartesian form, as an array of the form `[x, y]`.
   - `getPolarForm()`: A method that returns the r(modulus) and theta(argument) of the same complex number in polar form, as an array of the form `[r, theta]`.
@@ -212,6 +213,46 @@ Apart from these methods, the following new methods are also available and are c
 - `plot(number)`: Plots a single `number`, an instance of `Complex` class.
 
 ****
+
+#### `RealDrawBoard`
+This Real Renderer extends the `RealRenderer` class and can be used as a general purpose drawing board!
+Click and drag on the canvas to draw, change modes to erase. The brush color and eraser/brush sized can be changed.
+See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
+
+##### Properties (Readl-Only)
+- `brushSize` (*number*): The radius of the drawing brush. The size is measured in the board's
+ arbitrary coordinate system.
+- `brushColor` (*array*): The color of the brush in the corm `[red, green, blue]` where each of
+`red`, `green` and `blue` are between 0 and 1.
+- `eraserSize` (*number*): Size of the eraser.
+- `mode` ('paint' | 'erase'): The current mode of the board. This mode can be set in the options or using the `changeMode` method.
+
+##### Options
+Since this is a child class of `RealRenderer`, all the options of `RealRender` are applicable here as well.
+Apart from those, the following are additional options that can be passed on to the constructor.
+
+- `brushSize`(*Number*) (Default: `1`): Determines the size of the brush, i.e. the thickness of the stroke.
+
+- `brushColor`(*Array*) (Default: `[1, 1, 1]`): The color of the brush, i.e. the plotted points.
+
+- `eraserSize`(*Number*) (Default: `2`): Determines the size of the eraser.
+
+- `mode` (*'paint' | 'draw'*) (Default: `'paint'`): Determines whether the board paints or erases on mouse drag.
+
+##### Methods
+Since this is a child class of `RealRenderer`, all the methods of `RealRender` are available here as well.
+Apart from these methods, the following new methods are also available and are chainable too.
+
+- `startRender()` and `stopRender()`: Slightly different compared to `RealRenderer` but they don't draw continously.
+
+- `changeBrushColor(newColor)`: Change the brush color.
+- `changeBrushSize(newSize)`: Change the brush size.
+- `changeEraserSize(newSize)`: Change the eraser size.
+- `changeMode(newMode)`: Change the mode.
+- `reset` can be used to clear the board.
+
+****
+
 ### Thank You!
 
 > Open Source by Harsh Khandeparkar
