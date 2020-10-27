@@ -1,5 +1,5 @@
 import { RealRenderer } from './RealRenderer';
-import { getPlotComplexKernel } from '../kernels/plotComplex';
+import { getPlotKernel } from '../kernels/plot';
 import { getInterpolateKernel } from '../kernels/interpolate';
 import { Complex } from '../util/complex';
 
@@ -46,8 +46,8 @@ export class RealComplexSpace extends RealRenderer {
 
     this.watchedNumbers = []; // Numbers that are plotted at all times (to dynamically update the numbers)
 
-    this._plotComplex = getPlotComplexKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
-    this._plotComplexPersistent = getPlotComplexKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+    this._plotComplex = getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+    this._plotComplexPersistent = getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
 
     this._interpolateKernel = getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.lineThickness, this.lineColor);
   }

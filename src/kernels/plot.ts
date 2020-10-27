@@ -1,17 +1,17 @@
-import { GPU, Texture } from 'gpu.js';
+import { GPU } from 'gpu.js';
 import { GraphDimensions, Color } from '../types/RealRendererTypes';
 
 /**
- * @param gpu 
- * @param dimensions 
- * @param brushSize 
+ * @param gpu
+ * @param dimensions
+ * @param brushSize
  * @param brushColor
  * @param xScaleFactor
  * @param yScaleFactor
  * @param xOffset
  * @param yOffset
  */
-export function getPlotComplexKernel(
+export function getPlotKernel(
   gpu: GPU,
   dimensions: GraphDimensions,
   brushSize: number,
@@ -25,7 +25,7 @@ export function getPlotComplexKernel(
     function(graphPixels: any, valX: number, valY: number) {
       const x = this.thread.x,
         y = this.thread.y;
-        
+
       const outX = this.output.x, outY = this.output.y;
 
       const X = x / (this.constants.xScaleFactor as number) - (outX * (this.constants.yOffset as number/ 100)) / (this.constants.xScaleFactor as number);
@@ -48,7 +48,7 @@ export function getPlotComplexKernel(
         xScaleFactor,
         yScaleFactor,
         xOffset,
-        yOffset,
+        yOffset
       },
       constantTypes: {
         brushColor: 'Array(3)',
