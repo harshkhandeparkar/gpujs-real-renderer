@@ -21,3 +21,9 @@ const drawBoardOptions = {
 
 const DrawBoard = new GPUjsRealRenderer.RealDrawBoard(drawBoardOptions);
 DrawBoard.startRender();
+
+const drawModeSelector = document.querySelector('#draw-mode');
+drawModeSelector.addEventListener('change', e => {
+  e.preventDefault();
+  DrawBoard.changeMode(drawModeSelector.value);
+})
