@@ -16,7 +16,7 @@ const drawBoardOptions = {
   yOffset: 0, // 100%
 
   brushSize: 5, // The radius of one point of data, in coordinate units
-  brushColor: [0, 0, 0], // Color of the brush
+  brushColor: [1, 1, 1], // Color of the brush
 }
 
 const DrawBoard = new GPUjsRealRenderer.RealDrawBoard(drawBoardOptions);
@@ -24,7 +24,7 @@ DrawBoard.draw().startRender();
 
 const colorWheel = new iro.ColorPicker("#drawboard-colorwheel", {
   width: 100,
-  color: '#000',
+  color: '#fff',
   handleRadius: 4
 })
 
