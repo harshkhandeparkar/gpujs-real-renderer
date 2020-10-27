@@ -977,7 +977,8 @@
 	exports.RealDrawBoardDefaults = void 0;
 	exports.RealDrawBoardDefaults = {
 	    brushSize: 1,
-	    brushColor: [1, 1, 1]
+	    brushColor: [1, 1, 1],
+	    mode: 'paint'
 	};
 	});
 
@@ -1069,13 +1070,15 @@
 	        _this.options = options;
 	        _this.brushSize = options.brushSize; // 1 unit radius
 	        _this.brushColor = options.brushColor;
+	        _this.mode = options.mode;
 	        // *****DEFAULTS*****
 	        _this._initializeKernels();
 	        return _this;
 	    }
 	    RealDrawBoard.prototype._initializeKernels = function () {
 	        this._plot = plot.getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
-	        this._interpolate = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.brushSize, this.brushColor);
+	        this._paint = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.brushSize, this.brushColor);
+	        this._erase = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.brushSize, this.bgColor);
 	    };
 	    RealDrawBoard.prototype._addMouseEvents = function () {
 	        document.addEventListener('mousedown', this._mouseDownEventListener);
@@ -1090,7 +1093,9 @@
 	    RealDrawBoard.prototype.stroke = function (x, y) {
 	        if (this._lastCoords === null)
 	            this._lastCoords = [x, y];
-	        this.graphPixels = this._interpolate(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
+	        this.graphPixels = this.mode === 'paint' ?
+	            this._paint(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]) :
+	            this._erase(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
 	        this._display(this.graphPixels);
 	    };
 	    RealDrawBoard.prototype.plot = function (x, y) {
@@ -1108,6 +1113,9 @@
 	    RealDrawBoard.prototype.changeBrushColor = function (color) {
 	        this.brushColor = color;
 	        this._initializeKernels();
+	    };
+	    RealDrawBoard.prototype.changeMode = function (newMode) {
+	        this.mode = newMode;
 	    };
 	    RealDrawBoard.prototype.reset = function () {
 	        _super.prototype.reset.call(this);

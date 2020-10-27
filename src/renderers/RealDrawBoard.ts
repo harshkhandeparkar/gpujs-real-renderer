@@ -3,7 +3,7 @@ import { getPlotKernel } from '../kernels/plot';
 import { getInterpolateKernel } from '../kernels/interpolate';
 
 import { Color } from '../types/RealRendererTypes';
-import { RealDrawBoardOptions } from '../types/RealDrawBoardTypes';
+import { RealDrawBoardOptions, DrawMode } from '../types/RealDrawBoardTypes';
 import { RealDrawBoardDefaults } from '../constants/defaults/RealDrawBoardDefaults';
 
 import { IKernelRunShortcut, Texture } from 'gpu.js';
@@ -16,8 +16,10 @@ export class RealDrawBoard extends RealRenderer {
   options: RealDrawBoardOptions;
   brushSize: number;
   brushColor: Color;
+  mode: DrawMode;
   _plot: IKernelRunShortcut;
-  _interpolate: IKernelRunShortcut;
+  _paint: IKernelRunShortcut;
+  _erase: IKernelRunShortcut;
   _lastCoords: null | [number, number] = null;
   _clickStartCoords: null | [number, number] = null;
 
@@ -34,6 +36,8 @@ export class RealDrawBoard extends RealRenderer {
 
     this.brushSize = options.brushSize; // 1 unit radius
     this.brushColor = options.brushColor;
+
+    this.mode = options.mode;
     // *****DEFAULTS*****
 
     this._initializeKernels();
@@ -51,7 +55,7 @@ export class RealDrawBoard extends RealRenderer {
       this.yOffset
     )
 
-    this._interpolate = getInterpolateKernel(
+    this._paint = getInterpolateKernel(
       this.gpu,
       this.dimensions,
       this.xScaleFactor,
@@ -60,6 +64,17 @@ export class RealDrawBoard extends RealRenderer {
       this.yOffset,
       this.brushSize,
       this.brushColor
+    )
+
+    this._erase = getInterpolateKernel(
+      this.gpu,
+      this.dimensions,
+      this.xScaleFactor,
+      this.yScaleFactor,
+      this.xOffset,
+      this.yOffset,
+      this.brushSize,
+      this.bgColor
     )
   }
 
@@ -114,11 +129,17 @@ export class RealDrawBoard extends RealRenderer {
   stroke(x: number, y: number) {
     if (this._lastCoords === null) this._lastCoords = [x, y];
 
-    this.graphPixels = <Texture>this._interpolate(
-      this._cloneTexture(this.graphPixels),
-      this._lastCoords,
-      [x, y]
-    )
+    this.graphPixels = this.mode === 'paint' ?
+      <Texture>this._paint(
+        this._cloneTexture(this.graphPixels),
+        this._lastCoords,
+        [x, y]
+      ) :
+      <Texture>this._erase(
+        this._cloneTexture(this.graphPixels),
+        this._lastCoords,
+        [x, y]
+      )
 
     this._display(this.graphPixels);
   }
@@ -149,6 +170,10 @@ export class RealDrawBoard extends RealRenderer {
     this.brushColor = color;
 
     this._initializeKernels();
+  }
+
+  changeMode(newMode: DrawMode) {
+    this.mode = newMode;
   }
 
   reset() {
