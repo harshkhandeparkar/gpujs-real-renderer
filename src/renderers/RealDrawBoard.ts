@@ -109,7 +109,7 @@ export class RealDrawBoard extends RealRenderer {
         this._lastCoords[0] === currentCoords[0] &&
         this._lastCoords[1] === currentCoords[1]
       ) {
-        this.plot(...currentCoords);
+        this._plot(...currentCoords);
         this._drawnPaths[this._pathIndex + 1].pathCoords.push([...currentCoords, true])
       }
 
@@ -177,7 +177,7 @@ export class RealDrawBoard extends RealRenderer {
     this._display(this.graphPixels);
   }
 
-  plot(x: number, y: number) {
+  _plot(x: number, y: number) {
     this.graphPixels = <Texture>this._plotKernel(
       this._cloneTexture(this.graphPixels),
       x,
@@ -214,7 +214,7 @@ export class RealDrawBoard extends RealRenderer {
             this._stroke(coord[0], coord[1]); // Replay all strokes
             this._lastCoords = [coord[0], coord[1]];
           }
-          else this.plot(coord[0], coord[1])
+          else this._plot(coord[0], coord[1])
         })
       })
 
