@@ -1074,7 +1074,7 @@
 	                var currentCoords = _this._getCoords(e);
 	                if (_this._lastCoords[0] === currentCoords[0] &&
 	                    _this._lastCoords[1] === currentCoords[1]) {
-	                    _this.plot.apply(_this, currentCoords);
+	                    _this._plot.apply(_this, currentCoords);
 	                    _this._drawnPaths[_this._pathIndex + 1].pathCoords.push(__spreadArrays(currentCoords, [true]));
 	                }
 	                _this._strokeEnd();
@@ -1138,7 +1138,7 @@
 	        this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	        this._display(this.graphPixels);
 	    };
-	    RealDrawBoard.prototype.plot = function (x, y) {
+	    RealDrawBoard.prototype._plot = function (x, y) {
 	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	        this._display(this.graphPixels);
 	        return this;
@@ -1162,7 +1162,7 @@
 	                        _this._lastCoords = [coord[0], coord[1]];
 	                    }
 	                    else
-	                        _this.plot(coord[0], coord[1]);
+	                        _this._plot(coord[0], coord[1]);
 	                });
 	            });
 	            this.mode = originalMode;
