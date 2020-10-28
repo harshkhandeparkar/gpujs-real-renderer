@@ -3,8 +3,6 @@ import { GraphDimensions, Color } from '../types/RealRendererTypes';
 
 export interface IInterpolateKernelThis extends IKernelFunctionThis {
   constants: {
-    lineThickness: number,
-    lineColor: [number, number, number],
     xScaleFactor: number,
     yScaleFactor: number,
     xOffset: number,
@@ -28,21 +26,21 @@ export function getInterpolateKernel(
   xScaleFactor: number,
   yScaleFactor: number,
   xOffset: number,
-  yOffset: number,
-  lineThickness: number,
-  lineColor: Color
+  yOffset: number
 ) {
   return gpu.createKernel(
     function(
       this: IInterpolateKernelThis,
       graphPixels: any,
       val1: [number, number],
-      val2: [number, number]
+      val2: [number, number],
+      lineThickness: number,
+      lineColor: Color
     ) {
       const x = this.thread.x,
         y = this.thread.y;
 
-      const lineHalfThickness = this.constants.lineThickness;
+      const lineHalfThickness = lineThickness;
 
       const x1 = val1[0];
       const y1 = val1[1];
@@ -81,23 +79,19 @@ export function getInterpolateKernel(
           (X - x1) ** 2 + (Y - y1) ** 2 <= lineHalfThickness ** 2 ||
           (X - x2) ** 2 + (Y - y2) ** 2 <= lineHalfThickness ** 2
         )
-      ) return this.constants.lineColor;
+      ) return [lineColor[0], lineColor[1], lineColor[2]];
       else return graphPixels[this.thread.y][this.thread.x];
     },
     {
       output: dimensions,
       pipeline: true,
       constants: {
-        lineThickness,
-        lineColor,
         xScaleFactor,
         yScaleFactor,
         xOffset,
         yOffset
       },
       constantTypes: {
-        lineThickness: 'Float',
-        lineColor: 'Array(3)',
         xScaleFactor: 'Float',
         yScaleFactor: 'Float',
         xOffset: 'Float',
