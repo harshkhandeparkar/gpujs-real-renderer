@@ -1037,6 +1037,7 @@
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
 	        _this._isDrawing = false;
+	        _this._strokeHappening = false;
 	        _this._drawnPaths = [];
 	        _this._pathIndex = -1; // Index of path in _drawnPaths
 	        _this._lastCoords = null;
@@ -1051,6 +1052,7 @@
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
+	                _this._strokeHappening = true;
 	                _this._drawnPaths[_this._pathIndex + 1] = {
 	                    pathCoords: [],
 	                    color: _this.brushColor.map(function (x) { return x; }),
@@ -1064,29 +1066,32 @@
 	        };
 	        _this._mouseUpEventListener = function (e) {
 	            if (e.button === 0) {
-	                _this.canvas.removeEventListener('mousemove', _this._strokeEventListener);
-	                _this._lastCoords = null;
-	                var currentCoords = _this._getCoords(e);
-	                if (_this._clickStartCoords[0] === currentCoords[0] &&
-	                    _this._clickStartCoords[1] === currentCoords[1]) { // A single point instead of a stroke
-	                    _this.plot.apply(// A single point instead of a stroke
-	                    _this, currentCoords);
-	                    _this._drawnPaths[_this._drawnPaths.length - 1].pathCoords.push(currentCoords);
-	                }
-	                if (_this._drawnPaths[_this._drawnPaths.length - 1].pathCoords.length === 0)
-	                    _this._drawnPaths.splice(-1, 1);
-	                else
-	                    _this._pathIndex++;
+	                _this._strokeEnd();
 	            }
 	        };
 	        _this._mouseEnterEventListener = function (e) {
 	            _this._lastCoords = _this._getCoords(e);
 	        };
+	        _this._mouseLeaveEventListener = function (e) {
+	            _this._strokeEnd();
+	        };
 	        _this._strokeEventListener = function (e) {
 	            var coords = _this._getCoords(e);
-	            _this._drawnPaths[_this._drawnPaths.length - 1].pathCoords.push(coords);
+	            _this._strokeHappening = true;
+	            _this._drawnPaths[_this._pathIndex + 1].pathCoords.push(coords);
 	            _this._stroke.apply(_this, coords);
 	            _this._lastCoords = coords;
+	        };
+	        _this._strokeEnd = function () {
+	            if (_this._strokeHappening) {
+	                _this.canvas.removeEventListener('mousemove', _this._strokeEventListener);
+	                _this._lastCoords = null;
+	                if (_this._drawnPaths[_this._pathIndex + 1].pathCoords.length === 0)
+	                    _this._drawnPaths.splice(-1, 1);
+	                else
+	                    _this._pathIndex++;
+	                _this._strokeHappening = false;
+	            }
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;
@@ -1103,14 +1108,16 @@
 	        this._strokeKernel = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
 	    };
 	    RealDrawBoard.prototype._addMouseEvents = function () {
-	        document.addEventListener('mousedown', this._mouseDownEventListener);
-	        document.addEventListener('mouseup', this._mouseUpEventListener);
+	        this.canvas.addEventListener('mousedown', this._mouseDownEventListener);
+	        this.canvas.addEventListener('mouseup', this._mouseUpEventListener);
 	        this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
+	        this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
 	    };
 	    RealDrawBoard.prototype._removeMouseEvents = function () {
-	        document.removeEventListener('mousedown', this._mouseDownEventListener);
-	        document.removeEventListener('mouseup', this._mouseUpEventListener);
+	        this.canvas.removeEventListener('mousedown', this._mouseDownEventListener);
+	        this.canvas.removeEventListener('mouseup', this._mouseUpEventListener);
 	        this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
+	        this.canvas.removeEventListener('mouseexit', this._mouseLeaveEventListener);
 	    };
 	    RealDrawBoard.prototype._stroke = function (x, y) {
 	        if (this._lastCoords === null)
@@ -1125,7 +1132,8 @@
 	    RealDrawBoard.prototype.undo = function (numUndo) {
 	        var _this = this;
 	        if (numUndo === void 0) { numUndo = 1; }
-	        if (this._pathIndex >= numUndo - 1) {
+	        console.log(this._pathIndex, numUndo, this._drawnPaths.length);
+	        if (this._pathIndex >= numUndo - 1 && this._pathIndex - numUndo < this._drawnPaths.length) {
 	            this.graphPixels = this._blankGraph();
 	            this._display(this.graphPixels);
 	            var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
