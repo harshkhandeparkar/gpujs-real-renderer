@@ -18,9 +18,11 @@ export class RealDrawBoard extends RealRenderer {
   brushColor: Color;
   eraserSize: number;
   mode: DrawMode;
-  _plot: IKernelRunShortcut;
-  _paint: IKernelRunShortcut;
-  _erase: IKernelRunShortcut;
+  beforeDrawPixels: Texture;
+  deltas: [number, number, number, number, number][] = []; // [x, y, r, g, b]
+  _plotKernel: IKernelRunShortcut;
+  _strokeKernel: IKernelRunShortcut;
+  _testInterpolate: IKernelRunShortcut;
   _lastCoords: null | [number, number] = null;
   _clickStartCoords: null | [number, number] = null;
 
@@ -46,46 +48,24 @@ export class RealDrawBoard extends RealRenderer {
     this._initializeKernels();
   }
 
-  _initializePaintKernels() {
-    this._plot = getPlotKernel(
+  _initializeKernels() {
+    this._plotKernel = getPlotKernel(
       this.gpu,
       this.dimensions,
-      this.brushSize,
-      this.brushColor,
       this.xScaleFactor,
       this.yScaleFactor,
       this.xOffset,
       this.yOffset
     )
 
-    this._paint = getInterpolateKernel(
+    this._strokeKernel = getInterpolateKernel(
       this.gpu,
       this.dimensions,
       this.xScaleFactor,
       this.yScaleFactor,
       this.xOffset,
-      this.yOffset,
-      this.brushSize,
-      this.brushColor
+      this.yOffset
     )
-  }
-
-  _initializeEraserKernels() {
-    this._erase = getInterpolateKernel(
-      this.gpu,
-      this.dimensions,
-      this.xScaleFactor,
-      this.yScaleFactor,
-      this.xOffset,
-      this.yOffset,
-      this.eraserSize,
-      this.bgColor
-    )
-  }
-
-  _initializeKernels() {
-    this._initializePaintKernels();
-    this._initializeEraserKernels();
   }
 
   _getCoords = (e: MouseEvent): [number, number] => {
@@ -99,7 +79,9 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _mouseDownEventListener = (e: MouseEvent) => {
-    if (e.button === 0) {
+    if (e.button === 0 /* Left Click */) {
+      this.beforeDrawPixels = <Texture>this._cloneTexture(this.graphPixels);
+
       this.canvas.addEventListener('mousemove', this._strokeEventListener);
       this._lastCoords = this._getCoords(e);
       this._clickStartCoords = this._getCoords(e);
@@ -128,7 +110,7 @@ export class RealDrawBoard extends RealRenderer {
   _strokeEventListener = (e: MouseEvent) => {
     const coords = this._getCoords(e);
 
-    this.stroke(...coords);
+    this._stroke(...coords);
     this._lastCoords = coords;
   }
 
@@ -144,29 +126,27 @@ export class RealDrawBoard extends RealRenderer {
     this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
   }
 
-  stroke(x: number, y: number) {
+  _stroke(x: number, y: number) {
     if (this._lastCoords === null) this._lastCoords = [x, y];
 
-    this.graphPixels = this.mode === 'paint' ?
-      <Texture>this._paint(
-        this._cloneTexture(this.graphPixels),
-        this._lastCoords,
-        [x, y]
-      ) :
-      <Texture>this._erase(
-        this._cloneTexture(this.graphPixels),
-        this._lastCoords,
-        [x, y]
-      )
+    this.graphPixels = <Texture>this._strokeKernel(
+      this._cloneTexture(this.graphPixels),
+      this._lastCoords,
+      [x, y],
+      this.mode === 'paint' ? this.brushSize : this.eraserSize,
+      this.mode === 'paint' ? this.brushColor : this.bgColor
+    )
 
     this._display(this.graphPixels);
   }
 
   plot(x: number, y: number) {
-    this.graphPixels = <Texture>this._plot(
+    this.graphPixels = <Texture>this._plotKernel(
       this._cloneTexture(this.graphPixels),
       x,
-      y
+      y,
+      this.mode === 'paint' ? this.brushSize : this.eraserSize,
+      this.mode === 'paint' ? this.brushColor : this.bgColor
     )
 
     this._display(this.graphPixels);
@@ -186,20 +166,14 @@ export class RealDrawBoard extends RealRenderer {
 
   changeBrushColor(color: Color) {
     this.brushColor = color;
-
-    this._initializePaintKernels();
   }
 
   changeBrushSize(newSize: number) {
     this.brushSize = newSize;
-
-    this._initializePaintKernels();
   }
 
   changeEraserSize(newSize: number) {
     this.eraserSize = newSize;
-
-    this._initializeEraserKernels();
   }
 
   changeMode(newMode: DrawMode) {
