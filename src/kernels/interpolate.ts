@@ -17,8 +17,6 @@ export interface IInterpolateKernelThis extends IKernelFunctionThis {
  * @param yScaleFactor
  * @param xOffset
  * @param yOffset
- * @param lineThickness
- * @param lineColor
  */
 export function getInterpolateKernel(
   gpu: GPU,

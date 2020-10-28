@@ -13,8 +13,6 @@ interface IPlotKernelThis extends IKernelFunctionThis {
 /**
  * @param gpu
  * @param dimensions
- * @param brushSize
- * @param brushColor
  * @param xScaleFactor
  * @param yScaleFactor
  * @param xOffset
@@ -26,16 +24,16 @@ export function getPlotKernel(
   xScaleFactor: number,
   yScaleFactor: number,
   xOffset: number,
-  yOffset: number,
-  brushSize: number,
-  brushColor: Color
+  yOffset: number
 ) {
   return gpu.createKernel(
     function(
       this: IPlotKernelThis,
       graphPixels: any,
       valX: number,
-      valY: number
+      valY: number,
+      brushSize: number,
+      brushColor: Color
     ) {
       const x = this.thread.x,
         y = this.thread.y;
