@@ -249,7 +249,10 @@ Apart from these methods, the following new methods are also available and are c
 - `changeBrushSize(newSize)`: Change the brush size.
 - `changeEraserSize(newSize)`: Change the eraser size.
 - `changeMode(newMode)`: Change the mode.
-- `reset` can be used to clear the board.
+- `undo(numUndos = 1)`: Undoes the specified number of brush strokes. (Defualt: undoes one stroke)
+- `redo(numUndos = 1)`: Redoes the specified number of brush strokes. (Defualt: redoes one stroke)
+- `clear()`: Clears the board.
+- `reset()`: Clears the whole board and resets all options to original values.
 
 ****
 
