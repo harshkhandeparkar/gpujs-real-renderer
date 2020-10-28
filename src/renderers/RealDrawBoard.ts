@@ -18,8 +18,9 @@ export class RealDrawBoard extends RealRenderer {
   brushColor: Color;
   eraserSize: number;
   mode: DrawMode;
-  beforeDrawPixels: Texture;
-  deltas: [number, number, number, number, number][] = []; // [x, y, r, g, b]
+  _beforeDrawPixels: any[];
+  _deltas: [number, number, number, number, number][][] = []; // [x, y, r, g, b]
+  _calculateDelta: IKernelRunShortcut;
   _plotKernel: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
   _testInterpolate: IKernelRunShortcut;
@@ -80,7 +81,7 @@ export class RealDrawBoard extends RealRenderer {
 
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
-      this.beforeDrawPixels = <Texture>this._cloneTexture(this.graphPixels);
+      this._beforeDrawPixels = this.graphPixels.toArray();
 
       this.canvas.addEventListener('mousemove', this._strokeEventListener);
       this._lastCoords = this._getCoords(e);
@@ -100,6 +101,30 @@ export class RealDrawBoard extends RealRenderer {
       ) { // A single point instead of a stroke
         this.plot(...this._getCoords(e));
       }
+
+      this._deltas.push([]);
+
+      (<number[][][]>this.graphPixels.toArray()).forEach( // TODO: This is done on a CPU and is EXTREMELY inefficient. GPU is not working properly, try to fix it.
+        (row: number[][], y) => {
+          row.forEach((pixel: number[], x) => {
+            if (
+              pixel[0] !== this._beforeDrawPixels[y][x][0] ||
+              pixel[1] !== this._beforeDrawPixels[y][x][1] ||
+              pixel[2] !== this._beforeDrawPixels[y][x][2]
+            ) {
+              this._deltas[this._deltas.length - 1].push([
+                x,
+                y,
+                pixel[0] - this._beforeDrawPixels[y][x][0],
+                pixel[1] - this._beforeDrawPixels[y][x][1],
+                pixel[2] - this._beforeDrawPixels[y][x][2]
+              ])
+            }
+          })
+        }
+      )
+
+      console.log(this._deltas);
     }
   }
 
