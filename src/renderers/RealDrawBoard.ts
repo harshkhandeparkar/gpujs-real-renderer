@@ -169,7 +169,7 @@ export class RealDrawBoard extends RealRenderer {
     this._display(this.graphPixels);
   }
 
-  undo(numUndo: number) {
+  undo(numUndo: number = 1) {
     if (this._pathIndex >= numUndo - 1) {
       this.graphPixels = <Texture>this._blankGraph();
       this._display(this.graphPixels);
@@ -209,7 +209,7 @@ export class RealDrawBoard extends RealRenderer {
     return this;
   }
 
-  redo(numRedo: number) {
+  redo(numRedo: number = 1) {
     this.undo(-numRedo);
 
     return this;

@@ -1124,6 +1124,7 @@
 	    };
 	    RealDrawBoard.prototype.undo = function (numUndo) {
 	        var _this = this;
+	        if (numUndo === void 0) { numUndo = 1; }
 	        if (this._pathIndex >= numUndo - 1) {
 	            this.graphPixels = this._blankGraph();
 	            this._display(this.graphPixels);
@@ -1153,6 +1154,7 @@
 	        return this;
 	    };
 	    RealDrawBoard.prototype.redo = function (numRedo) {
+	        if (numRedo === void 0) { numRedo = 1; }
 	        this.undo(-numRedo);
 	        return this;
 	    };
