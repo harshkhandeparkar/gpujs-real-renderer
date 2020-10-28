@@ -63,3 +63,8 @@ document.querySelector('#draw-redo').addEventListener('click', e => {
   e.preventDefault();
   DrawBoard.redo();
 })
+
+document.querySelector('#draw-clear').addEventListener('click', e => {
+  e.preventDefault();
+  DrawBoard.clear();
+})
