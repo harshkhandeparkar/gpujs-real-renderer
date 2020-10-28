@@ -1048,7 +1048,6 @@
 	        _this._drawnPaths = [];
 	        _this._pathIndex = -1; // Index of path in _drawnPaths
 	        _this._lastCoords = null;
-	        _this._clickStartCoords = null;
 	        _this._getCoords = function (e) {
 	            var x = e.offsetX; // in pixels
 	            var y = _this.dimensions[1] - e.offsetY; // in pixels
@@ -1068,7 +1067,6 @@
 	                    eraserSize: _this.eraserSize
 	                };
 	                _this._lastCoords = _this._getCoords(e);
-	                _this._clickStartCoords = _this._getCoords(e);
 	            }
 	        };
 	        _this._mouseUpEventListener = function (e) {
@@ -1205,10 +1203,27 @@
 	    RealDrawBoard.prototype.changeMode = function (newMode) {
 	        this.mode = newMode;
 	    };
+	    RealDrawBoard.prototype.clear = function () {
+	        this._strokeHappening = false;
+	        this._drawnPaths = [];
+	        this._pathIndex = -1;
+	        this._lastCoords = null;
+	    };
 	    RealDrawBoard.prototype.reset = function () {
-	        _super.prototype.reset.call(this);
 	        this.xScaleFactor = this.options.xScaleFactor;
 	        this.yScaleFactor = this.options.yScaleFactor;
+	        this.brushColor = this.options.brushColor;
+	        this.brushSize = this.options.brushSize;
+	        this.bgColor = this.options.bgColor;
+	        this.eraserSize = this.options.eraserSize;
+	        this.mode = this.options.mode;
+	        this._isDrawing = false;
+	        this._strokeHappening = false;
+	        this._drawnPaths = [];
+	        this._pathIndex = -1;
+	        this._lastCoords = null;
+	        this.stopRender();
+	        _super.prototype.reset.call(this);
 	        return this;
 	    };
 	    return RealDrawBoard;

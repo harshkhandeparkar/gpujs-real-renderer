@@ -31,7 +31,6 @@ export class RealDrawBoard extends RealRenderer {
   _plotKernel: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
   _lastCoords: null | [number, number] = null;
-  _clickStartCoords: null | [number, number] = null;
 
   constructor(options: RealDrawBoardOptions) {
     // *****DEFAULTS*****
@@ -99,7 +98,6 @@ export class RealDrawBoard extends RealRenderer {
       }
 
       this._lastCoords = this._getCoords(e);
-      this._clickStartCoords = this._getCoords(e);
     }
   }
 
@@ -270,11 +268,31 @@ export class RealDrawBoard extends RealRenderer {
     this.mode = newMode;
   }
 
-  reset() {
-    super.reset();
+  clear() {
+    this._strokeHappening = false;
+    this._drawnPaths = [];
+    this._pathIndex = -1;
+    this._lastCoords = null;
+  }
 
+  reset() {
     this.xScaleFactor = this.options.xScaleFactor;
     this.yScaleFactor = this.options.yScaleFactor;
+    this.brushColor = this.options.brushColor;
+    this.brushSize = this.options.brushSize;
+    this.bgColor = this.options.bgColor;
+    this.eraserSize = this.options.eraserSize;
+    this.mode = this.options.mode;
+
+    this._isDrawing = false;
+    this._strokeHappening = false;
+    this._drawnPaths = [];
+    this._pathIndex = -1;
+    this._lastCoords = null;
+
+    this.stopRender();
+
+    super.reset();
 
     return this;
   }
