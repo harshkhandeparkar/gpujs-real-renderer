@@ -1038,6 +1038,7 @@
 	        _super.call(this, options) || this;
 	        _this._isDrawing = false;
 	        _this._drawnPaths = [];
+	        _this._pathIndex = -1; // Index of path in _drawnPaths
 	        _this._lastCoords = null;
 	        _this._clickStartCoords = null;
 	        _this._getCoords = function (e) {
@@ -1050,13 +1051,13 @@
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
-	                _this._drawnPaths.push({
+	                _this._drawnPaths[_this._pathIndex + 1] = {
 	                    pathCoords: [],
 	                    color: _this.brushColor.map(function (x) { return x; }),
 	                    mode: _this.mode,
 	                    brushSize: _this.brushSize,
 	                    eraserSize: _this.eraserSize
-	                });
+	                };
 	                _this._lastCoords = _this._getCoords(e);
 	                _this._clickStartCoords = _this._getCoords(e);
 	            }
@@ -1074,7 +1075,8 @@
 	                }
 	                if (_this._drawnPaths[_this._drawnPaths.length - 1].pathCoords.length === 0)
 	                    _this._drawnPaths.splice(-1, 1);
-	                console.log(_this._drawnPaths);
+	                else
+	                    _this._pathIndex++;
 	            }
 	        };
 	        _this._mouseEnterEventListener = function (e) {
@@ -1120,32 +1122,39 @@
 	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	        this._display(this.graphPixels);
 	    };
-	    RealDrawBoard.prototype.undo = function () {
+	    RealDrawBoard.prototype.undo = function (numUndo) {
 	        var _this = this;
-	        this.graphPixels = this._blankGraph();
-	        this._display(this.graphPixels);
-	        var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
-	        this._removeMouseEvents();
-	        this._drawnPaths.slice(0, -1).forEach(function (path, i) {
-	            _this.mode = path.mode;
-	            _this.brushColor = path.color;
-	            _this.brushSize = path.brushSize;
-	            _this.eraserSize = path.eraserSize;
-	            _this._lastCoords = null;
-	            path.pathCoords.forEach(function (coord) {
-	                _this._stroke.apply(_this, coord);
-	                _this._lastCoords = coord;
+	        if (this._pathIndex >= numUndo - 1) {
+	            this.graphPixels = this._blankGraph();
+	            this._display(this.graphPixels);
+	            var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
+	            this._removeMouseEvents();
+	            this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(function (path) {
+	                _this.mode = path.mode;
+	                _this.brushColor = path.color;
+	                _this.brushSize = path.brushSize;
+	                _this.eraserSize = path.eraserSize;
+	                _this._lastCoords = null;
+	                path.pathCoords.forEach(function (coord) {
+	                    _this._stroke.apply(_this, coord);
+	                    _this._lastCoords = coord;
+	                });
 	            });
-	        });
-	        this._drawnPaths.splice(-1, 1); // Delete last path
-	        this.mode = originalMode;
-	        this.brushColor = originalBrushColor;
-	        this.brushSize = originalBrushSize;
-	        this.eraserSize = originalEraserSize;
-	        this._lastCoords = null;
-	        this._display(this.graphPixels);
-	        if (this._isDrawing)
-	            this.startRender();
+	            this.mode = originalMode;
+	            this.brushColor = originalBrushColor;
+	            this.brushSize = originalBrushSize;
+	            this.eraserSize = originalEraserSize;
+	            this._pathIndex -= numUndo;
+	            this._lastCoords = null;
+	            this._display(this.graphPixels);
+	            if (this._isDrawing)
+	                this.startRender();
+	        }
+	        return this;
+	    };
+	    RealDrawBoard.prototype.redo = function (numRedo) {
+	        this.undo(-numRedo);
+	        return this;
 	    };
 	    RealDrawBoard.prototype.startRender = function () {
 	        this._addMouseEvents();

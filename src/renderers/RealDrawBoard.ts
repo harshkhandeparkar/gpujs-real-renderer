@@ -26,6 +26,7 @@ export class RealDrawBoard extends RealRenderer {
     brushSize: number,
     eraserSize: number
   }[] = [];
+  _pathIndex: number = -1; // Index of path in _drawnPaths
   _plotKernel: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
   _lastCoords: null | [number, number] = null;
@@ -87,13 +88,13 @@ export class RealDrawBoard extends RealRenderer {
     if (e.button === 0 /* Left Click */) {
       this.canvas.addEventListener('mousemove', this._strokeEventListener);
 
-      this._drawnPaths.push({
+      this._drawnPaths[this._pathIndex + 1] = {
         pathCoords: [],
         color: <Color>this.brushColor.map(x => x),
         mode: this.mode,
         brushSize: this.brushSize,
         eraserSize: this.eraserSize
-      })
+      }
       this._lastCoords = this._getCoords(e);
       this._clickStartCoords = this._getCoords(e);
     }
@@ -114,8 +115,7 @@ export class RealDrawBoard extends RealRenderer {
       }
 
       if (this._drawnPaths[this._drawnPaths.length - 1].pathCoords.length === 0) this._drawnPaths.splice(-1, 1);
-
-      console.log(this._drawnPaths);
+      else this._pathIndex++;
     }
   }
 
@@ -169,41 +169,50 @@ export class RealDrawBoard extends RealRenderer {
     this._display(this.graphPixels);
   }
 
-  undo() {
-    this.graphPixels = <Texture>this._blankGraph();
-    this._display(this.graphPixels);
-    const originalMode = this.mode,
-    originalBrushColor = this.brushColor,
-    originalBrushSize = this.brushSize,
-    originalEraserSize = this.eraserSize;
+  undo(numUndo: number) {
+    if (this._pathIndex >= numUndo - 1) {
+      this.graphPixels = <Texture>this._blankGraph();
+      this._display(this.graphPixels);
+      const originalMode = this.mode,
+      originalBrushColor = this.brushColor,
+      originalBrushSize = this.brushSize,
+      originalEraserSize = this.eraserSize;
 
-    this._removeMouseEvents();
+      this._removeMouseEvents();
 
-    this._drawnPaths.slice(0, -1).forEach((path, i) => {
-      this.mode = path.mode;
-      this.brushColor = path.color;
-      this.brushSize = path.brushSize;
-      this.eraserSize = path.eraserSize;
+      this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(path => {
+        this.mode = path.mode;
+        this.brushColor = path.color;
+        this.brushSize = path.brushSize;
+        this.eraserSize = path.eraserSize;
+
+        this._lastCoords = null;
+        path.pathCoords.forEach(coord => {
+          this._stroke(...coord)
+          this._lastCoords = coord;
+        })
+      })
+
+      this.mode = originalMode;
+      this.brushColor = originalBrushColor;
+      this.brushSize = originalBrushSize;
+      this.eraserSize = originalEraserSize;
+
+      this._pathIndex -= numUndo;
 
       this._lastCoords = null;
-      path.pathCoords.forEach(coord => {
-        this._stroke(...coord)
-        this._lastCoords = coord;
-      })
-    })
+      this._display(this.graphPixels);
 
+      if (this._isDrawing) this.startRender();
+    }
 
-    this._drawnPaths.splice(-1, 1); // Delete last path
+    return this;
+  }
 
-    this.mode = originalMode;
-    this.brushColor = originalBrushColor;
-    this.brushSize = originalBrushSize;
-    this.eraserSize = originalEraserSize;
+  redo(numRedo: number) {
+    this.undo(-numRedo);
 
-    this._lastCoords = null;
-    this._display(this.graphPixels);
-
-    if (this._isDrawing) this.startRender();
+    return this;
   }
 
   startRender() {
