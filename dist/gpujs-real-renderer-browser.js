@@ -1141,6 +1141,7 @@
 	    RealDrawBoard.prototype.plot = function (x, y) {
 	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	        this._display(this.graphPixels);
+	        return this;
 	    };
 	    RealDrawBoard.prototype.undo = function (numUndo) {
 	        var _this = this;
@@ -1193,21 +1194,28 @@
 	    };
 	    RealDrawBoard.prototype.changeBrushColor = function (color) {
 	        this.brushColor = color;
+	        return this;
 	    };
 	    RealDrawBoard.prototype.changeBrushSize = function (newSize) {
 	        this.brushSize = newSize;
+	        return this;
 	    };
 	    RealDrawBoard.prototype.changeEraserSize = function (newSize) {
 	        this.eraserSize = newSize;
+	        return this;
 	    };
 	    RealDrawBoard.prototype.changeMode = function (newMode) {
 	        this.mode = newMode;
+	        return this;
 	    };
 	    RealDrawBoard.prototype.clear = function () {
 	        this._strokeHappening = false;
 	        this._drawnPaths = [];
 	        this._pathIndex = -1;
 	        this._lastCoords = null;
+	        this.graphPixels = this._blankGraph();
+	        this._display(this.graphPixels);
+	        return this;
 	    };
 	    RealDrawBoard.prototype.reset = function () {
 	        this.xScaleFactor = this.options.xScaleFactor;

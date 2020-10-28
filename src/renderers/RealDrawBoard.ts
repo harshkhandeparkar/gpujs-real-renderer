@@ -187,6 +187,8 @@ export class RealDrawBoard extends RealRenderer {
     )
 
     this._display(this.graphPixels);
+
+    return this;
   }
 
   undo(numUndo: number = 1) {
@@ -254,18 +256,22 @@ export class RealDrawBoard extends RealRenderer {
 
   changeBrushColor(color: Color) {
     this.brushColor = color;
+    return this;
   }
 
   changeBrushSize(newSize: number) {
     this.brushSize = newSize;
+    return this;
   }
 
   changeEraserSize(newSize: number) {
     this.eraserSize = newSize;
+    return this;
   }
 
   changeMode(newMode: DrawMode) {
     this.mode = newMode;
+    return this;
   }
 
   clear() {
@@ -273,6 +279,11 @@ export class RealDrawBoard extends RealRenderer {
     this._drawnPaths = [];
     this._pathIndex = -1;
     this._lastCoords = null;
+
+    this.graphPixels = <Texture>this._blankGraph();
+    this._display(this.graphPixels);
+
+    return this;
   }
 
   reset() {
