@@ -53,3 +53,13 @@ eraserSizeRange.addEventListener('input', e => {
   e.preventDefault();
   DrawBoard.changeEraserSize(Number(eraserSizeRange.value))
 })
+
+document.querySelector('#draw-undo').addEventListener('click', e => {
+  e.preventDefault();
+  DrawBoard.undo();
+})
+
+document.querySelector('#draw-redo').addEventListener('click', e => {
+  e.preventDefault();
+  DrawBoard.redo();
+})
