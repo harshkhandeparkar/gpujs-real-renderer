@@ -49,8 +49,6 @@ export class RealComplexSpace extends RealRenderer {
     this._plotComplex = getPlotKernel(
       this.gpu,
       this.dimensions,
-      this.brushSize,
-      this.brushColor,
       this.xScaleFactor,
       this.yScaleFactor,
       this.xOffset,
@@ -60,8 +58,6 @@ export class RealComplexSpace extends RealRenderer {
     this._plotComplexPersistent = getPlotKernel(
       this.gpu,
       this.dimensions,
-      this.brushSize,
-      this.brushColor,
       this.xScaleFactor,
       this.yScaleFactor,
       this.xOffset,
@@ -74,9 +70,7 @@ export class RealComplexSpace extends RealRenderer {
       this.xScaleFactor,
       this.yScaleFactor,
       this.xOffset,
-      this.yOffset,
-      this.lineThickness,
-      this.lineColor
+      this.yOffset
     )
   }
 
@@ -123,7 +117,9 @@ export class RealComplexSpace extends RealRenderer {
     graphPixels = <Texture>this._interpolateKernel(
       this._cloneTexture(graphPixels),
       [n1.x, n1.y],
-      [n2.x, n2.y]
+      [n2.x, n2.y],
+      this.lineThickness,
+      this.lineColor
     )
 
     return graphPixels;
@@ -155,7 +151,9 @@ export class RealComplexSpace extends RealRenderer {
     return this._plotComplex(
       this._cloneTexture(graphPixels),
       number.x,
-      number.y
+      number.y,
+      this.brushSize,
+      this.brushColor
     )
   }
 
@@ -163,7 +161,9 @@ export class RealComplexSpace extends RealRenderer {
     return this._plotComplexPersistent(
       this._cloneTexture(graphPixels),
       number.x,
-      number.y
+      number.y,
+      this.brushSize,
+      this.brushColor
     )
   }
 

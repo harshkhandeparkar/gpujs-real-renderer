@@ -600,40 +600,34 @@
 	/**
 	 * @param gpu
 	 * @param dimensions
-	 * @param brushSize
-	 * @param brushColor
 	 * @param xScaleFactor
 	 * @param yScaleFactor
 	 * @param xOffset
 	 * @param yOffset
 	 */
-	function getPlotKernel(gpu, dimensions, brushSize, brushColor, xScaleFactor, yScaleFactor, xOffset, yOffset) {
-	    return gpu.createKernel(function (graphPixels, valX, valY) {
+	function getPlotKernel(gpu, dimensions, xScaleFactor, yScaleFactor, xOffset, yOffset) {
+	    return gpu.createKernel(function (graphPixels, valX, valY, brushSize, brushColor) {
 	        var x = this.thread.x, y = this.thread.y;
 	        var outX = this.output.x, outY = this.output.y;
-	        var X = x / this.constants.xScaleFactor - (outX * (this.constants.yOffset / 100)) / this.constants.xScaleFactor;
-	        var Y = y / this.constants.yScaleFactor - (outY * (this.constants.xOffset / 100)) / this.constants.yScaleFactor;
-	        var xDist = (X - valX) * this.constants.xScaleFactor;
-	        var yDist = (Y - valY) * this.constants.yScaleFactor;
+	        var X = x / (this.constants.xScaleFactor) - (outX * (this.constants.yOffset / 100)) / (this.constants.xScaleFactor);
+	        var Y = y / (this.constants.yScaleFactor) - (outY * (this.constants.xOffset / 100)) / (this.constants.yScaleFactor);
+	        var xDist = (X - valX) * (this.constants.xScaleFactor);
+	        var yDist = (Y - valY) * (this.constants.yScaleFactor);
 	        var dist = Math.sqrt(xDist * xDist + yDist * yDist);
-	        if (dist <= this.constants.brushSize)
-	            return this.constants.brushColor;
+	        if (dist <= brushSize)
+	            return [brushColor[0], brushColor[1], brushColor[2]];
 	        else
 	            return graphPixels[this.thread.y][this.thread.x];
 	    }, {
 	        output: dimensions,
 	        pipeline: true,
 	        constants: {
-	            brushSize: brushSize,
-	            brushColor: brushColor,
 	            xScaleFactor: xScaleFactor,
 	            yScaleFactor: yScaleFactor,
 	            xOffset: xOffset,
 	            yOffset: yOffset
 	        },
 	        constantTypes: {
-	            brushColor: 'Array(3)',
-	            brushSize: 'Float',
 	            xScaleFactor: 'Float',
 	            yScaleFactor: 'Float',
 	            xOffset: 'Float',
@@ -654,13 +648,11 @@
 	 * @param yScaleFactor
 	 * @param xOffset
 	 * @param yOffset
-	 * @param lineThickness
-	 * @param lineColor
 	 */
-	function getInterpolateKernel(gpu, dimensions, xScaleFactor, yScaleFactor, xOffset, yOffset, lineThickness, lineColor) {
-	    return gpu.createKernel(function (graphPixels, val1, val2) {
+	function getInterpolateKernel(gpu, dimensions, xScaleFactor, yScaleFactor, xOffset, yOffset) {
+	    return gpu.createKernel(function (graphPixels, val1, val2, lineThickness, lineColor) {
 	        var x = this.thread.x, y = this.thread.y;
-	        var lineHalfThickness = this.constants.lineThickness;
+	        var lineHalfThickness = lineThickness;
 	        var x1 = val1[0];
 	        var y1 = val1[1];
 	        var x2 = val2[0];
@@ -682,23 +674,19 @@
 	            ||
 	                (Math.pow((X - x1), 2) + Math.pow((Y - y1), 2) <= Math.pow(lineHalfThickness, 2) ||
 	                    Math.pow((X - x2), 2) + Math.pow((Y - y2), 2) <= Math.pow(lineHalfThickness, 2)))
-	            return this.constants.lineColor;
+	            return [lineColor[0], lineColor[1], lineColor[2]];
 	        else
 	            return graphPixels[this.thread.y][this.thread.x];
 	    }, {
 	        output: dimensions,
 	        pipeline: true,
 	        constants: {
-	            lineThickness: lineThickness,
-	            lineColor: lineColor,
 	            xScaleFactor: xScaleFactor,
 	            yScaleFactor: yScaleFactor,
 	            xOffset: xOffset,
 	            yOffset: yOffset
 	        },
 	        constantTypes: {
-	            lineThickness: 'Float',
-	            lineColor: 'Array(3)',
 	            xScaleFactor: 'Float',
 	            yScaleFactor: 'Float',
 	            xOffset: 'Float',
@@ -904,9 +892,9 @@
 	        _this.lineColor = options.lineColor || [1, 1, 1];
 	        // *****DEFAULTS*****
 	        _this.watchedNumbers = []; // Numbers that are plotted at all times (to dynamically update the numbers)
-	        _this._plotComplex = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
-	        _this._plotComplexPersistent = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.brushSize, _this.brushColor, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
-	        _this._interpolateKernel = interpolate.getInterpolateKernel(_this.gpu, _this.dimensions, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset, _this.lineThickness, _this.lineColor);
+	        _this._plotComplex = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
+	        _this._plotComplexPersistent = plot.getPlotKernel(_this.gpu, _this.dimensions, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
+	        _this._interpolateKernel = interpolate.getInterpolateKernel(_this.gpu, _this.dimensions, _this.xScaleFactor, _this.yScaleFactor, _this.xOffset, _this.yOffset);
 	        return _this;
 	    }
 	    /**
@@ -942,7 +930,7 @@
 	        return this;
 	    };
 	    RealComplexSpace.prototype._interpolate = function (graphPixels, n1, n2) {
-	        graphPixels = this._interpolateKernel(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y]);
+	        graphPixels = this._interpolateKernel(this._cloneTexture(graphPixels), [n1.x, n1.y], [n2.x, n2.y], this.lineThickness, this.lineColor);
 	        return graphPixels;
 	    };
 	    RealComplexSpace.prototype._overlayFunc = function (graphPixels) {
@@ -964,10 +952,10 @@
 	        return graphPixels;
 	    };
 	    RealComplexSpace.prototype._plot = function (graphPixels, number) {
-	        return this._plotComplex(this._cloneTexture(graphPixels), number.x, number.y);
+	        return this._plotComplex(this._cloneTexture(graphPixels), number.x, number.y, this.brushSize, this.brushColor);
 	    };
 	    RealComplexSpace.prototype._plotPersistent = function (graphPixels, number) {
-	        return this._plotComplexPersistent(this._cloneTexture(graphPixels), number.x, number.y);
+	        return this._plotComplexPersistent(this._cloneTexture(graphPixels), number.x, number.y, this.brushSize, this.brushColor);
 	    };
 	    /**
 	     * @param number Complex number to be plotted.
@@ -1048,6 +1036,7 @@
 	        var _this = 
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
+	        _this.deltas = []; // [x, y, r, g, b]
 	        _this._lastCoords = null;
 	        _this._clickStartCoords = null;
 	        _this._getCoords = function (e) {
@@ -1058,7 +1047,8 @@
 	            return [x, y]; // In graph coordinates
 	        };
 	        _this._mouseDownEventListener = function (e) {
-	            if (e.button === 0) {
+	            if (e.button === 0 /* Left Click */) {
+	                _this.beforeDrawPixels = _this._cloneTexture(_this.graphPixels);
 	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
 	                _this._lastCoords = _this._getCoords(e);
 	                _this._clickStartCoords = _this._getCoords(e);
@@ -1081,7 +1071,7 @@
 	        };
 	        _this._strokeEventListener = function (e) {
 	            var coords = _this._getCoords(e);
-	            _this.stroke.apply(_this, coords);
+	            _this._stroke.apply(_this, coords);
 	            _this._lastCoords = coords;
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
@@ -1094,16 +1084,9 @@
 	        _this._initializeKernels();
 	        return _this;
 	    }
-	    RealDrawBoard.prototype._initializePaintKernels = function () {
-	        this._plot = plot.getPlotKernel(this.gpu, this.dimensions, this.brushSize, this.brushColor, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
-	        this._paint = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.brushSize, this.brushColor);
-	    };
-	    RealDrawBoard.prototype._initializeEraserKernels = function () {
-	        this._erase = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset, this.eraserSize, this.bgColor);
-	    };
 	    RealDrawBoard.prototype._initializeKernels = function () {
-	        this._initializePaintKernels();
-	        this._initializeEraserKernels();
+	        this._plotKernel = plot.getPlotKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+	        this._strokeKernel = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
 	    };
 	    RealDrawBoard.prototype._addMouseEvents = function () {
 	        document.addEventListener('mousedown', this._mouseDownEventListener);
@@ -1115,16 +1098,14 @@
 	        document.removeEventListener('mouseup', this._mouseUpEventListener);
 	        this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
 	    };
-	    RealDrawBoard.prototype.stroke = function (x, y) {
+	    RealDrawBoard.prototype._stroke = function (x, y) {
 	        if (this._lastCoords === null)
 	            this._lastCoords = [x, y];
-	        this.graphPixels = this.mode === 'paint' ?
-	            this._paint(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]) :
-	            this._erase(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y]);
+	        this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	        this._display(this.graphPixels);
 	    };
 	    RealDrawBoard.prototype.plot = function (x, y) {
-	        this.graphPixels = this._plot(this._cloneTexture(this.graphPixels), x, y);
+	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	        this._display(this.graphPixels);
 	    };
 	    RealDrawBoard.prototype.startRender = function () {
@@ -1137,15 +1118,12 @@
 	    };
 	    RealDrawBoard.prototype.changeBrushColor = function (color) {
 	        this.brushColor = color;
-	        this._initializePaintKernels();
 	    };
 	    RealDrawBoard.prototype.changeBrushSize = function (newSize) {
 	        this.brushSize = newSize;
-	        this._initializePaintKernels();
 	    };
 	    RealDrawBoard.prototype.changeEraserSize = function (newSize) {
 	        this.eraserSize = newSize;
-	        this._initializeEraserKernels();
 	    };
 	    RealDrawBoard.prototype.changeMode = function (newMode) {
 	        this.mode = newMode;
