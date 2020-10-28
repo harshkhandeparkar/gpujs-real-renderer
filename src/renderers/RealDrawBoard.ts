@@ -18,12 +18,16 @@ export class RealDrawBoard extends RealRenderer {
   brushColor: Color;
   eraserSize: number;
   mode: DrawMode;
-  _beforeDrawPixels: any[];
-  _deltas: [number, number, number, number, number][][] = []; // [x, y, r, g, b]
-  _calculateDelta: IKernelRunShortcut;
+  _isDrawing: boolean = false;
+  _drawnPaths: {
+    pathCoords: [number, number][], // [x, y][]
+    color: Color,
+    mode: DrawMode,
+    brushSize: number,
+    eraserSize: number
+  }[] = [];
   _plotKernel: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
-  _testInterpolate: IKernelRunShortcut;
   _lastCoords: null | [number, number] = null;
   _clickStartCoords: null | [number, number] = null;
 
@@ -81,9 +85,15 @@ export class RealDrawBoard extends RealRenderer {
 
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
-      this._beforeDrawPixels = this.graphPixels.toArray();
-
       this.canvas.addEventListener('mousemove', this._strokeEventListener);
+
+      this._drawnPaths.push({
+        pathCoords: [],
+        color: <Color>this.brushColor.map(x => x),
+        mode: this.mode,
+        brushSize: this.brushSize,
+        eraserSize: this.eraserSize
+      })
       this._lastCoords = this._getCoords(e);
       this._clickStartCoords = this._getCoords(e);
     }
@@ -99,32 +109,13 @@ export class RealDrawBoard extends RealRenderer {
         this._clickStartCoords[0] === currentCoords[0] &&
         this._clickStartCoords[1] === currentCoords[1]
       ) { // A single point instead of a stroke
-        this.plot(...this._getCoords(e));
+        this.plot(...currentCoords);
+        this._drawnPaths[this._drawnPaths.length - 1].pathCoords.push(currentCoords);
       }
 
-      this._deltas.push([]);
+      if (this._drawnPaths[this._drawnPaths.length - 1].pathCoords.length === 0) this._drawnPaths.splice(-1, 1);
 
-      (<number[][][]>this.graphPixels.toArray()).forEach( // TODO: This is done on a CPU and is EXTREMELY inefficient. GPU is not working properly, try to fix it.
-        (row: number[][], y) => {
-          row.forEach((pixel: number[], x) => {
-            if (
-              pixel[0] !== this._beforeDrawPixels[y][x][0] ||
-              pixel[1] !== this._beforeDrawPixels[y][x][1] ||
-              pixel[2] !== this._beforeDrawPixels[y][x][2]
-            ) {
-              this._deltas[this._deltas.length - 1].push([
-                x,
-                y,
-                pixel[0] - this._beforeDrawPixels[y][x][0],
-                pixel[1] - this._beforeDrawPixels[y][x][1],
-                pixel[2] - this._beforeDrawPixels[y][x][2]
-              ])
-            }
-          })
-        }
-      )
-
-      console.log(this._deltas);
+      console.log(this._drawnPaths);
     }
   }
 
@@ -135,6 +126,7 @@ export class RealDrawBoard extends RealRenderer {
   _strokeEventListener = (e: MouseEvent) => {
     const coords = this._getCoords(e);
 
+    this._drawnPaths[this._drawnPaths.length - 1].pathCoords.push(coords);
     this._stroke(...coords);
     this._lastCoords = coords;
   }
@@ -177,14 +169,53 @@ export class RealDrawBoard extends RealRenderer {
     this._display(this.graphPixels);
   }
 
+  undo() {
+    this.graphPixels = <Texture>this._blankGraph();
+    this._display(this.graphPixels);
+    const originalMode = this.mode,
+    originalBrushColor = this.brushColor,
+    originalBrushSize = this.brushSize,
+    originalEraserSize = this.eraserSize;
+
+    this._removeMouseEvents();
+
+    this._drawnPaths.slice(0, -1).forEach((path, i) => {
+      this.mode = path.mode;
+      this.brushColor = path.color;
+      this.brushSize = path.brushSize;
+      this.eraserSize = path.eraserSize;
+
+      this._lastCoords = null;
+      path.pathCoords.forEach(coord => {
+        this._stroke(...coord)
+        this._lastCoords = coord;
+      })
+    })
+
+
+    this._drawnPaths.splice(-1, 1); // Delete last path
+
+    this.mode = originalMode;
+    this.brushColor = originalBrushColor;
+    this.brushSize = originalBrushSize;
+    this.eraserSize = originalEraserSize;
+
+    this._lastCoords = null;
+    this._display(this.graphPixels);
+
+    if (this._isDrawing) this.startRender();
+  }
+
   startRender() {
     this._addMouseEvents();
+    this._isDrawing = true;
 
     return this;
   }
 
   stopRender() {
     this._removeMouseEvents();
+    this._isDrawing = false;
 
     return this;
   }

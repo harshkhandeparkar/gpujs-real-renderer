@@ -1036,7 +1036,8 @@
 	        var _this = 
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
-	        _this.deltas = []; // [x, y, r, g, b]
+	        _this._isDrawing = false;
+	        _this._drawnPaths = [];
 	        _this._lastCoords = null;
 	        _this._clickStartCoords = null;
 	        _this._getCoords = function (e) {
@@ -1048,8 +1049,14 @@
 	        };
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
-	                _this.beforeDrawPixels = _this._cloneTexture(_this.graphPixels);
 	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
+	                _this._drawnPaths.push({
+	                    pathCoords: [],
+	                    color: _this.brushColor.map(function (x) { return x; }),
+	                    mode: _this.mode,
+	                    brushSize: _this.brushSize,
+	                    eraserSize: _this.eraserSize
+	                });
 	                _this._lastCoords = _this._getCoords(e);
 	                _this._clickStartCoords = _this._getCoords(e);
 	            }
@@ -1062,8 +1069,12 @@
 	                if (_this._clickStartCoords[0] === currentCoords[0] &&
 	                    _this._clickStartCoords[1] === currentCoords[1]) { // A single point instead of a stroke
 	                    _this.plot.apply(// A single point instead of a stroke
-	                    _this, _this._getCoords(e));
+	                    _this, currentCoords);
+	                    _this._drawnPaths[_this._drawnPaths.length - 1].pathCoords.push(currentCoords);
 	                }
+	                if (_this._drawnPaths[_this._drawnPaths.length - 1].pathCoords.length === 0)
+	                    _this._drawnPaths.splice(-1, 1);
+	                console.log(_this._drawnPaths);
 	            }
 	        };
 	        _this._mouseEnterEventListener = function (e) {
@@ -1071,6 +1082,7 @@
 	        };
 	        _this._strokeEventListener = function (e) {
 	            var coords = _this._getCoords(e);
+	            _this._drawnPaths[_this._drawnPaths.length - 1].pathCoords.push(coords);
 	            _this._stroke.apply(_this, coords);
 	            _this._lastCoords = coords;
 	        };
@@ -1108,12 +1120,41 @@
 	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	        this._display(this.graphPixels);
 	    };
+	    RealDrawBoard.prototype.undo = function () {
+	        var _this = this;
+	        this.graphPixels = this._blankGraph();
+	        this._display(this.graphPixels);
+	        var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
+	        this._removeMouseEvents();
+	        this._drawnPaths.slice(0, -1).forEach(function (path, i) {
+	            _this.mode = path.mode;
+	            _this.brushColor = path.color;
+	            _this.brushSize = path.brushSize;
+	            _this.eraserSize = path.eraserSize;
+	            _this._lastCoords = null;
+	            path.pathCoords.forEach(function (coord) {
+	                _this._stroke.apply(_this, coord);
+	                _this._lastCoords = coord;
+	            });
+	        });
+	        this._drawnPaths.splice(-1, 1); // Delete last path
+	        this.mode = originalMode;
+	        this.brushColor = originalBrushColor;
+	        this.brushSize = originalBrushSize;
+	        this.eraserSize = originalEraserSize;
+	        this._lastCoords = null;
+	        this._display(this.graphPixels);
+	        if (this._isDrawing)
+	            this.startRender();
+	    };
 	    RealDrawBoard.prototype.startRender = function () {
 	        this._addMouseEvents();
+	        this._isDrawing = true;
 	        return this;
 	    };
 	    RealDrawBoard.prototype.stopRender = function () {
 	        this._removeMouseEvents();
+	        this._isDrawing = false;
 	        return this;
 	    };
 	    RealDrawBoard.prototype.changeBrushColor = function (color) {
