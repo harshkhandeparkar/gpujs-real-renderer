@@ -1021,6 +1021,13 @@
 	var __exportStar = (commonjsGlobal && commonjsGlobal.__exportStar) || function(m, exports) {
 	    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 	};
+	var __spreadArrays = (commonjsGlobal && commonjsGlobal.__spreadArrays) || function () {
+	    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+	    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+	        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+	            r[k] = a[j];
+	    return r;
+	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RealDrawBoard = exports.RealDrawBoardTypes = exports.RealRendererTypes = void 0;
 
@@ -1066,6 +1073,12 @@
 	        };
 	        _this._mouseUpEventListener = function (e) {
 	            if (e.button === 0) {
+	                var currentCoords = _this._getCoords(e);
+	                if (_this._lastCoords[0] === currentCoords[0] &&
+	                    _this._lastCoords[1] === currentCoords[1]) {
+	                    _this.plot.apply(_this, currentCoords);
+	                    _this._drawnPaths[_this._pathIndex + 1].pathCoords.push(__spreadArrays(currentCoords, [true]));
+	                }
 	                _this._strokeEnd();
 	            }
 	        };
@@ -1078,7 +1091,7 @@
 	        _this._strokeEventListener = function (e) {
 	            var coords = _this._getCoords(e);
 	            _this._strokeHappening = true;
-	            _this._drawnPaths[_this._pathIndex + 1].pathCoords.push(coords);
+	            _this._drawnPaths[_this._pathIndex + 1].pathCoords.push(__spreadArrays(coords, [false]));
 	            _this._stroke.apply(_this, coords);
 	            _this._lastCoords = coords;
 	        };
@@ -1132,10 +1145,8 @@
 	    RealDrawBoard.prototype.undo = function (numUndo) {
 	        var _this = this;
 	        if (numUndo === void 0) { numUndo = 1; }
-	        console.log(this._pathIndex, numUndo, this._drawnPaths.length);
 	        if (this._pathIndex >= numUndo - 1 && this._pathIndex - numUndo < this._drawnPaths.length) {
-	            this.graphPixels = this._blankGraph();
-	            this._display(this.graphPixels);
+	            this.graphPixels = this._blankGraph(); // Start with a blank graph
 	            var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
 	            this._removeMouseEvents();
 	            this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(function (path) {
@@ -1145,8 +1156,12 @@
 	                _this.eraserSize = path.eraserSize;
 	                _this._lastCoords = null;
 	                path.pathCoords.forEach(function (coord) {
-	                    _this._stroke.apply(_this, coord);
-	                    _this._lastCoords = coord;
+	                    if (coord[2] === false) {
+	                        _this._stroke(coord[0], coord[1]); // Replay all strokes
+	                        _this._lastCoords = [coord[0], coord[1]];
+	                    }
+	                    else
+	                        _this.plot(coord[0], coord[1]);
 	                });
 	            });
 	            this.mode = originalMode;

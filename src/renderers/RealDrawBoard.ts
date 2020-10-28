@@ -21,7 +21,7 @@ export class RealDrawBoard extends RealRenderer {
   _isDrawing: boolean = false;
   _strokeHappening: boolean = false;
   _drawnPaths: {
-    pathCoords: [number, number][], // [x, y][]
+    pathCoords: [number, number, boolean][], // [x, y, isAPoint][]
     color: Color,
     mode: DrawMode,
     brushSize: number,
@@ -105,6 +105,16 @@ export class RealDrawBoard extends RealRenderer {
 
   _mouseUpEventListener = (e: MouseEvent) => {
     if (e.button === 0) {
+      const currentCoords = this._getCoords(e);
+
+      if (
+        this._lastCoords[0] === currentCoords[0] &&
+        this._lastCoords[1] === currentCoords[1]
+      ) {
+        this.plot(...currentCoords);
+        this._drawnPaths[this._pathIndex + 1].pathCoords.push([...currentCoords, true])
+      }
+
       this._strokeEnd();
     }
   }
@@ -121,7 +131,7 @@ export class RealDrawBoard extends RealRenderer {
     const coords = this._getCoords(e);
 
     this._strokeHappening = true;
-    this._drawnPaths[this._pathIndex + 1].pathCoords.push(coords);
+    this._drawnPaths[this._pathIndex + 1].pathCoords.push([...coords, false]);
     this._stroke(...coords);
     this._lastCoords = coords;
   }
@@ -180,8 +190,8 @@ export class RealDrawBoard extends RealRenderer {
 
   undo(numUndo: number = 1) {
     if (this._pathIndex >= numUndo - 1 && this._pathIndex - numUndo < this._drawnPaths.length) {
-      this.graphPixels = <Texture>this._blankGraph();
-      this._display(this.graphPixels);
+      this.graphPixels = <Texture>this._blankGraph(); // Start with a blank graph
+
       const originalMode = this.mode,
       originalBrushColor = this.brushColor,
       originalBrushSize = this.brushSize,
@@ -197,8 +207,11 @@ export class RealDrawBoard extends RealRenderer {
 
         this._lastCoords = null;
         path.pathCoords.forEach(coord => {
-          this._stroke(...coord)
-          this._lastCoords = coord;
+          if (coord[2] === false) {
+            this._stroke(coord[0], coord[1]); // Replay all strokes
+            this._lastCoords = [coord[0], coord[1]];
+          }
+          else this.plot(coord[0], coord[1])
         })
       })
 
