@@ -1102,7 +1102,7 @@
 	                if (_this._drawnPaths[_this._pathIndex + 1].pathCoords.length === 0)
 	                    _this._drawnPaths.splice(-1, 1);
 	                else {
-	                    _this._drawnPaths.splice(0, _this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
+	                    _this._drawnPaths = _this._drawnPaths.slice(0, _this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
 	                    _this._pathIndex++;
 	                }
 	                _this._strokeHappening = false;

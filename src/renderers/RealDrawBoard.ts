@@ -143,7 +143,7 @@ export class RealDrawBoard extends RealRenderer {
 
       if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0) this._drawnPaths.splice(-1, 1);
       else {
-        this._drawnPaths.splice(0, this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
+        this._drawnPaths = this._drawnPaths.slice(0, this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
         this._pathIndex++;
       }
 
