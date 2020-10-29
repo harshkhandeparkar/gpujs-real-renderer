@@ -1182,6 +1182,19 @@
 	exports._doStroke = _doStroke;
 	});
 
+	var _coords = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._getMouseCoords = void 0;
+	function _getMouseCoords(e) {
+	    var x = e.offsetX; // in pixels
+	    var y = this.dimensions[1] - e.offsetY; // in pixels
+	    x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
+	    y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
+	    return [x, y]; // In graph coordinates
+	}
+	exports._getMouseCoords = _getMouseCoords;
+	});
+
 	var RealDrawBoard_1 = createCommonjsModule(function (module, exports) {
 	var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 	    var extendStatics = function (d, b) {
@@ -1230,6 +1243,7 @@
 
 
 
+
 	var RealDrawBoard = /** @class */ (function (_super) {
 	    __extends(RealDrawBoard, _super);
 	    function RealDrawBoard(options) {
@@ -1250,6 +1264,7 @@
 	        _this._startStroke = stroke._startStroke;
 	        _this._endStroke = stroke._endStroke;
 	        _this._doStroke = stroke._doStroke;
+	        _this._getMouseCoords = _coords._getMouseCoords;
 	        _this.undo = undo_1.undo;
 	        _this.redo = undo_1.redo;
 	        _this.changeBrushColor = boardManip.changeBrushColor;
@@ -1257,33 +1272,26 @@
 	        _this.changeEraserSize = boardManip.changeEraserSize;
 	        _this.changeMode = boardManip.changeMode;
 	        _this.clear = boardManip.clear;
-	        _this._getCoords = function (e) {
-	            var x = e.offsetX; // in pixels
-	            var y = _this.dimensions[1] - e.offsetY; // in pixels
-	            x = x / _this.xScaleFactor - (_this.dimensions[0] * (_this.yOffset / 100)) / _this.xScaleFactor;
-	            y = y / _this.yScaleFactor - (_this.dimensions[1] * (_this.xOffset / 100)) / _this.yScaleFactor;
-	            return [x, y]; // In graph coordinates
-	        };
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                _this.canvas.addEventListener('mousemove', _this._mouseMoveEventListener);
-	                _this._startStroke(_this._getCoords(e));
+	                _this._startStroke(_this._getMouseCoords(e));
 	            }
 	        };
 	        _this._mouseUpEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
-	                var endCoords = _this._getCoords(e);
+	                var endCoords = _this._getMouseCoords(e);
 	                _this._endStroke(endCoords);
 	            }
 	        };
 	        _this._mouseEnterEventListener = function (e) {
-	            _this._lastCoords = _this._getCoords(e);
+	            _this._lastCoords = _this._getMouseCoords(e);
 	        };
 	        _this._mouseLeaveEventListener = function (e) {
-	            _this._endStroke(_this._getCoords(e));
+	            _this._endStroke(_this._getMouseCoords(e));
 	        };
 	        _this._mouseMoveEventListener = function (e) {
-	            var coords = _this._getCoords(e);
+	            var coords = _this._getMouseCoords(e);
 	            _this._doStroke(coords);
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);

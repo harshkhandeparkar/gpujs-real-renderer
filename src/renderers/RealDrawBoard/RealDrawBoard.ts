@@ -30,6 +30,7 @@ import {
   _endStroke,
   _doStroke
 } from './stroke';
+import { _getMouseCoords } from './_coords';
 
 export class RealDrawBoard extends RealRenderer {
   options: RealDrawBoardOptions;
@@ -60,6 +61,7 @@ export class RealDrawBoard extends RealRenderer {
   protected _startStroke = _startStroke;
   protected _endStroke = _endStroke;
   protected _doStroke = _doStroke;
+  protected _getMouseCoords = _getMouseCoords;
 
   public undo = undo;
   public redo = redo;
@@ -91,41 +93,31 @@ export class RealDrawBoard extends RealRenderer {
     this._initializeKernels();
   }
 
-  _getCoords = (e: MouseEvent): [number, number] => {
-    let x = e.offsetX; // in pixels
-    let y = this.dimensions[1] - e.offsetY // in pixels
-
-    x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
-    y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
-
-    return [x, y]; // In graph coordinates
-  }
-
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
 
-      this._startStroke(this._getCoords(e));
+      this._startStroke(this._getMouseCoords(e));
     }
   }
 
   _mouseUpEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
-      const endCoords = this._getCoords(e);
+      const endCoords = this._getMouseCoords(e);
       this._endStroke(endCoords);
     }
   }
 
   _mouseEnterEventListener = (e: MouseEvent) => {
-    this._lastCoords = this._getCoords(e);
+    this._lastCoords = this._getMouseCoords(e);
   }
 
   _mouseLeaveEventListener = (e: MouseEvent) => {
-    this._endStroke(this._getCoords(e));
+    this._endStroke(this._getMouseCoords(e));
   }
 
   _mouseMoveEventListener = (e: MouseEvent) => {
-    const coords = this._getCoords(e);
+    const coords = this._getMouseCoords(e);
     this._doStroke(coords);
   }
 
