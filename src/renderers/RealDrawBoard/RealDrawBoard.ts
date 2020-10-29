@@ -11,8 +11,7 @@ export * as RealDrawBoardTypes from '../../types/RealDrawBoardTypes';
 export * from '../../constants/defaults/RealDrawBoardDefaults';
 
 import { _initializeKernels } from './_initializeKernels';
-import { _stroke } from './_stroke';
-import { _plot } from './_plot';
+import { _plot, _stroke } from './_draw';
 import { undo, redo } from './undo';
 import {
   changeBrushColor,

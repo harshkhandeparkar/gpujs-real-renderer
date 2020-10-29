@@ -998,9 +998,15 @@
 	exports._initializeKernels = _initializeKernels;
 	});
 
-	var _stroke_1 = createCommonjsModule(function (module, exports) {
+	var _draw = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._stroke = void 0;
+	exports._stroke = exports._plot = void 0;
+	function _plot(x, y) {
+	    this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	    this._display(this.graphPixels);
+	    return this;
+	}
+	exports._plot = _plot;
 	function _stroke(x, y) {
 	    if (this._lastCoords === null)
 	        this._lastCoords = [x, y];
@@ -1008,17 +1014,6 @@
 	    this._display(this.graphPixels);
 	}
 	exports._stroke = _stroke;
-	});
-
-	var _plot_1 = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._plot = void 0;
-	function _plot(x, y) {
-	    this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
-	    this._display(this.graphPixels);
-	    return this;
-	}
-	exports._plot = _plot;
 	});
 
 	var undo_1 = createCommonjsModule(function (module, exports) {
@@ -1235,7 +1230,6 @@
 
 
 
-
 	var RealDrawBoard = /** @class */ (function (_super) {
 	    __extends(RealDrawBoard, _super);
 	    function RealDrawBoard(options) {
@@ -1248,8 +1242,8 @@
 	        _this._pathIndex = -1; // Index of path in _drawnPaths
 	        _this._lastCoords = null;
 	        _this._initializeKernels = _initializeKernels_1._initializeKernels;
-	        _this._stroke = _stroke_1._stroke;
-	        _this._plot = _plot_1._plot;
+	        _this._stroke = _draw._stroke;
+	        _this._plot = _draw._plot;
 	        _this._resetBoard = boardManip._resetBoard;
 	        _this._addMouseEvents = _DOMEvents._addMouseEvents;
 	        _this._removeMouseEvents = _DOMEvents._removeMouseEvents;
