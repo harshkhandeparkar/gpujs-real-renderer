@@ -15,7 +15,7 @@ export function _startStroke(
     eraserSize: this.eraserSize
   }
 
-  this._lastCoords = coords;
+  this._lastCoords.set('mouse', coords);
 }
 
 export function _endStroke(
@@ -23,16 +23,15 @@ export function _endStroke(
   endCoords: [number, number]
 ) {
   if (
-    this._lastCoords[0] === endCoords[0] &&
-    this._lastCoords[1] === endCoords[1]
+    this._lastCoords.get('mouse')[0] === endCoords[0] &&
+    this._lastCoords.get('mouse')[1] === endCoords[1]
   ) {
     this._plot(...endCoords);
     this._drawnPaths[this._pathIndex + 1].pathCoords.push([...endCoords, true]);
   }
 
   if (this._strokeHappening) {
-    this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
-    this._lastCoords = null;
+    this._lastCoords.delete('mouse');
 
     if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0) this._drawnPaths.splice(-1, 1);
     else {
@@ -51,5 +50,5 @@ export function _doStroke(
   this._strokeHappening = true;
   this._drawnPaths[this._pathIndex + 1].pathCoords.push([...coords, false]);
   this._stroke(...coords);
-  this._lastCoords = coords;
+  this._lastCoords.set('mouse', coords);
 }

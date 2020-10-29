@@ -27,7 +27,7 @@ export function clear(this: RealDrawBoard) {
   this._strokeHappening = false;
   this._drawnPaths = [];
   this._pathIndex = -1;
-  this._lastCoords = null;
+  this._lastCoords.clear();
 
   this.graphPixels = <Texture>this._blankGraph();
   this._display(this.graphPixels);
@@ -48,7 +48,7 @@ export function _resetBoard(this: RealDrawBoard) {
   this._strokeHappening = false;
   this._drawnPaths = [];
   this._pathIndex = -1;
-  this._lastCoords = null;
+  this._lastCoords.clear();
 
   this.stopRender();
 }

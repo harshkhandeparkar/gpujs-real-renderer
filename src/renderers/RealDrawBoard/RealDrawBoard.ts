@@ -30,7 +30,10 @@ import {
   _endStroke,
   _doStroke
 } from './stroke';
-import { _getMouseCoords } from './_coords';
+import {
+  _getMouseCoords,
+  _getTouchCoords
+} from './_coords';
 
 export class RealDrawBoard extends RealRenderer {
   options: RealDrawBoardOptions;
@@ -50,7 +53,10 @@ export class RealDrawBoard extends RealRenderer {
   _pathIndex: number = -1; // Index of path in _drawnPaths
   _plotKernel: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
-  _lastCoords: null | [number, number] = null;
+  /** key -> identifier, value -> coordinate
+   *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
+   */
+  _lastCoords: Map<string, [number, number]> = new Map(); /* key -> identifier, value -> coordinate*/
 
   protected _initializeKernels = _initializeKernels;
   protected _stroke = _stroke;
@@ -62,6 +68,7 @@ export class RealDrawBoard extends RealRenderer {
   protected _endStroke = _endStroke;
   protected _doStroke = _doStroke;
   protected _getMouseCoords = _getMouseCoords;
+  protected _getTouchCoords = _getTouchCoords;
 
   public undo = undo;
   public redo = redo;
@@ -92,7 +99,9 @@ export class RealDrawBoard extends RealRenderer {
 
     this._initializeKernels();
   }
+  // --- DOM Event Listeners ---
 
+  // --- Mouse Events ---
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
@@ -105,11 +114,13 @@ export class RealDrawBoard extends RealRenderer {
     if (e.button === 0 /* Left Click */) {
       const endCoords = this._getMouseCoords(e);
       this._endStroke(endCoords);
+
+      if (!this._strokeHappening) this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     }
   }
 
   _mouseEnterEventListener = (e: MouseEvent) => {
-    this._lastCoords = this._getMouseCoords(e);
+    this._lastCoords.set('mouse', this._getMouseCoords(e));
   }
 
   _mouseLeaveEventListener = (e: MouseEvent) => {
@@ -120,6 +131,24 @@ export class RealDrawBoard extends RealRenderer {
     const coords = this._getMouseCoords(e);
     this._doStroke(coords);
   }
+  // --- Mouse Events ---
+
+  // --- Touch Events ---
+  _touchStartEventListener = (e: TouchEvent) => {
+    // this.canvas.addEventListener();
+  }
+
+  _touchEndEventListener = (e: TouchEvent) => {
+    const endCoords = this._getTouchCoords(e)[0];
+    this._endStroke(endCoords);
+  }
+
+  _touchMoveEventListener = (e: TouchEvent) => {
+
+  }
+  // --- Touch Events ---
+
+  // --- DOM Event Listeners ---
 
   startRender() {
     this._addDOMEvents();
