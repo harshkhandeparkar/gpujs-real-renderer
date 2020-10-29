@@ -22,8 +22,8 @@ import {
   _resetBoard
 } from './boardManip';
 import {
-  _addMouseEvents,
-  _removeMouseEvents
+  _addDOMEvents,
+  _removeDOMEvents
 } from './_DOMEvents';
 import {
   _startStroke,
@@ -55,8 +55,8 @@ export class RealDrawBoard extends RealRenderer {
   protected _stroke = _stroke;
   protected _plot = _plot;
   protected _resetBoard = _resetBoard;
-  protected _addMouseEvents = _addMouseEvents;
-  protected _removeMouseEvents = _removeMouseEvents;
+  protected _addDOMEvents = _addDOMEvents;
+  protected _removeDOMEvents = _removeDOMEvents;
   protected _startStroke = _startStroke;
   protected _endStroke = _endStroke;
   protected _doStroke = _doStroke;
@@ -103,7 +103,7 @@ export class RealDrawBoard extends RealRenderer {
 
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
-      this.canvas.addEventListener('mousemove', this._strokeEventListener);
+      this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
 
       this._startStroke(this._getCoords(e));
     }
@@ -124,20 +124,20 @@ export class RealDrawBoard extends RealRenderer {
     this._endStroke(this._getCoords(e));
   }
 
-  _strokeEventListener = (e: MouseEvent) => {
+  _mouseMoveEventListener = (e: MouseEvent) => {
     const coords = this._getCoords(e);
     this._doStroke(coords);
   }
 
   startRender() {
-    this._addMouseEvents();
+    this._addDOMEvents();
     this._isDrawing = true;
 
     return this;
   }
 
   stopRender() {
-    this._removeMouseEvents();
+    this._removeDOMEvents();
     this._isDrawing = false;
 
     return this;

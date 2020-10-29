@@ -31,7 +31,7 @@ export function _endStroke(
   }
 
   if (this._strokeHappening) {
-    this.canvas.removeEventListener('mousemove', this._strokeEventListener);
+    this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     this._lastCoords = null;
 
     if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0) this._drawnPaths.splice(-1, 1);

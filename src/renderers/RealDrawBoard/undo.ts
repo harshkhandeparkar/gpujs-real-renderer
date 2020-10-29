@@ -10,7 +10,7 @@ export function undo(this: RealDrawBoard, numUndo: number = 1) {
     originalBrushSize = this.brushSize,
     originalEraserSize = this.eraserSize;
 
-    this._removeMouseEvents();
+    this._removeDOMEvents();
 
     this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(path => {
       this.mode = path.mode;

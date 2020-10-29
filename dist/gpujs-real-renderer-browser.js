@@ -1025,7 +1025,7 @@
 	    if (this._pathIndex >= numUndo - 1 && this._pathIndex - numUndo < this._drawnPaths.length) {
 	        this.graphPixels = this._blankGraph(); // Start with a blank graph
 	        var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
-	        this._removeMouseEvents();
+	        this._removeDOMEvents();
 	        this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(function (path) {
 	            _this.mode = path.mode;
 	            _this.brushColor = path.color;
@@ -1115,21 +1115,21 @@
 
 	var _DOMEvents = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._removeMouseEvents = exports._addMouseEvents = void 0;
-	function _addMouseEvents() {
+	exports._removeDOMEvents = exports._addDOMEvents = void 0;
+	function _addDOMEvents() {
 	    this.canvas.addEventListener('mousedown', this._mouseDownEventListener);
 	    this.canvas.addEventListener('mouseup', this._mouseUpEventListener);
 	    this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
 	    this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
 	}
-	exports._addMouseEvents = _addMouseEvents;
-	function _removeMouseEvents() {
+	exports._addDOMEvents = _addDOMEvents;
+	function _removeDOMEvents() {
 	    this.canvas.removeEventListener('mousedown', this._mouseDownEventListener);
 	    this.canvas.removeEventListener('mouseup', this._mouseUpEventListener);
 	    this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
 	    this.canvas.removeEventListener('mouseexit', this._mouseLeaveEventListener);
 	}
-	exports._removeMouseEvents = _removeMouseEvents;
+	exports._removeDOMEvents = _removeDOMEvents;
 	});
 
 	var stroke = createCommonjsModule(function (module, exports) {
@@ -1161,7 +1161,7 @@
 	        this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
 	    }
 	    if (this._strokeHappening) {
-	        this.canvas.removeEventListener('mousemove', this._strokeEventListener);
+	        this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
 	        this._lastCoords = null;
 	        if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0)
 	            this._drawnPaths.splice(-1, 1);
@@ -1245,8 +1245,8 @@
 	        _this._stroke = _draw._stroke;
 	        _this._plot = _draw._plot;
 	        _this._resetBoard = boardManip._resetBoard;
-	        _this._addMouseEvents = _DOMEvents._addMouseEvents;
-	        _this._removeMouseEvents = _DOMEvents._removeMouseEvents;
+	        _this._addDOMEvents = _DOMEvents._addDOMEvents;
+	        _this._removeDOMEvents = _DOMEvents._removeDOMEvents;
 	        _this._startStroke = stroke._startStroke;
 	        _this._endStroke = stroke._endStroke;
 	        _this._doStroke = stroke._doStroke;
@@ -1266,7 +1266,7 @@
 	        };
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
-	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
+	                _this.canvas.addEventListener('mousemove', _this._mouseMoveEventListener);
 	                _this._startStroke(_this._getCoords(e));
 	            }
 	        };
@@ -1282,7 +1282,7 @@
 	        _this._mouseLeaveEventListener = function (e) {
 	            _this._endStroke(_this._getCoords(e));
 	        };
-	        _this._strokeEventListener = function (e) {
+	        _this._mouseMoveEventListener = function (e) {
 	            var coords = _this._getCoords(e);
 	            _this._doStroke(coords);
 	        };
@@ -1297,12 +1297,12 @@
 	        return _this;
 	    }
 	    RealDrawBoard.prototype.startRender = function () {
-	        this._addMouseEvents();
+	        this._addDOMEvents();
 	        this._isDrawing = true;
 	        return this;
 	    };
 	    RealDrawBoard.prototype.stopRender = function () {
-	        this._removeMouseEvents();
+	        this._removeDOMEvents();
 	        this._isDrawing = false;
 	        return this;
 	    };
