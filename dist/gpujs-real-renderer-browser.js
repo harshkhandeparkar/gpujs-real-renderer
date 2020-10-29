@@ -986,6 +986,157 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	});
 
+	var _initializeKernels_1 = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._initializeKernels = void 0;
+
+
+	function _initializeKernels() {
+	    this._plotKernel = plot.getPlotKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+	    this._strokeKernel = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+	}
+	exports._initializeKernels = _initializeKernels;
+	});
+
+	var _stroke_1 = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._stroke = void 0;
+	function _stroke(x, y) {
+	    if (this._lastCoords === null)
+	        this._lastCoords = [x, y];
+	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	    this._display(this.graphPixels);
+	}
+	exports._stroke = _stroke;
+	});
+
+	var _plot_1 = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._plot = void 0;
+	function _plot(x, y) {
+	    this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	    this._display(this.graphPixels);
+	    return this;
+	}
+	exports._plot = _plot;
+	});
+
+	var undo_1 = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.redo = exports.undo = void 0;
+	function undo(numUndo) {
+	    var _this = this;
+	    if (numUndo === void 0) { numUndo = 1; }
+	    if (this._pathIndex >= numUndo - 1 && this._pathIndex - numUndo < this._drawnPaths.length) {
+	        this.graphPixels = this._blankGraph(); // Start with a blank graph
+	        var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
+	        this._removeMouseEvents();
+	        this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(function (path) {
+	            _this.mode = path.mode;
+	            _this.brushColor = path.color;
+	            _this.brushSize = path.brushSize;
+	            _this.eraserSize = path.eraserSize;
+	            _this._lastCoords = null;
+	            path.pathCoords.forEach(function (coord) {
+	                if (coord[2] === false) {
+	                    _this._stroke(coord[0], coord[1]); // Replay all strokes
+	                    _this._lastCoords = [coord[0], coord[1]];
+	                }
+	                else
+	                    _this._plot(coord[0], coord[1]);
+	            });
+	        });
+	        this.mode = originalMode;
+	        this.brushColor = originalBrushColor;
+	        this.brushSize = originalBrushSize;
+	        this.eraserSize = originalEraserSize;
+	        this._pathIndex -= numUndo;
+	        this._lastCoords = null;
+	        this._display(this.graphPixels);
+	        if (this._isDrawing)
+	            this.startRender();
+	    }
+	    return this;
+	}
+	exports.undo = undo;
+	function redo(numRedo) {
+	    if (numRedo === void 0) { numRedo = 1; }
+	    this.undo(-numRedo);
+	    return this;
+	}
+	exports.redo = redo;
+	});
+
+	var boardManip = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._resetBoard = exports.clear = exports.changeMode = exports.changeEraserSize = exports.changeBrushSize = exports.changeBrushColor = void 0;
+	function changeBrushColor(color) {
+	    this.brushColor = color;
+	    return this;
+	}
+	exports.changeBrushColor = changeBrushColor;
+	function changeBrushSize(newSize) {
+	    this.brushSize = newSize;
+	    return this;
+	}
+	exports.changeBrushSize = changeBrushSize;
+	function changeEraserSize(newSize) {
+	    this.eraserSize = newSize;
+	    return this;
+	}
+	exports.changeEraserSize = changeEraserSize;
+	function changeMode(newMode) {
+	    this.mode = newMode;
+	    return this;
+	}
+	exports.changeMode = changeMode;
+	function clear() {
+	    this._strokeHappening = false;
+	    this._drawnPaths = [];
+	    this._pathIndex = -1;
+	    this._lastCoords = null;
+	    this.graphPixels = this._blankGraph();
+	    this._display(this.graphPixels);
+	    return this;
+	}
+	exports.clear = clear;
+	function _resetBoard() {
+	    this.xScaleFactor = this.options.xScaleFactor;
+	    this.yScaleFactor = this.options.yScaleFactor;
+	    this.brushColor = this.options.brushColor;
+	    this.brushSize = this.options.brushSize;
+	    this.bgColor = this.options.bgColor;
+	    this.eraserSize = this.options.eraserSize;
+	    this.mode = this.options.mode;
+	    this._isDrawing = false;
+	    this._strokeHappening = false;
+	    this._drawnPaths = [];
+	    this._pathIndex = -1;
+	    this._lastCoords = null;
+	    this.stopRender();
+	}
+	exports._resetBoard = _resetBoard;
+	});
+
+	var _DOMEvents = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._removeMouseEvents = exports._addMouseEvents = void 0;
+	function _addMouseEvents() {
+	    this.canvas.addEventListener('mousedown', this._mouseDownEventListener);
+	    this.canvas.addEventListener('mouseup', this._mouseUpEventListener);
+	    this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
+	    this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
+	}
+	exports._addMouseEvents = _addMouseEvents;
+	function _removeMouseEvents() {
+	    this.canvas.removeEventListener('mousedown', this._mouseDownEventListener);
+	    this.canvas.removeEventListener('mouseup', this._mouseUpEventListener);
+	    this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
+	    this.canvas.removeEventListener('mouseexit', this._mouseLeaveEventListener);
+	}
+	exports._removeMouseEvents = _removeMouseEvents;
+	});
+
 	var RealDrawBoard_1 = createCommonjsModule(function (module, exports) {
 	var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 	    var extendStatics = function (d, b) {
@@ -1032,11 +1183,15 @@
 	exports.RealDrawBoard = exports.RealDrawBoardTypes = exports.RealRendererTypes = void 0;
 
 
-
-
 	exports.RealRendererTypes = RealRendererTypes;
 	exports.RealDrawBoardTypes = RealDrawBoardTypes;
 	__exportStar(RealDrawBoardDefaults, exports);
+
+
+
+
+
+
 	var RealDrawBoard = /** @class */ (function (_super) {
 	    __extends(RealDrawBoard, _super);
 	    function RealDrawBoard(options) {
@@ -1048,6 +1203,19 @@
 	        _this._drawnPaths = [];
 	        _this._pathIndex = -1; // Index of path in _drawnPaths
 	        _this._lastCoords = null;
+	        _this._initializeKernels = _initializeKernels_1._initializeKernels;
+	        _this._stroke = _stroke_1._stroke;
+	        _this._plot = _plot_1._plot;
+	        _this._resetBoard = boardManip._resetBoard;
+	        _this._addMouseEvents = _DOMEvents._addMouseEvents;
+	        _this._removeMouseEvents = _DOMEvents._removeMouseEvents;
+	        _this.undo = undo_1.undo;
+	        _this.redo = undo_1.redo;
+	        _this.changeBrushColor = boardManip.changeBrushColor;
+	        _this.changeBrushSize = boardManip.changeBrushSize;
+	        _this.changeEraserSize = boardManip.changeEraserSize;
+	        _this.changeMode = boardManip.changeMode;
+	        _this.clear = boardManip.clear;
 	        _this._getCoords = function (e) {
 	            var x = e.offsetX; // in pixels
 	            var y = _this.dimensions[1] - e.offsetY; // in pixels
@@ -1116,72 +1284,6 @@
 	        _this._initializeKernels();
 	        return _this;
 	    }
-	    RealDrawBoard.prototype._initializeKernels = function () {
-	        this._plotKernel = plot.getPlotKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
-	        this._strokeKernel = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
-	    };
-	    RealDrawBoard.prototype._addMouseEvents = function () {
-	        this.canvas.addEventListener('mousedown', this._mouseDownEventListener);
-	        this.canvas.addEventListener('mouseup', this._mouseUpEventListener);
-	        this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
-	        this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
-	    };
-	    RealDrawBoard.prototype._removeMouseEvents = function () {
-	        this.canvas.removeEventListener('mousedown', this._mouseDownEventListener);
-	        this.canvas.removeEventListener('mouseup', this._mouseUpEventListener);
-	        this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
-	        this.canvas.removeEventListener('mouseexit', this._mouseLeaveEventListener);
-	    };
-	    RealDrawBoard.prototype._stroke = function (x, y) {
-	        if (this._lastCoords === null)
-	            this._lastCoords = [x, y];
-	        this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords, [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
-	        this._display(this.graphPixels);
-	    };
-	    RealDrawBoard.prototype._plot = function (x, y) {
-	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
-	        this._display(this.graphPixels);
-	        return this;
-	    };
-	    RealDrawBoard.prototype.undo = function (numUndo) {
-	        var _this = this;
-	        if (numUndo === void 0) { numUndo = 1; }
-	        if (this._pathIndex >= numUndo - 1 && this._pathIndex - numUndo < this._drawnPaths.length) {
-	            this.graphPixels = this._blankGraph(); // Start with a blank graph
-	            var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
-	            this._removeMouseEvents();
-	            this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(function (path) {
-	                _this.mode = path.mode;
-	                _this.brushColor = path.color;
-	                _this.brushSize = path.brushSize;
-	                _this.eraserSize = path.eraserSize;
-	                _this._lastCoords = null;
-	                path.pathCoords.forEach(function (coord) {
-	                    if (coord[2] === false) {
-	                        _this._stroke(coord[0], coord[1]); // Replay all strokes
-	                        _this._lastCoords = [coord[0], coord[1]];
-	                    }
-	                    else
-	                        _this._plot(coord[0], coord[1]);
-	                });
-	            });
-	            this.mode = originalMode;
-	            this.brushColor = originalBrushColor;
-	            this.brushSize = originalBrushSize;
-	            this.eraserSize = originalEraserSize;
-	            this._pathIndex -= numUndo;
-	            this._lastCoords = null;
-	            this._display(this.graphPixels);
-	            if (this._isDrawing)
-	                this.startRender();
-	        }
-	        return this;
-	    };
-	    RealDrawBoard.prototype.redo = function (numRedo) {
-	        if (numRedo === void 0) { numRedo = 1; }
-	        this.undo(-numRedo);
-	        return this;
-	    };
 	    RealDrawBoard.prototype.startRender = function () {
 	        this._addMouseEvents();
 	        this._isDrawing = true;
@@ -1192,45 +1294,8 @@
 	        this._isDrawing = false;
 	        return this;
 	    };
-	    RealDrawBoard.prototype.changeBrushColor = function (color) {
-	        this.brushColor = color;
-	        return this;
-	    };
-	    RealDrawBoard.prototype.changeBrushSize = function (newSize) {
-	        this.brushSize = newSize;
-	        return this;
-	    };
-	    RealDrawBoard.prototype.changeEraserSize = function (newSize) {
-	        this.eraserSize = newSize;
-	        return this;
-	    };
-	    RealDrawBoard.prototype.changeMode = function (newMode) {
-	        this.mode = newMode;
-	        return this;
-	    };
-	    RealDrawBoard.prototype.clear = function () {
-	        this._strokeHappening = false;
-	        this._drawnPaths = [];
-	        this._pathIndex = -1;
-	        this._lastCoords = null;
-	        this.graphPixels = this._blankGraph();
-	        this._display(this.graphPixels);
-	        return this;
-	    };
 	    RealDrawBoard.prototype.reset = function () {
-	        this.xScaleFactor = this.options.xScaleFactor;
-	        this.yScaleFactor = this.options.yScaleFactor;
-	        this.brushColor = this.options.brushColor;
-	        this.brushSize = this.options.brushSize;
-	        this.bgColor = this.options.bgColor;
-	        this.eraserSize = this.options.eraserSize;
-	        this.mode = this.options.mode;
-	        this._isDrawing = false;
-	        this._strokeHappening = false;
-	        this._drawnPaths = [];
-	        this._pathIndex = -1;
-	        this._lastCoords = null;
-	        this.stopRender();
+	        this._resetBoard();
 	        _super.prototype.reset.call(this);
 	        return this;
 	    };
