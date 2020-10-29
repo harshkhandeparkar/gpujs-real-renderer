@@ -1117,7 +1117,6 @@
 	function _addDOMEvents() {
 	    this.canvas.addEventListener('mousedown', this._mouseDownEventListener);
 	    this.canvas.addEventListener('mouseup', this._mouseUpEventListener);
-	    this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
 	    this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
 	    this.canvas.addEventListener('touchstart', this._touchStartEventListener);
 	    this.canvas.addEventListener('touchmove', this._touchMoveEventListener);
@@ -1127,7 +1126,6 @@
 	function _removeDOMEvents() {
 	    this.canvas.removeEventListener('mousedown', this._mouseDownEventListener);
 	    this.canvas.removeEventListener('mouseup', this._mouseUpEventListener);
-	    this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
 	    this.canvas.removeEventListener('mouseexit', this._mouseLeaveEventListener);
 	    this.canvas.removeEventListener('touchstart', this._touchStartEventListener);
 	    this.canvas.removeEventListener('touchmove', this._touchMoveEventListener);
@@ -1161,7 +1159,8 @@
 	    if (this._lastCoords.get(identifier)[0] === endCoords[0] &&
 	        this._lastCoords.get(identifier)[1] === endCoords[1]) {
 	        this._plot.apply(this, endCoords);
-	        this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
+	        if (this._drawnPaths[this._pathIndex + 1])
+	            this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
 	    }
 	    this._lastCoords.delete(identifier);
 	    if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0)
@@ -1296,12 +1295,10 @@
 	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	            }
 	        };
-	        _this._mouseEnterEventListener = function (e) {
-	            _this._lastCoords.set('mouse', _this._getMouseCoords(e));
-	        };
 	        _this._mouseLeaveEventListener = function (e) {
 	            _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
-	            _this._endStroke(_this._getMouseCoords(e), 'mouse');
+	            if (_this._lastCoords.has('mouse'))
+	                _this._endStroke(_this._getMouseCoords(e), 'mouse');
 	        };
 	        _this._mouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);

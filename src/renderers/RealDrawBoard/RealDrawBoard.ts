@@ -121,13 +121,9 @@ export class RealDrawBoard extends RealRenderer {
     }
   }
 
-  _mouseEnterEventListener = (e: MouseEvent) => {
-    this._lastCoords.set('mouse', this._getMouseCoords(e));
-  }
-
   _mouseLeaveEventListener = (e: MouseEvent) => {
     this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
-    this._endStroke(this._getMouseCoords(e), 'mouse');
+    if(this._lastCoords.has('mouse')) this._endStroke(this._getMouseCoords(e), 'mouse');
   }
 
   _mouseMoveEventListener = (e: MouseEvent) => {

@@ -27,7 +27,7 @@ export function _endStroke(
     this._lastCoords.get(identifier)[1] === endCoords[1]
   ) {
     this._plot(...endCoords);
-    this._drawnPaths[this._pathIndex + 1].pathCoords.push([...endCoords, true]);
+    if(this._drawnPaths[this._pathIndex + 1]) this._drawnPaths[this._pathIndex + 1].pathCoords.push([...endCoords, true]);
   }
 
   this._lastCoords.delete(identifier);
