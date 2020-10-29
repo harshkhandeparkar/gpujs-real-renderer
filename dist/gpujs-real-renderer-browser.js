@@ -1007,10 +1007,10 @@
 	    return this;
 	}
 	exports._plot = _plot;
-	function _stroke(x, y) {
-	    if (!this._lastCoords.has('mouse'))
-	        this._lastCoords.set('mouse', [x, y]);
-	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords.get('mouse'), [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	function _stroke(x, y, identifier) {
+	    if (!this._lastCoords.has(identifier))
+	        this._lastCoords.set(identifier, [x, y]);
+	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords.get(identifier), [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	    this._display(this.graphPixels);
 	}
 	exports._stroke = _stroke;
@@ -1031,11 +1031,11 @@
 	            _this.brushColor = path.color;
 	            _this.brushSize = path.brushSize;
 	            _this.eraserSize = path.eraserSize;
-	            _this._lastCoords.delete('mouse');
+	            _this._lastCoords.delete('temp');
 	            path.pathCoords.forEach(function (coord) {
 	                if (coord[2] === false) {
-	                    _this._stroke(coord[0], coord[1]); // Replay all strokes
-	                    _this._lastCoords.set('mouse', [coord[0], coord[1]]);
+	                    _this._stroke(coord[0], coord[1], 'temp'); // Replay all strokes
+	                    _this._lastCoords.set('temp', [coord[0], coord[1]]);
 	                }
 	                else
 	                    _this._plot(coord[0], coord[1]);
@@ -1046,7 +1046,7 @@
 	        this.brushSize = originalBrushSize;
 	        this.eraserSize = originalEraserSize;
 	        this._pathIndex -= numUndo;
-	        this._lastCoords.delete('mouse');
+	        this._lastCoords.delete('temp');
 	        this._display(this.graphPixels);
 	        if (this._isDrawing)
 	            this.startRender();
@@ -1119,6 +1119,9 @@
 	    this.canvas.addEventListener('mouseup', this._mouseUpEventListener);
 	    this.canvas.addEventListener('mouseenter', this._mouseEnterEventListener);
 	    this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
+	    this.canvas.addEventListener('touchstart', this._touchStartEventListener);
+	    this.canvas.addEventListener('touchmove', this._touchMoveEventListener);
+	    this.canvas.addEventListener('touchend', this._touchEndEventListener);
 	}
 	exports._addDOMEvents = _addDOMEvents;
 	function _removeDOMEvents() {
@@ -1126,6 +1129,9 @@
 	    this.canvas.removeEventListener('mouseup', this._mouseUpEventListener);
 	    this.canvas.removeEventListener('mouseenter', this._mouseEnterEventListener);
 	    this.canvas.removeEventListener('mouseexit', this._mouseLeaveEventListener);
+	    this.canvas.removeEventListener('touchstart', this._touchStartEventListener);
+	    this.canvas.removeEventListener('touchmove', this._touchMoveEventListener);
+	    this.canvas.removeEventListener('touchend', this._touchEndEventListener);
 	}
 	exports._removeDOMEvents = _removeDOMEvents;
 	});
@@ -1168,7 +1174,7 @@
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
 	    this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(coords, [false]));
-	    this._stroke.apply(this, coords);
+	    this._stroke(coords[0], coords[1], identifier);
 	    this._lastCoords.set(identifier, coords);
 	}
 	exports._doStroke = _doStroke;
@@ -1185,17 +1191,12 @@
 	    return [x, y]; // In graph coordinates
 	}
 	exports._getMouseCoords = _getMouseCoords;
-	function _getTouchCoords(e) {
-	    var allCoords = [];
-	    for (var i = 0; i < e.touches.length; i++) {
-	        var touch = e.touches.item(i);
-	        var x = touch.clientX - this.canvas.getBoundingClientRect().left;
-	        var y = this.dimensions[1] - (touch.clientY - this.canvas.getBoundingClientRect().top);
-	        x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
-	        y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
-	        allCoords.push([x, y]);
-	    }
-	    return allCoords;
+	function _getTouchCoords(touch) {
+	    var x = touch.clientX - this.canvas.getBoundingClientRect().left;
+	    var y = this.dimensions[1] - (touch.clientY - this.canvas.getBoundingClientRect().top);
+	    x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
+	    y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
+	    return [x, y];
 	}
 	exports._getTouchCoords = _getTouchCoords;
 	});
@@ -1299,6 +1300,7 @@
 	            _this._lastCoords.set('mouse', _this._getMouseCoords(e));
 	        };
 	        _this._mouseLeaveEventListener = function (e) {
+	            _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	            _this._endStroke(_this._getMouseCoords(e), 'mouse');
 	        };
 	        _this._mouseMoveEventListener = function (e) {
@@ -1308,13 +1310,22 @@
 	        // --- Mouse Events ---
 	        // --- Touch Events ---
 	        _this._touchStartEventListener = function (e) {
-	            // this.canvas.addEventListener();
+	            e.preventDefault();
+	            for (var i = 0; i < e.touches.length; i++) {
+	                _this._startStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
+	            }
 	        };
 	        _this._touchEndEventListener = function (e) {
-	            var endCoords = _this._getTouchCoords(e)[0];
-	            _this._endStroke(endCoords, 'mouse');
+	            e.preventDefault();
+	            for (var i = 0; i < e.changedTouches.length; i++) {
+	                _this._endStroke(_this._getTouchCoords(e.changedTouches.item(i)), e.changedTouches.item(i).identifier.toString());
+	            }
 	        };
 	        _this._touchMoveEventListener = function (e) {
+	            e.preventDefault();
+	            for (var i = 0; i < e.touches.length; i++) {
+	                _this._doStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
+	            }
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;

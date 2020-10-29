@@ -45,6 +45,6 @@ export function _doStroke(
   identifier: string
 ) {
   this._drawnPaths[this._pathIndex + 1].pathCoords.push([...coords, false]);
-  this._stroke(...coords);
+  this._stroke(coords[0], coords[1], identifier);
   this._lastCoords.set(identifier, coords);
 }

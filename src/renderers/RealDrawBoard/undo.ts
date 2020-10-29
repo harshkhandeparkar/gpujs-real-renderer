@@ -18,11 +18,11 @@ export function undo(this: RealDrawBoard, numUndo: number = 1) {
       this.brushSize = path.brushSize;
       this.eraserSize = path.eraserSize;
 
-      this._lastCoords.delete('mouse');
+      this._lastCoords.delete('temp');
       path.pathCoords.forEach(coord => {
         if (coord[2] === false) {
-          this._stroke(coord[0], coord[1]); // Replay all strokes
-          this._lastCoords.set('mouse', [coord[0], coord[1]]);
+          this._stroke(coord[0], coord[1], 'temp'); // Replay all strokes
+          this._lastCoords.set('temp', [coord[0], coord[1]]);
         }
         else this._plot(coord[0], coord[1])
       })
@@ -35,7 +35,7 @@ export function undo(this: RealDrawBoard, numUndo: number = 1) {
 
     this._pathIndex -= numUndo;
 
-    this._lastCoords.delete('mouse');
+    this._lastCoords.delete('temp');
     this._display(this.graphPixels);
 
     if (this._isDrawing) this.startRender();

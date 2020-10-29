@@ -15,12 +15,17 @@ export function _plot(this: RealDrawBoard, x: number, y: number) {
   return this;
 }
 
-export function _stroke(this: RealDrawBoard, x: number, y: number) {
-  if (!this._lastCoords.has('mouse')) this._lastCoords.set('mouse', [x, y]);
+export function _stroke(
+  this: RealDrawBoard,
+  x: number,
+  y: number,
+  identifier: string
+) {
+  if (!this._lastCoords.has(identifier)) this._lastCoords.set(identifier, [x, y]);
 
   this.graphPixels = <Texture>this._strokeKernel(
     this._cloneTexture(this.graphPixels),
-    this._lastCoords.get('mouse'),
+    this._lastCoords.get(identifier),
     [x, y],
     this.mode === 'paint' ? this.brushSize : this.eraserSize,
     this.mode === 'paint' ? this.brushColor : this.bgColor

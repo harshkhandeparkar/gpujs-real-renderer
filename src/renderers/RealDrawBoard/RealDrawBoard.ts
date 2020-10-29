@@ -126,6 +126,7 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _mouseLeaveEventListener = (e: MouseEvent) => {
+    this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     this._endStroke(this._getMouseCoords(e), 'mouse');
   }
 
@@ -137,16 +138,36 @@ export class RealDrawBoard extends RealRenderer {
 
   // --- Touch Events ---
   _touchStartEventListener = (e: TouchEvent) => {
-    // this.canvas.addEventListener();
+    e.preventDefault();
+
+    for (let i = 0; i < e.touches.length; i++) {
+      this._startStroke(
+        this._getTouchCoords(e.touches.item(i)),
+        e.touches.item(i).identifier.toString()
+      )
+    }
   }
 
   _touchEndEventListener = (e: TouchEvent) => {
-    const endCoords = this._getTouchCoords(e)[0];
-    this._endStroke(endCoords, 'mouse');
+    e.preventDefault();
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      this._endStroke(
+        this._getTouchCoords(e.changedTouches.item(i)),
+        e.changedTouches.item(i).identifier.toString()
+      )
+    }
   }
 
   _touchMoveEventListener = (e: TouchEvent) => {
+    e.preventDefault();
 
+    for (let i = 0; i < e.touches.length; i++) {
+      this._doStroke(
+        this._getTouchCoords(e.touches.item(i)),
+        e.touches.item(i).identifier.toString()
+      )
+    }
   }
   // --- Touch Events ---
 

@@ -15,21 +15,13 @@ export function _getMouseCoords(
 
 export function _getTouchCoords(
   this: RealDrawBoard,
-  e: TouchEvent
-): [number, number][] {
-  let allCoords: [number, number][] = [];
+  touch: Touch
+): [number, number] {
+  let x = touch.clientX - this.canvas.getBoundingClientRect().left;
+  let y = this.dimensions[1] - (touch.clientY - this.canvas.getBoundingClientRect().top);
 
-  for (let i = 0; i < e.touches.length; i++) {
-    const touch = e.touches.item(i);
+  x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
+  y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
 
-    let x = touch.clientX - this.canvas.getBoundingClientRect().left;
-    let y = this.dimensions[1] - (touch.clientY - this.canvas.getBoundingClientRect().top);
-
-    x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
-    y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
-
-    allCoords.push([x, y]);
-  }
-
-  return allCoords;
+  return [x, y];
 }
