@@ -42,7 +42,6 @@ export class RealDrawBoard extends RealRenderer {
   eraserSize: number;
   mode: DrawMode;
   _isDrawing: boolean = false;
-  _strokeHappening: boolean = false;
   _drawnPaths: {
     pathCoords: [number, number, boolean][], // [x, y, isAPoint][]
     color: Color,
@@ -106,16 +105,19 @@ export class RealDrawBoard extends RealRenderer {
     if (e.button === 0 /* Left Click */) {
       this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
 
-      this._startStroke(this._getMouseCoords(e));
+      this._startStroke(
+        this._getMouseCoords(e),
+        'mouse'
+      )
     }
   }
 
   _mouseUpEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       const endCoords = this._getMouseCoords(e);
-      this._endStroke(endCoords);
+      this._endStroke(endCoords, 'mouse');
 
-      if (!this._strokeHappening) this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
+      this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     }
   }
 
@@ -124,12 +126,12 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _mouseLeaveEventListener = (e: MouseEvent) => {
-    this._endStroke(this._getMouseCoords(e));
+    this._endStroke(this._getMouseCoords(e), 'mouse');
   }
 
   _mouseMoveEventListener = (e: MouseEvent) => {
     const coords = this._getMouseCoords(e);
-    this._doStroke(coords);
+    this._doStroke(coords, 'mouse');
   }
   // --- Mouse Events ---
 
@@ -140,7 +142,7 @@ export class RealDrawBoard extends RealRenderer {
 
   _touchEndEventListener = (e: TouchEvent) => {
     const endCoords = this._getTouchCoords(e)[0];
-    this._endStroke(endCoords);
+    this._endStroke(endCoords, 'mouse');
   }
 
   _touchMoveEventListener = (e: TouchEvent) => {

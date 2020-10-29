@@ -24,7 +24,6 @@ export function changeMode(this: RealDrawBoard, newMode: DrawMode) {
 }
 
 export function clear(this: RealDrawBoard) {
-  this._strokeHappening = false;
   this._drawnPaths = [];
   this._pathIndex = -1;
   this._lastCoords.clear();
@@ -45,7 +44,6 @@ export function _resetBoard(this: RealDrawBoard) {
   this.mode = this.options.mode;
 
   this._isDrawing = false;
-  this._strokeHappening = false;
   this._drawnPaths = [];
   this._pathIndex = -1;
   this._lastCoords.clear();

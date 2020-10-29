@@ -1086,7 +1086,6 @@
 	}
 	exports.changeMode = changeMode;
 	function clear() {
-	    this._strokeHappening = false;
 	    this._drawnPaths = [];
 	    this._pathIndex = -1;
 	    this._lastCoords.clear();
@@ -1104,7 +1103,6 @@
 	    this.eraserSize = this.options.eraserSize;
 	    this.mode = this.options.mode;
 	    this._isDrawing = false;
-	    this._strokeHappening = false;
 	    this._drawnPaths = [];
 	    this._pathIndex = -1;
 	    this._lastCoords.clear();
@@ -1142,8 +1140,7 @@
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports._doStroke = exports._endStroke = exports._startStroke = void 0;
-	function _startStroke(coords) {
-	    this._strokeHappening = true;
+	function _startStroke(coords, identifier) {
 	    this._drawnPaths[this._pathIndex + 1] = {
 	        pathCoords: [],
 	        color: this.brushColor.map(function (x) { return x; }),
@@ -1151,32 +1148,28 @@
 	        brushSize: this.brushSize,
 	        eraserSize: this.eraserSize
 	    };
-	    this._lastCoords.set('mouse', coords);
+	    this._lastCoords.set(identifier, coords);
 	}
 	exports._startStroke = _startStroke;
-	function _endStroke(endCoords) {
-	    if (this._lastCoords.get('mouse')[0] === endCoords[0] &&
-	        this._lastCoords.get('mouse')[1] === endCoords[1]) {
+	function _endStroke(endCoords, identifier) {
+	    if (this._lastCoords.get(identifier)[0] === endCoords[0] &&
+	        this._lastCoords.get(identifier)[1] === endCoords[1]) {
 	        this._plot.apply(this, endCoords);
 	        this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
 	    }
-	    if (this._strokeHappening) {
-	        this._lastCoords.delete('mouse');
-	        if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0)
-	            this._drawnPaths.splice(-1, 1);
-	        else {
-	            this._drawnPaths = this._drawnPaths.slice(0, this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
-	            this._pathIndex++;
-	        }
-	        this._strokeHappening = false;
+	    this._lastCoords.delete(identifier);
+	    if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0)
+	        this._drawnPaths.splice(-1, 1);
+	    else {
+	        this._drawnPaths = this._drawnPaths.slice(0, this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
+	        this._pathIndex++;
 	    }
 	}
 	exports._endStroke = _endStroke;
-	function _doStroke(coords) {
-	    this._strokeHappening = true;
+	function _doStroke(coords, identifier) {
 	    this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(coords, [false]));
 	    this._stroke.apply(this, coords);
-	    this._lastCoords.set('mouse', coords);
+	    this._lastCoords.set(identifier, coords);
 	}
 	exports._doStroke = _doStroke;
 	});
@@ -1263,7 +1256,6 @@
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
 	        _this._isDrawing = false;
-	        _this._strokeHappening = false;
 	        _this._drawnPaths = [];
 	        _this._pathIndex = -1; // Index of path in _drawnPaths
 	        /** key -> identifier, value -> coordinate
@@ -1293,26 +1285,25 @@
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                _this.canvas.addEventListener('mousemove', _this._mouseMoveEventListener);
-	                _this._startStroke(_this._getMouseCoords(e));
+	                _this._startStroke(_this._getMouseCoords(e), 'mouse');
 	            }
 	        };
 	        _this._mouseUpEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                var endCoords = _this._getMouseCoords(e);
-	                _this._endStroke(endCoords);
-	                if (!_this._strokeHappening)
-	                    _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
+	                _this._endStroke(endCoords, 'mouse');
+	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	            }
 	        };
 	        _this._mouseEnterEventListener = function (e) {
 	            _this._lastCoords.set('mouse', _this._getMouseCoords(e));
 	        };
 	        _this._mouseLeaveEventListener = function (e) {
-	            _this._endStroke(_this._getMouseCoords(e));
+	            _this._endStroke(_this._getMouseCoords(e), 'mouse');
 	        };
 	        _this._mouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
-	            _this._doStroke(coords);
+	            _this._doStroke(coords, 'mouse');
 	        };
 	        // --- Mouse Events ---
 	        // --- Touch Events ---
@@ -1321,7 +1312,7 @@
 	        };
 	        _this._touchEndEventListener = function (e) {
 	            var endCoords = _this._getTouchCoords(e)[0];
-	            _this._endStroke(endCoords);
+	            _this._endStroke(endCoords, 'mouse');
 	        };
 	        _this._touchMoveEventListener = function (e) {
 	        };
