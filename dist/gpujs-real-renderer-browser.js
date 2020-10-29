@@ -1137,6 +1137,56 @@
 	exports._removeMouseEvents = _removeMouseEvents;
 	});
 
+	var stroke = createCommonjsModule(function (module, exports) {
+	var __spreadArrays = (commonjsGlobal && commonjsGlobal.__spreadArrays) || function () {
+	    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+	    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+	        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+	            r[k] = a[j];
+	    return r;
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._doStroke = exports._endStroke = exports._startStroke = void 0;
+	function _startStroke(coords) {
+	    this._strokeHappening = true;
+	    this._drawnPaths[this._pathIndex + 1] = {
+	        pathCoords: [],
+	        color: this.brushColor.map(function (x) { return x; }),
+	        mode: this.mode,
+	        brushSize: this.brushSize,
+	        eraserSize: this.eraserSize
+	    };
+	    this._lastCoords = coords;
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords) {
+	    if (this._lastCoords[0] === endCoords[0] &&
+	        this._lastCoords[1] === endCoords[1]) {
+	        this._plot.apply(this, endCoords);
+	        this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
+	    }
+	    if (this._strokeHappening) {
+	        this.canvas.removeEventListener('mousemove', this._strokeEventListener);
+	        this._lastCoords = null;
+	        if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0)
+	            this._drawnPaths.splice(-1, 1);
+	        else {
+	            this._drawnPaths = this._drawnPaths.slice(0, this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
+	            this._pathIndex++;
+	        }
+	        this._strokeHappening = false;
+	    }
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords) {
+	    this._strokeHappening = true;
+	    this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(coords, [false]));
+	    this._stroke.apply(this, coords);
+	    this._lastCoords = coords;
+	}
+	exports._doStroke = _doStroke;
+	});
+
 	var RealDrawBoard_1 = createCommonjsModule(function (module, exports) {
 	var __extends = (commonjsGlobal && commonjsGlobal.__extends) || (function () {
 	    var extendStatics = function (d, b) {
@@ -1172,13 +1222,6 @@
 	var __exportStar = (commonjsGlobal && commonjsGlobal.__exportStar) || function(m, exports) {
 	    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 	};
-	var __spreadArrays = (commonjsGlobal && commonjsGlobal.__spreadArrays) || function () {
-	    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-	    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-	        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-	            r[k] = a[j];
-	    return r;
-	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RealDrawBoard = exports.RealDrawBoardTypes = exports.RealRendererTypes = void 0;
 
@@ -1186,6 +1229,7 @@
 	exports.RealRendererTypes = RealRendererTypes;
 	exports.RealDrawBoardTypes = RealDrawBoardTypes;
 	__exportStar(RealDrawBoardDefaults, exports);
+
 
 
 
@@ -1209,6 +1253,9 @@
 	        _this._resetBoard = boardManip._resetBoard;
 	        _this._addMouseEvents = _DOMEvents._addMouseEvents;
 	        _this._removeMouseEvents = _DOMEvents._removeMouseEvents;
+	        _this._startStroke = stroke._startStroke;
+	        _this._endStroke = stroke._endStroke;
+	        _this._doStroke = stroke._doStroke;
 	        _this.undo = undo_1.undo;
 	        _this.redo = undo_1.redo;
 	        _this.changeBrushColor = boardManip.changeBrushColor;
@@ -1226,53 +1273,24 @@
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                _this.canvas.addEventListener('mousemove', _this._strokeEventListener);
-	                _this._strokeHappening = true;
-	                _this._drawnPaths[_this._pathIndex + 1] = {
-	                    pathCoords: [],
-	                    color: _this.brushColor.map(function (x) { return x; }),
-	                    mode: _this.mode,
-	                    brushSize: _this.brushSize,
-	                    eraserSize: _this.eraserSize
-	                };
-	                _this._lastCoords = _this._getCoords(e);
+	                _this._startStroke(_this._getCoords(e));
 	            }
 	        };
 	        _this._mouseUpEventListener = function (e) {
-	            if (e.button === 0) {
-	                var currentCoords = _this._getCoords(e);
-	                if (_this._lastCoords[0] === currentCoords[0] &&
-	                    _this._lastCoords[1] === currentCoords[1]) {
-	                    _this._plot.apply(_this, currentCoords);
-	                    _this._drawnPaths[_this._pathIndex + 1].pathCoords.push(__spreadArrays(currentCoords, [true]));
-	                }
-	                _this._strokeEnd();
+	            if (e.button === 0 /* Left Click */) {
+	                var endCoords = _this._getCoords(e);
+	                _this._endStroke(endCoords);
 	            }
 	        };
 	        _this._mouseEnterEventListener = function (e) {
 	            _this._lastCoords = _this._getCoords(e);
 	        };
 	        _this._mouseLeaveEventListener = function (e) {
-	            _this._strokeEnd();
+	            _this._endStroke(_this._getCoords(e));
 	        };
 	        _this._strokeEventListener = function (e) {
 	            var coords = _this._getCoords(e);
-	            _this._strokeHappening = true;
-	            _this._drawnPaths[_this._pathIndex + 1].pathCoords.push(__spreadArrays(coords, [false]));
-	            _this._stroke.apply(_this, coords);
-	            _this._lastCoords = coords;
-	        };
-	        _this._strokeEnd = function () {
-	            if (_this._strokeHappening) {
-	                _this.canvas.removeEventListener('mousemove', _this._strokeEventListener);
-	                _this._lastCoords = null;
-	                if (_this._drawnPaths[_this._pathIndex + 1].pathCoords.length === 0)
-	                    _this._drawnPaths.splice(-1, 1);
-	                else {
-	                    _this._drawnPaths = _this._drawnPaths.slice(0, _this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
-	                    _this._pathIndex++;
-	                }
-	                _this._strokeHappening = false;
-	            }
+	            _this._doStroke(coords);
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;

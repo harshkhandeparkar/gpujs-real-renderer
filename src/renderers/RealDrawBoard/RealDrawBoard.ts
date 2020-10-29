@@ -22,7 +22,15 @@ import {
   clear,
   _resetBoard
 } from './boardManip';
-import { _addMouseEvents, _removeMouseEvents } from './_DOMEvents';
+import {
+  _addMouseEvents,
+  _removeMouseEvents
+} from './_DOMEvents';
+import {
+  _startStroke,
+  _endStroke,
+  _doStroke
+} from './stroke';
 
 export class RealDrawBoard extends RealRenderer {
   options: RealDrawBoardOptions;
@@ -50,6 +58,9 @@ export class RealDrawBoard extends RealRenderer {
   protected _resetBoard = _resetBoard;
   protected _addMouseEvents = _addMouseEvents;
   protected _removeMouseEvents = _removeMouseEvents;
+  protected _startStroke = _startStroke;
+  protected _endStroke = _endStroke;
+  protected _doStroke = _doStroke;
 
   public undo = undo;
   public redo = redo;
@@ -91,37 +102,18 @@ export class RealDrawBoard extends RealRenderer {
     return [x, y]; // In graph coordinates
   }
 
-
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       this.canvas.addEventListener('mousemove', this._strokeEventListener);
-      this._strokeHappening = true;
 
-      this._drawnPaths[this._pathIndex + 1] = {
-        pathCoords: [],
-        color: <Color>this.brushColor.map(x => x),
-        mode: this.mode,
-        brushSize: this.brushSize,
-        eraserSize: this.eraserSize
-      }
-
-      this._lastCoords = this._getCoords(e);
+      this._startStroke(this._getCoords(e));
     }
   }
 
   _mouseUpEventListener = (e: MouseEvent) => {
-    if (e.button === 0) {
-      const currentCoords = this._getCoords(e);
-
-      if (
-        this._lastCoords[0] === currentCoords[0] &&
-        this._lastCoords[1] === currentCoords[1]
-      ) {
-        this._plot(...currentCoords);
-        this._drawnPaths[this._pathIndex + 1].pathCoords.push([...currentCoords, true])
-      }
-
-      this._strokeEnd();
+    if (e.button === 0 /* Left Click */) {
+      const endCoords = this._getCoords(e);
+      this._endStroke(endCoords);
     }
   }
 
@@ -130,31 +122,12 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _mouseLeaveEventListener = (e: MouseEvent) => {
-    this._strokeEnd();
+    this._endStroke(this._getCoords(e));
   }
 
   _strokeEventListener = (e: MouseEvent) => {
     const coords = this._getCoords(e);
-
-    this._strokeHappening = true;
-    this._drawnPaths[this._pathIndex + 1].pathCoords.push([...coords, false]);
-    this._stroke(...coords);
-    this._lastCoords = coords;
-  }
-
-  _strokeEnd = () => {
-    if (this._strokeHappening) {
-      this.canvas.removeEventListener('mousemove', this._strokeEventListener);
-      this._lastCoords = null;
-
-      if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0) this._drawnPaths.splice(-1, 1);
-      else {
-        this._drawnPaths = this._drawnPaths.slice(0, this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
-        this._pathIndex++;
-      }
-
-      this._strokeHappening = false;
-    }
+    this._doStroke(coords);
   }
 
   startRender() {
