@@ -81,9 +81,9 @@ export function getInterpolateKernel(
           (X - x2) ** 2 + (Y - y2) ** 2 <= lineHalfThickness ** 2
         )
       ) return [
-        Math.max((lineColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor)), 1),
-        Math.max((lineColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor)), 1),
-        Math.max((lineColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)), 1)
+        Math.min((lineColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor)), 1),
+        Math.min((lineColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor)), 1),
+        Math.min((lineColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)), 1)
       ]
       else return graphColor;
     },

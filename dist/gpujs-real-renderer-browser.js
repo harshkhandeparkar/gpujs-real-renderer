@@ -683,9 +683,9 @@
 	                (Math.pow((X - x1), 2) + Math.pow((Y - y1), 2) <= Math.pow(lineHalfThickness, 2) ||
 	                    Math.pow((X - x2), 2) + Math.pow((Y - y2), 2) <= Math.pow(lineHalfThickness, 2)))
 	            return [
-	                Math.max((lineColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor)), 1),
-	                Math.max((lineColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor)), 1),
-	                Math.max((lineColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)), 1)
+	                Math.min((lineColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor)), 1),
+	                Math.min((lineColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor)), 1),
+	                Math.min((lineColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)), 1)
 	            ];
 	        else
 	            return graphColor;
