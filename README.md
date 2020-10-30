@@ -61,7 +61,7 @@ const renderer = GPUjsRealRenderer.RealRenderer(options); // options is an objec
 The constructor of the class takes an options javascript object as the only argument. The object can have the following properties.
 
 - `canvas`(*HTMLCanvasElement*) (Required, No default):  The `canvas` element on which the graph should be rendered.
-- `dimensions`(*Object*) (Default: `{x: 1000, y: 1000}`): An object which contains the dimensions(in pixels) of graph.
+- `dimensions`(*Array*) (Default: `[1000, 1000]`): An array which contains the x and y dimensions(in pixels) of graph.
 - `xScaleFactor`(*Number) (Default: `10`): This is a number that determines the scaling of the x-axis. A greater value zooms into the x-axis. Greater values provide more precision and lower values increase the limits of the x-axis.
 
 Technically, each coordinate on the x-axis is divided by this number.
