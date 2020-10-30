@@ -1303,7 +1303,8 @@
 	        _this._mouseUpEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                var endCoords = _this._getMouseCoords(e);
-	                _this._endStroke(endCoords, 'mouse');
+	                if (_this._lastCoords.has('mouse'))
+	                    _this._endStroke(endCoords, 'mouse');
 	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	            }
 	        };

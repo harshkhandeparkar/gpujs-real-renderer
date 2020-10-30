@@ -115,7 +115,7 @@ export class RealDrawBoard extends RealRenderer {
   _mouseUpEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       const endCoords = this._getMouseCoords(e);
-      this._endStroke(endCoords, 'mouse');
+      if(this._lastCoords.has('mouse')) this._endStroke(endCoords, 'mouse');
 
       this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     }
