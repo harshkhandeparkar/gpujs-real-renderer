@@ -614,10 +614,16 @@
 	        var xDist = (X - valX) * (this.constants.xScaleFactor);
 	        var yDist = (Y - valY) * (this.constants.yScaleFactor);
 	        var dist = Math.sqrt(xDist * xDist + yDist * yDist);
+	        var distanceFactor = (Math.pow(brushSize, 2)) / (Math.pow(brushSize, 2) + Math.pow(dist, 2));
+	        var graphColor = graphPixels[this.thread.y][this.thread.x];
 	        if (dist <= brushSize)
-	            return [brushColor[0], brushColor[1], brushColor[2]];
+	            return [
+	                brushColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor),
+	                brushColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor),
+	                brushColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)
+	            ];
 	        else
-	            return graphPixels[this.thread.y][this.thread.x];
+	            return graphColor;
 	    }, {
 	        output: dimensions,
 	        pipeline: true,
@@ -666,6 +672,8 @@
 	            Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)));
 	        var lineCosine = Math.abs((x2 - x1) /
 	            Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)));
+	        var distanceFactor = (Math.pow(lineThickness, 2)) / (Math.pow(lineThickness, 2) + Math.pow(lineDist, 2));
+	        var graphColor = graphPixels[this.thread.y][this.thread.x];
 	        if ((lineDist <= lineHalfThickness &&
 	            X <= Math.max(x1, x2) + lineHalfThickness * lineSine &&
 	            X >= Math.min(x1, x2) - lineHalfThickness * lineSine &&
@@ -674,9 +682,13 @@
 	            ||
 	                (Math.pow((X - x1), 2) + Math.pow((Y - y1), 2) <= Math.pow(lineHalfThickness, 2) ||
 	                    Math.pow((X - x2), 2) + Math.pow((Y - y2), 2) <= Math.pow(lineHalfThickness, 2)))
-	            return [lineColor[0], lineColor[1], lineColor[2]];
+	            return [
+	                Math.max((lineColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor)), 1),
+	                Math.max((lineColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor)), 1),
+	                Math.max((lineColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)), 1)
+	            ];
 	        else
-	            return graphPixels[this.thread.y][this.thread.x];
+	            return graphColor;
 	    }, {
 	        output: dimensions,
 	        pipeline: true,

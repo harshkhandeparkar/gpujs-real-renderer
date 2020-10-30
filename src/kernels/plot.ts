@@ -47,9 +47,16 @@ export function getPlotKernel(
       const yDist = (Y - valY) * (this.constants.yScaleFactor);
 
       const dist = Math.sqrt(xDist*xDist + yDist*yDist);
+      const distanceFactor = (brushSize ** 2) / (brushSize ** 2 + dist ** 2);
 
-      if (dist <= brushSize) return [brushColor[0], brushColor[1], brushColor[2]];
-      else return graphPixels[this.thread.y][this.thread.x];
+      const graphColor = graphPixels[this.thread.y][this.thread.x];
+
+      if (dist <= brushSize) return [
+        brushColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor),
+        brushColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor),
+        brushColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)
+      ]
+      else return graphColor;
     },
     {
       output: dimensions,

@@ -64,6 +64,9 @@ export function getInterpolateKernel(
         Math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
       )
 
+      const distanceFactor = (lineThickness ** 2) / (lineThickness ** 2 + lineDist ** 2);
+      const graphColor = graphPixels[this.thread.y][this.thread.x];
+
       if (
         (
           lineDist <= lineHalfThickness &&
@@ -77,8 +80,12 @@ export function getInterpolateKernel(
           (X - x1) ** 2 + (Y - y1) ** 2 <= lineHalfThickness ** 2 ||
           (X - x2) ** 2 + (Y - y2) ** 2 <= lineHalfThickness ** 2
         )
-      ) return [lineColor[0], lineColor[1], lineColor[2]];
-      else return graphPixels[this.thread.y][this.thread.x];
+      ) return [
+        Math.max((lineColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor)), 1),
+        Math.max((lineColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor)), 1),
+        Math.max((lineColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)), 1)
+      ]
+      else return graphColor;
     },
     {
       output: dimensions,
