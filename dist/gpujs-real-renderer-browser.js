@@ -111,7 +111,7 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RealRendererDefaults = void 0;
 	exports.RealRendererDefaults = {
-	    dimensions: { x: 1000, y: 1000 },
+	    dimensions: [1000, 1000],
 	    xScaleFactor: 10,
 	    yScaleFactor: 1,
 	    bgColor: [0, 0, 0],

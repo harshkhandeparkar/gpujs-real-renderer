@@ -1,6 +1,6 @@
 import { GPU } from 'gpu.js';
 
-export type GraphDimensions = [number, number] | {x: number, y: number};
+export type GraphDimensions = [number, number];
 export type Color = [number, number, number];
 
 export interface RealRendererOptions {
