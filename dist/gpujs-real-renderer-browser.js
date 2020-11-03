@@ -614,14 +614,23 @@
 	        var xDist = (X - valX) * (this.constants.xScaleFactor);
 	        var yDist = (Y - valY) * (this.constants.yScaleFactor);
 	        var dist = Math.sqrt(xDist * xDist + yDist * yDist);
-	        var distanceFactor = (Math.pow(brushSize, 2)) / (Math.pow(brushSize, 2) + Math.pow(dist, 2));
 	        var graphColor = graphPixels[this.thread.y][this.thread.x];
-	        if (dist <= brushSize)
-	            return [
-	                brushColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor),
-	                brushColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor),
-	                brushColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)
-	            ];
+	        if (dist <= brushSize) {
+	            if (dist + 0.5 <= brushSize)
+	                return [
+	                    brushColor[0],
+	                    brushColor[1],
+	                    brushColor[2]
+	                ];
+	            else {
+	                var pixFraction = dist + 0.5 - brushSize - Math.floor(dist + 0.5 - brushSize);
+	                return [
+	                    brushColor[0] * pixFraction + graphColor[0] * (1 - pixFraction),
+	                    brushColor[1] * pixFraction + graphColor[1] * (1 - pixFraction),
+	                    brushColor[2] * pixFraction + graphColor[2] * (1 - pixFraction)
+	                ];
+	            }
+	        }
 	        else
 	            return graphColor;
 	    }, {
@@ -658,35 +667,32 @@
 	function getInterpolateKernel(gpu, dimensions, xScaleFactor, yScaleFactor, xOffset, yOffset) {
 	    return gpu.createKernel(function (graphPixels, val1, val2, lineThickness, lineColor) {
 	        var x = this.thread.x, y = this.thread.y;
-	        var lineHalfThickness = lineThickness;
-	        var x1 = val1[0];
-	        var y1 = val1[1];
-	        var x2 = val2[0];
-	        var y2 = val2[1];
 	        var outX = this.output.x, outY = this.output.y;
-	        var X = x / (this.constants.xScaleFactor) - (outX * (this.constants.yOffset / 100)) / (this.constants.xScaleFactor);
-	        var Y = y / (this.constants.yScaleFactor) - (outY * (this.constants.xOffset / 100)) / (this.constants.yScaleFactor);
-	        var lineEqn = X * (y1 - y2) - x1 * (y1 - y2) - Y * (x1 - x2) + y1 * (x1 - x2);
+	        var x1 = val1[0] * this.constants.xScaleFactor + outX * (this.constants.yOffset / 100);
+	        var y1 = val1[1] * this.constants.yScaleFactor + outY * (this.constants.xOffset / 100);
+	        var x2 = val2[0] * this.constants.xScaleFactor + outX * (this.constants.yOffset / 100);
+	        var y2 = val2[1] * this.constants.yScaleFactor + outY * (this.constants.xOffset / 100);
+	        var lineEqn = x * (y1 - y2) - x1 * (y1 - y2) - y * (x1 - x2) + y1 * (x1 - x2);
 	        var lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
 	        var lineSine = Math.abs((y2 - y1) /
 	            Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)));
 	        var lineCosine = Math.abs((x2 - x1) /
 	            Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)));
-	        var distanceFactor = (Math.pow(lineThickness, 2)) / (Math.pow(lineThickness, 2) + Math.pow(lineDist, 2));
 	        var graphColor = graphPixels[this.thread.y][this.thread.x];
-	        if ((lineDist <= lineHalfThickness &&
-	            X <= Math.max(x1, x2) + lineHalfThickness * lineSine &&
-	            X >= Math.min(x1, x2) - lineHalfThickness * lineSine &&
-	            Y <= Math.max(y1, y2) + lineHalfThickness * lineCosine &&
-	            Y >= Math.min(y1, y2) - lineHalfThickness * lineCosine)
+	        if ((lineDist <= lineThickness &&
+	            x <= Math.max(x1, x2) + lineThickness * lineSine &&
+	            x >= Math.min(x1, x2) - lineThickness * lineSine &&
+	            y <= Math.max(y1, y2) + lineThickness * lineCosine &&
+	            y >= Math.min(y1, y2) - lineThickness * lineCosine)
 	            ||
-	                (Math.pow((X - x1), 2) + Math.pow((Y - y1), 2) <= Math.pow(lineHalfThickness, 2) ||
-	                    Math.pow((X - x2), 2) + Math.pow((Y - y2), 2) <= Math.pow(lineHalfThickness, 2)))
+	                (Math.pow((x - x1), 2) + Math.pow((y - y1), 2) <= Math.pow(lineThickness, 2) ||
+	                    Math.pow((x - x2), 2) + Math.pow((y - y2), 2) <= Math.pow(lineThickness, 2))) {
 	            return [
-	                Math.min((lineColor[0] * distanceFactor + graphColor[0] * (1 - distanceFactor)), 1),
-	                Math.min((lineColor[1] * distanceFactor + graphColor[1] * (1 - distanceFactor)), 1),
-	                Math.min((lineColor[2] * distanceFactor + graphColor[2] * (1 - distanceFactor)), 1)
+	                lineColor[0],
+	                lineColor[1],
+	                lineColor[2]
 	            ];
+	        }
 	        else
 	            return graphColor;
 	    }, {
