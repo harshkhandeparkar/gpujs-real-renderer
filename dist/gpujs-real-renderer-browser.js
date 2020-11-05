@@ -617,6 +617,7 @@
 	        var graphColor = graphPixels[this.thread.y][this.thread.x];
 	        if (dist <= brushSize + 1) {
 	            var intensity = 0;
+	            // The following code basically blurs the line by convolving a simple average kernel
 	            for (var i = x - 1; i <= x + 1; i++) {
 	                for (var j = y - 1; j <= y + 1; j++) {
 	                    var xDist_1 = (i - x1);
@@ -680,18 +681,42 @@
 	        var lineCosine = Math.abs((x2 - x1) /
 	            Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)));
 	        var graphColor = graphPixels[this.thread.y][this.thread.x];
-	        if ((lineDist <= lineThickness &&
-	            x <= Math.max(x1, x2) + lineThickness * lineSine &&
-	            x >= Math.min(x1, x2) - lineThickness * lineSine &&
-	            y <= Math.max(y1, y2) + lineThickness * lineCosine &&
-	            y >= Math.min(y1, y2) - lineThickness * lineCosine)
-	            ||
-	                (Math.pow((x - x1), 2) + Math.pow((y - y1), 2) <= Math.pow(lineThickness, 2) ||
-	                    Math.pow((x - x2), 2) + Math.pow((y - y2), 2) <= Math.pow(lineThickness, 2))) {
+	        if ((lineDist <= lineThickness + 1 &&
+	            x <= Math.max(x1, x2) + (lineThickness + 1) * lineSine &&
+	            x >= Math.min(x1, x2) - (lineThickness + 1) * lineSine &&
+	            y <= Math.max(y1, y2) + (lineThickness + 1) * lineCosine &&
+	            y >= Math.min(y1, y2) - (lineThickness + 1) * lineCosine)) {
+	            var intensity = 0;
+	            // The following code basically blurs the line by convolving a simple average kernel
+	            for (var i = x - 1; i <= x + 1; i++) {
+	                for (var j = y - 1; j <= y + 1; j++) {
+	                    var lineEqn_1 = i * (y1 - y2) - x1 * (y1 - y2) - j * (x1 - x2) + y1 * (x1 - x2);
+	                    var lineDist_1 = Math.abs(lineEqn_1) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
+	                    if (lineDist_1 <= lineThickness)
+	                        intensity += 1 / 9;
+	                }
+	            }
 	            return [
-	                lineColor[0],
-	                lineColor[1],
-	                lineColor[2]
+	                lineColor[0] * intensity + graphColor[0] * (1 - intensity),
+	                lineColor[1] * intensity + graphColor[1] * (1 - intensity),
+	                lineColor[2] * intensity + graphColor[2] * (1 - intensity)
+	            ];
+	        }
+	        else if (Math.pow((x - x1), 2) + Math.pow((y - y1), 2) <= Math.pow((lineThickness + 1), 2) ||
+	            Math.pow((x - x2), 2) + Math.pow((y - y2), 2) <= Math.pow((lineThickness + 1), 2)) {
+	            var intensity = 0;
+	            // The following code basically blurs the line by convolving a simple average kernel
+	            for (var i = x - 1; i <= x + 1; i++) {
+	                for (var j = y - 1; j <= y + 1; j++) {
+	                    var dist = Math.min(Math.sqrt(Math.pow((i - x1), 2) + Math.pow((j - y1), 2)), Math.sqrt(Math.pow((i - x2), 2) + Math.pow((j - y2), 2)));
+	                    if (dist <= lineThickness)
+	                        intensity += 1 / 9;
+	                }
+	            }
+	            return [
+	                lineColor[0] * intensity + graphColor[0] * (1 - intensity),
+	                lineColor[1] * intensity + graphColor[1] * (1 - intensity),
+	                lineColor[2] * intensity + graphColor[2] * (1 - intensity)
 	            ];
 	        }
 	        else

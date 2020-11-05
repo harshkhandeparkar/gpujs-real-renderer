@@ -63,22 +63,53 @@ export function getInterpolateKernel(
 
       if (
         (
-          lineDist <= lineThickness &&
-          x <= Math.max(x1, x2) + lineThickness * lineSine &&
-          x >= Math.min(x1, x2) - lineThickness * lineSine &&
-          y <= Math.max(y1, y2) + lineThickness * lineCosine &&
-          y >= Math.min(y1, y2) - lineThickness * lineCosine
-        )
-        ||
-        (
-          (x - x1) ** 2 + (y - y1) ** 2 <= lineThickness ** 2 ||
-          (x - x2) ** 2 + (y - y2) ** 2 <= lineThickness ** 2
+          lineDist <= lineThickness + 1 &&
+          x <= Math.max(x1, x2) + (lineThickness + 1) * lineSine &&
+          x >= Math.min(x1, x2) - (lineThickness + 1) * lineSine &&
+          y <= Math.max(y1, y2) + (lineThickness + 1) * lineCosine &&
+          y >= Math.min(y1, y2) - (lineThickness + 1) * lineCosine
         )
       ) {
+        let intensity = 0;
+
+        // The following code basically blurs the line by convolving a simple average kernel
+        for (let i = x - 1; i <= x + 1; i++) {
+          for (let j = y - 1; j <= y + 1; j++) {
+            let lineEqn = i * (y1 - y2) - x1 * (y1 - y2) - j * (x1 - x2) + y1 * (x1 - x2);
+            let lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
+
+            if (lineDist <= lineThickness) intensity += 1 / 9;
+          }
+        }
+
         return [
-          lineColor[0],
-          lineColor[1],
-          lineColor[2]
+          lineColor[0] * intensity + graphColor[0] * (1 - intensity),
+          lineColor[1] * intensity + graphColor[1] * (1 - intensity),
+          lineColor[2] * intensity + graphColor[2] * (1 - intensity)
+        ]
+      }
+      else if (
+        (x - x1) ** 2 + (y - y1) ** 2 <= (lineThickness + 1) ** 2 ||
+        (x - x2) ** 2 + (y - y2) ** 2 <= (lineThickness + 1) ** 2
+      ) {
+        let intensity = 0;
+
+        // The following code basically blurs the line by convolving a simple average kernel
+        for (let i = x - 1; i <= x + 1; i++) {
+          for (let j = y - 1; j <= y + 1; j++) {
+            const dist = Math.min(
+              Math.sqrt((i - x1) ** 2 + (j - y1) ** 2),
+              Math.sqrt((i - x2) ** 2 + (j - y2) ** 2)
+            )
+
+            if (dist <= lineThickness) intensity += 1 / 9;
+          }
+        }
+
+        return [
+          lineColor[0] * intensity + graphColor[0] * (1 - intensity),
+          lineColor[1] * intensity + graphColor[1] * (1 - intensity),
+          lineColor[2] * intensity + graphColor[2] * (1 - intensity)
         ]
       }
       else return graphColor;
