@@ -618,6 +618,7 @@
 	        if (dist <= brushSize + 1) {
 	            var intensity = 0;
 	            // The following code basically blurs the line by convolving a simple average kernel
+	            // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
 	            for (var i = x - 1; i <= x + 1; i++) {
 	                for (var j = y - 1; j <= y + 1; j++) {
 	                    var xDist_1 = (i - x1);
@@ -688,6 +689,7 @@
 	            y >= Math.min(y1, y2) - (lineThickness + 1) * lineCosine)) {
 	            var intensity = 0;
 	            // The following code basically blurs the line by convolving a simple average kernel
+	            // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
 	            for (var i = x - 1; i <= x + 1; i++) {
 	                for (var j = y - 1; j <= y + 1; j++) {
 	                    var lineEqn_1 = i * (y1 - y2) - x1 * (y1 - y2) - j * (x1 - x2) + y1 * (x1 - x2);
@@ -706,6 +708,7 @@
 	            Math.pow((x - x2), 2) + Math.pow((y - y2), 2) <= Math.pow((lineThickness + 1), 2)) {
 	            var intensity = 0;
 	            // The following code basically blurs the line by convolving a simple average kernel
+	            // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
 	            for (var i = x - 1; i <= x + 1; i++) {
 	                for (var j = y - 1; j <= y + 1; j++) {
 	                    var dist = Math.min(Math.sqrt(Math.pow((i - x1), 2) + Math.pow((j - y1), 2)), Math.sqrt(Math.pow((i - x2), 2) + Math.pow((j - y2), 2)));

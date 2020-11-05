@@ -73,6 +73,7 @@ export function getInterpolateKernel(
         let intensity = 0;
 
         // The following code basically blurs the line by convolving a simple average kernel
+        // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
         for (let i = x - 1; i <= x + 1; i++) {
           for (let j = y - 1; j <= y + 1; j++) {
             let lineEqn = i * (y1 - y2) - x1 * (y1 - y2) - j * (x1 - x2) + y1 * (x1 - x2);
@@ -95,6 +96,7 @@ export function getInterpolateKernel(
         let intensity = 0;
 
         // The following code basically blurs the line by convolving a simple average kernel
+        // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
         for (let i = x - 1; i <= x + 1; i++) {
           for (let j = y - 1; j <= y + 1; j++) {
             const dist = Math.min(
