@@ -40,31 +40,35 @@ export function getPlotKernel(
 
       const outX = this.output.x, outY = this.output.y;
 
-      const X = x / (this.constants.xScaleFactor) - (outX * (this.constants.yOffset/ 100)) / (this.constants.xScaleFactor);
-      const Y = y / (this.constants.yScaleFactor) - (outY * (this.constants.xOffset/ 100)) / (this.constants.yScaleFactor);
+      const x1 = valX * this.constants.xScaleFactor + (outX * (this.constants.yOffset / 100));
+      const y1 = valY * this.constants.yScaleFactor + (outY * (this.constants.xOffset / 100));
 
-      const xDist = (X - valX) * (this.constants.xScaleFactor);
-      const yDist = (Y - valY) * (this.constants.yScaleFactor);
+      const xDist = (x - x1);
+      const yDist = (y - y1);
 
       const dist = Math.sqrt(xDist*xDist + yDist*yDist);
 
       const graphColor = graphPixels[this.thread.y][this.thread.x];
 
-      if (dist <= brushSize) {
-        if (dist + 0.5 <= brushSize) return [
-            brushColor[0],
-            brushColor[1],
-            brushColor[2]
-          ]
-        else {
-          const pixFraction = dist + 0.5 - brushSize - Math.floor(dist + 0.5 - brushSize);
+       if (dist <= brushSize + 1) {
+        let intensity = 0;
 
-          return [
-            brushColor[0] * pixFraction + graphColor[0] * (1 - pixFraction),
-            brushColor[1] * pixFraction + graphColor[1] * (1 - pixFraction),
-            brushColor[2] * pixFraction + graphColor[2] * (1 - pixFraction)
-          ]
+        for (let i = x - 1; i <= x + 1; i++) {
+          for (let j = y - 1; j <= y + 1; j++) {
+            const xDist = (i - x1);
+            const yDist = (j - y1);
+
+            const dist = Math.sqrt(xDist ** 2 + yDist ** 2);
+
+            if (dist <= brushSize) intensity += 1 / 9;
+          }
         }
+
+        return [
+          brushColor[0] * intensity + graphColor[0] * (1 - intensity),
+          brushColor[1] * intensity + graphColor[1] * (1 - intensity),
+          brushColor[2] * intensity + graphColor[2] * (1 - intensity)
+        ]
       }
       else return graphColor;
     },

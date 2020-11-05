@@ -609,27 +609,28 @@
 	    return gpu.createKernel(function (graphPixels, valX, valY, brushSize, brushColor) {
 	        var x = this.thread.x, y = this.thread.y;
 	        var outX = this.output.x, outY = this.output.y;
-	        var X = x / (this.constants.xScaleFactor) - (outX * (this.constants.yOffset / 100)) / (this.constants.xScaleFactor);
-	        var Y = y / (this.constants.yScaleFactor) - (outY * (this.constants.xOffset / 100)) / (this.constants.yScaleFactor);
-	        var xDist = (X - valX) * (this.constants.xScaleFactor);
-	        var yDist = (Y - valY) * (this.constants.yScaleFactor);
+	        var x1 = valX * this.constants.xScaleFactor + (outX * (this.constants.yOffset / 100));
+	        var y1 = valY * this.constants.yScaleFactor + (outY * (this.constants.xOffset / 100));
+	        var xDist = (x - x1);
+	        var yDist = (y - y1);
 	        var dist = Math.sqrt(xDist * xDist + yDist * yDist);
 	        var graphColor = graphPixels[this.thread.y][this.thread.x];
-	        if (dist <= brushSize) {
-	            if (dist + 0.5 <= brushSize)
-	                return [
-	                    brushColor[0],
-	                    brushColor[1],
-	                    brushColor[2]
-	                ];
-	            else {
-	                var pixFraction = dist + 0.5 - brushSize - Math.floor(dist + 0.5 - brushSize);
-	                return [
-	                    brushColor[0] * pixFraction + graphColor[0] * (1 - pixFraction),
-	                    brushColor[1] * pixFraction + graphColor[1] * (1 - pixFraction),
-	                    brushColor[2] * pixFraction + graphColor[2] * (1 - pixFraction)
-	                ];
+	        if (dist <= brushSize + 1) {
+	            var intensity = 0;
+	            for (var i = x - 1; i <= x + 1; i++) {
+	                for (var j = y - 1; j <= y + 1; j++) {
+	                    var xDist_1 = (i - x1);
+	                    var yDist_1 = (j - y1);
+	                    var dist_1 = Math.sqrt(Math.pow(xDist_1, 2) + Math.pow(yDist_1, 2));
+	                    if (dist_1 <= brushSize)
+	                        intensity += 1 / 9;
+	                }
 	            }
+	            return [
+	                brushColor[0] * intensity + graphColor[0] * (1 - intensity),
+	                brushColor[1] * intensity + graphColor[1] * (1 - intensity),
+	                brushColor[2] * intensity + graphColor[2] * (1 - intensity)
+	            ];
 	        }
 	        else
 	            return graphColor;
