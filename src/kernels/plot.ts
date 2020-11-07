@@ -62,7 +62,10 @@ export function getPlotKernel(
 
             const dist = Math.sqrt(xDist ** 2 + yDist ** 2);
 
-            if (dist <= brushSize) intensity += 1 / 9;
+            intensity += (1 / 9) * Math.min(
+              1,
+              Math.floor(brushSize / dist)
+            )
           }
         }
 

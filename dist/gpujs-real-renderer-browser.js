@@ -624,8 +624,7 @@
 	                    var xDist_1 = (i - x1);
 	                    var yDist_1 = (j - y1);
 	                    var dist_1 = Math.sqrt(Math.pow(xDist_1, 2) + Math.pow(yDist_1, 2));
-	                    if (dist_1 <= brushSize)
-	                        intensity += 1 / 9;
+	                    intensity += (1 / 9) * Math.min(1, Math.floor(brushSize / dist_1));
 	                }
 	            }
 	            return [
@@ -668,63 +667,7 @@
 	 * @param yOffset
 	 */
 	function getInterpolateKernel(gpu, dimensions, xScaleFactor, yScaleFactor, xOffset, yOffset) {
-	    return gpu.createKernel(function (graphPixels, val1, val2, lineThickness, lineColor) {
-	        var x = this.thread.x, y = this.thread.y;
-	        var outX = this.output.x, outY = this.output.y;
-	        var x1 = val1[0] * this.constants.xScaleFactor + outX * (this.constants.yOffset / 100);
-	        var y1 = val1[1] * this.constants.yScaleFactor + outY * (this.constants.xOffset / 100);
-	        var x2 = val2[0] * this.constants.xScaleFactor + outX * (this.constants.yOffset / 100);
-	        var y2 = val2[1] * this.constants.yScaleFactor + outY * (this.constants.xOffset / 100);
-	        var lineEqn = x * (y1 - y2) - x1 * (y1 - y2) - y * (x1 - x2) + y1 * (x1 - x2);
-	        var lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
-	        var lineSine = Math.abs((y2 - y1) /
-	            Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)));
-	        var lineCosine = Math.abs((x2 - x1) /
-	            Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)));
-	        var graphColor = graphPixels[this.thread.y][this.thread.x];
-	        if ((lineDist <= lineThickness + 1 &&
-	            x <= Math.max(x1, x2) + (lineThickness + 1) * lineSine &&
-	            x >= Math.min(x1, x2) - (lineThickness + 1) * lineSine &&
-	            y <= Math.max(y1, y2) + (lineThickness + 1) * lineCosine &&
-	            y >= Math.min(y1, y2) - (lineThickness + 1) * lineCosine)) {
-	            var intensity = 0;
-	            // The following code basically blurs the line by convolving a simple average kernel
-	            // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
-	            for (var i = x - 1; i <= x + 1; i++) {
-	                for (var j = y - 1; j <= y + 1; j++) {
-	                    var lineEqn_1 = i * (y1 - y2) - x1 * (y1 - y2) - j * (x1 - x2) + y1 * (x1 - x2);
-	                    var lineDist_1 = Math.abs(lineEqn_1) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
-	                    if (lineDist_1 <= lineThickness)
-	                        intensity += 1 / 9;
-	                }
-	            }
-	            return [
-	                lineColor[0] * intensity + graphColor[0] * (1 - intensity),
-	                lineColor[1] * intensity + graphColor[1] * (1 - intensity),
-	                lineColor[2] * intensity + graphColor[2] * (1 - intensity)
-	            ];
-	        }
-	        else if (Math.pow((x - x1), 2) + Math.pow((y - y1), 2) <= Math.pow((lineThickness + 1), 2) ||
-	            Math.pow((x - x2), 2) + Math.pow((y - y2), 2) <= Math.pow((lineThickness + 1), 2)) {
-	            var intensity = 0;
-	            // The following code basically blurs the line by convolving a simple average kernel
-	            // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
-	            for (var i = x - 1; i <= x + 1; i++) {
-	                for (var j = y - 1; j <= y + 1; j++) {
-	                    var dist = Math.min(Math.sqrt(Math.pow((i - x1), 2) + Math.pow((j - y1), 2)), Math.sqrt(Math.pow((i - x2), 2) + Math.pow((j - y2), 2)));
-	                    if (dist <= lineThickness)
-	                        intensity += 1 / 9;
-	                }
-	            }
-	            return [
-	                lineColor[0] * intensity + graphColor[0] * (1 - intensity),
-	                lineColor[1] * intensity + graphColor[1] * (1 - intensity),
-	                lineColor[2] * intensity + graphColor[2] * (1 - intensity)
-	            ];
-	        }
-	        else
-	            return graphColor;
-	    }, {
+	    return gpu.createKernel("function(\n      graphPixels,\n      val1,\n      val2,\n      lineThickness,\n      lineColor\n    ) {\n      const x = this.thread.x,\n        y = this.thread.y;\n\n      const outX = this.output.x, outY = this.output.y;\n\n      const x1 = (val1[0] * this.constants.xScaleFactor) + outX * (this.constants.yOffset / 100);\n      const y1 = (val1[1] * this.constants.yScaleFactor) + outY * (this.constants.xOffset / 100);\n\n      const x2 = (val2[0] * this.constants.xScaleFactor) + outX * (this.constants.yOffset / 100);\n      const y2 = (val2[1] * this.constants.yScaleFactor) + outY * (this.constants.xOffset / 100);\n\n      let lineEqn = x * (y1 - y2) - x1 * (y1 - y2) - y * (x1 - x2) + y1 * (x1 - x2);\n      let lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));\n\n      const lineSine = Math.abs(\n        (y2 - y1) /\n        Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)\n      )\n\n      const lineCosine = Math.abs(\n        (x2 - x1) /\n        Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)\n      )\n\n      const graphColor = graphPixels[this.thread.y][this.thread.x];\n\n      if (\n        (\n          lineDist <= lineThickness + 1 &&\n          x <= Math.max(x1, x2) + (lineThickness + 1) * lineSine &&\n          x >= Math.min(x1, x2) - (lineThickness + 1) * lineSine &&\n          y <= Math.max(y1, y2) + (lineThickness + 1) * lineCosine &&\n          y >= Math.min(y1, y2) - (lineThickness + 1) * lineCosine\n        )\n      ) {\n        let intensity = 0;\n\n        // The following code basically blurs the line by convolving a simple average kernel\n        // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines\n        for (let i = x - 1; i <= x + 1; i++) {\n          for (let j = y - 1; j <= y + 1; j++) {\n            let lineEqn = i * (y1 - y2) - x1 * (y1 - y2) - j * (x1 - x2) + y1 * (x1 - x2);\n            let lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));\n\n            intensity += (1 / 9) * Math.min(\n              1,\n              Math.floor(lineThickness / lineDist)\n            )\n          }\n        }\n\n        return [\n          lineColor[0] * intensity + graphColor[0] * (1 - intensity),\n          lineColor[1] * intensity + graphColor[1] * (1 - intensity),\n          lineColor[2] * intensity + graphColor[2] * (1 - intensity)\n        ]\n      }\n      else if (\n        (x - x1) ** 2 + (y - y1) ** 2 <= (lineThickness + 1) ** 2 ||\n        (x - x2) ** 2 + (y - y2) ** 2 <= (lineThickness + 1) ** 2\n      ) {\n        let intensity = 0;\n\n        // The following code basically blurs the line by convolving a simple average kernel\n        // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines\n        for (let i = x - 1; i <= x + 1; i++) {\n          for (let j = y - 1; j <= y + 1; j++) {\n            const dist = Math.min(\n              Math.sqrt((i - x1) ** 2 + (j - y1) ** 2),\n              Math.sqrt((i - x2) ** 2 + (j - y2) ** 2)\n            )\n\n            intensity += (1 / 9) * Math.min(\n              1,\n              Math.floor(lineThickness / lineDist)\n            )\n          }\n        }\n\n        return [\n          lineColor[0] * intensity + graphColor[0] * (1 - intensity),\n          lineColor[1] * intensity + graphColor[1] * (1 - intensity),\n          lineColor[2] * intensity + graphColor[2] * (1 - intensity)\n        ]\n      }\n      else return graphColor;\n    }", {
 	        output: dimensions,
 	        pipeline: true,
 	        constants: {

@@ -27,24 +27,23 @@ export function getInterpolateKernel(
   yOffset: number
 ) {
   return gpu.createKernel(
-    function(
-      this: IInterpolateKernelThis,
-      graphPixels: any,
-      val1: [number, number],
-      val2: [number, number],
-      lineThickness: number,
-      lineColor: Color
+    <any>`function(
+      graphPixels,
+      val1,
+      val2,
+      lineThickness,
+      lineColor
     ) {
       const x = this.thread.x,
         y = this.thread.y;
 
       const outX = this.output.x, outY = this.output.y;
 
-      const x1 = val1[0] * this.constants.xScaleFactor + outX * (this.constants.yOffset / 100);
-      const y1 = val1[1] * this.constants.yScaleFactor + outY * (this.constants.xOffset / 100);
+      const x1 = (val1[0] * this.constants.xScaleFactor) + outX * (this.constants.yOffset / 100);
+      const y1 = (val1[1] * this.constants.yScaleFactor) + outY * (this.constants.xOffset / 100);
 
-      const x2 = val2[0] * this.constants.xScaleFactor + outX * (this.constants.yOffset / 100);
-      const y2 = val2[1] * this.constants.yScaleFactor + outY * (this.constants.xOffset / 100);
+      const x2 = (val2[0] * this.constants.xScaleFactor) + outX * (this.constants.yOffset / 100);
+      const y2 = (val2[1] * this.constants.yScaleFactor) + outY * (this.constants.xOffset / 100);
 
       let lineEqn = x * (y1 - y2) - x1 * (y1 - y2) - y * (x1 - x2) + y1 * (x1 - x2);
       let lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
@@ -79,7 +78,10 @@ export function getInterpolateKernel(
             let lineEqn = i * (y1 - y2) - x1 * (y1 - y2) - j * (x1 - x2) + y1 * (x1 - x2);
             let lineDist = Math.abs(lineEqn) / Math.sqrt((y1 - y2) * (y1 - y2) + (x1 - x2) * (x1 - x2));
 
-            if (lineDist <= lineThickness) intensity += 1 / 9;
+            intensity += (1 / 9) * Math.min(
+              1,
+              Math.floor(lineThickness / lineDist)
+            )
           }
         }
 
@@ -104,7 +106,10 @@ export function getInterpolateKernel(
               Math.sqrt((i - x2) ** 2 + (j - y2) ** 2)
             )
 
-            if (dist <= lineThickness) intensity += 1 / 9;
+            intensity += (1 / 9) * Math.min(
+              1,
+              Math.floor(lineThickness / lineDist)
+            )
           }
         }
 
@@ -115,7 +120,7 @@ export function getInterpolateKernel(
         ]
       }
       else return graphColor;
-    },
+    }`,
     {
       output: dimensions,
       pipeline: true,
