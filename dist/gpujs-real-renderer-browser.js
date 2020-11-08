@@ -1142,16 +1142,14 @@
 	        brushSize: this.brushSize,
 	        eraserSize: this.eraserSize
 	    };
+	    this._plot.apply(this, coords);
 	    this._lastCoords.set(identifier, coords);
 	}
 	exports._startStroke = _startStroke;
 	function _endStroke(endCoords, identifier) {
-	    if (this._lastCoords.get(identifier)[0] === endCoords[0] &&
-	        this._lastCoords.get(identifier)[1] === endCoords[1]) {
-	        this._plot.apply(this, endCoords);
-	        if (this._drawnPaths[this._pathIndex + 1])
-	            this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
-	    }
+	    this._plot.apply(this, endCoords);
+	    if (this._drawnPaths[this._pathIndex + 1])
+	        this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
 	    this._lastCoords.delete(identifier);
 	    if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0)
 	        this._drawnPaths.splice(-1, 1);
@@ -1163,6 +1161,7 @@
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
 	    this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(coords, [false]));
+	    this._plot.apply(this, coords);
 	    this._stroke(coords[0], coords[1], identifier);
 	    this._lastCoords.set(identifier, coords);
 	}

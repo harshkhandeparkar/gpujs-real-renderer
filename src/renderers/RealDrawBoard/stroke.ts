@@ -13,6 +13,7 @@ export function _startStroke(
     brushSize: this.brushSize,
     eraserSize: this.eraserSize
   }
+  this._plot(...coords);
 
   this._lastCoords.set(identifier, coords);
 }
@@ -22,13 +23,8 @@ export function _endStroke(
   endCoords: [number, number],
   identifier: string
 ) {
-  if (
-    this._lastCoords.get(identifier)[0] === endCoords[0] &&
-    this._lastCoords.get(identifier)[1] === endCoords[1]
-  ) {
-    this._plot(...endCoords);
-    if(this._drawnPaths[this._pathIndex + 1]) this._drawnPaths[this._pathIndex + 1].pathCoords.push([...endCoords, true]);
-  }
+  this._plot(...endCoords);
+  if(this._drawnPaths[this._pathIndex + 1]) this._drawnPaths[this._pathIndex + 1].pathCoords.push([...endCoords, true]);
 
   this._lastCoords.delete(identifier);
 
@@ -45,6 +41,7 @@ export function _doStroke(
   identifier: string
 ) {
   this._drawnPaths[this._pathIndex + 1].pathCoords.push([...coords, false]);
+  this._plot(...coords);
   this._stroke(coords[0], coords[1], identifier);
   this._lastCoords.set(identifier, coords);
 }
