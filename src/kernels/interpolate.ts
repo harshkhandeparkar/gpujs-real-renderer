@@ -91,34 +91,6 @@ export function getInterpolateKernel(
           lineColor[2] * intensity + graphColor[2] * (1 - intensity)
         ]
       }
-      else if (
-        (x - x1) ** 2 + (y - y1) ** 2 <= (lineThickness + 1) ** 2 ||
-        (x - x2) ** 2 + (y - y2) ** 2 <= (lineThickness + 1) ** 2
-      ) {
-        let intensity = 0;
-
-        // The following code basically blurs the line by convolving a simple average kernel
-        // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
-        for (let i = x - 1; i <= x + 1; i++) {
-          for (let j = y - 1; j <= y + 1; j++) {
-            const dist = Math.min(
-              Math.sqrt((i - x1) ** 2 + (j - y1) ** 2),
-              Math.sqrt((i - x2) ** 2 + (j - y2) ** 2)
-            )
-
-            intensity += (1 / 9) * Math.min(
-              1,
-              Math.floor(lineThickness / dist)
-            )
-          }
-        }
-
-        return [
-          lineColor[0] * intensity + graphColor[0] * (1 - intensity),
-          lineColor[1] * intensity + graphColor[1] * (1 - intensity),
-          lineColor[2] * intensity + graphColor[2] * (1 - intensity)
-        ]
-      }
       else return graphColor;
     }`,
     {
