@@ -108,7 +108,7 @@ export function getInterpolateKernel(
 
             intensity += (1 / 9) * Math.min(
               1,
-              Math.floor(lineThickness / lineDist)
+              Math.floor(lineThickness / dist)
             )
           }
         }
