@@ -1172,16 +1172,20 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports._getTouchCoords = exports._getMouseCoords = void 0;
 	function _getMouseCoords(e) {
-	    var x = e.offsetX; // in pixels
-	    var y = this.dimensions[1] - e.offsetY; // in pixels
+	    var graphX = (e.offsetX * this.dimensions[0]) / this.canvas.getBoundingClientRect().width; // Handle canvas resize
+	    var graphY = (e.offsetY * this.dimensions[1]) / this.canvas.getBoundingClientRect().height;
+	    var x = graphX; // in pixels;
+	    var y = this.dimensions[1] - graphY; // in pixels
 	    x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
 	    y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
 	    return [x, y]; // In graph coordinates
 	}
 	exports._getMouseCoords = _getMouseCoords;
 	function _getTouchCoords(touch) {
-	    var x = touch.clientX - this.canvas.getBoundingClientRect().left;
-	    var y = this.dimensions[1] - (touch.clientY - this.canvas.getBoundingClientRect().top);
+	    var graphX = ((touch.clientX - this.canvas.getBoundingClientRect().left) * this.dimensions[0]) / this.canvas.getBoundingClientRect().width; // Handle canvas resize
+	    var graphY = ((touch.clientY - this.canvas.getBoundingClientRect().top) * this.dimensions[1]) / this.canvas.getBoundingClientRect().height;
+	    var x = graphX;
+	    var y = this.dimensions[1] - graphY;
 	    x = x / this.xScaleFactor - (this.dimensions[0] * (this.yOffset / 100)) / this.xScaleFactor;
 	    y = y / this.yScaleFactor - (this.dimensions[1] * (this.xOffset / 100)) / this.yScaleFactor;
 	    return [x, y];
