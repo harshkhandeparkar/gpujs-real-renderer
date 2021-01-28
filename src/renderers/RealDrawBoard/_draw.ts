@@ -36,7 +36,7 @@ export function _stroke(
   const sin = (y - lastCoords[1]) / Math.sqrt((x - lastCoords[0]) ** 2 + (y - lastCoords[1]) ** 2);
   const distance = Math.sqrt((x - lastCoords[0]) ** 2 + (y - lastCoords[1]) ** 2);
 
-  for (let k = 0; k <= 1; k += 0.2) {
+  for (let k = 0; k <= 1; k += 1 / distance) {
     const x1 = lastCoords[0] + cos * k * distance;
     const y1 = lastCoords[1] + sin * k * distance;
 
