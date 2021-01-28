@@ -10,8 +10,6 @@ export function _plot(this: RealDrawBoard, x: number, y: number) {
     this.mode === 'paint' ? this.brushColor : this.bgColor
   )
 
-  this._display(this.graphPixels);
-
   return this;
 }
 
@@ -30,6 +28,4 @@ export function _stroke(
     this.mode === 'paint' ? this.brushSize : this.eraserSize,
     this.mode === 'paint' ? this.brushColor : this.bgColor
   )
-
-  this._display(this.graphPixels);
 }

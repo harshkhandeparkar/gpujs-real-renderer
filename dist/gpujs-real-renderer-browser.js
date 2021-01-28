@@ -994,7 +994,6 @@
 	exports._stroke = exports._plot = void 0;
 	function _plot(x, y) {
 	    this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
-	    this._display(this.graphPixels);
 	    return this;
 	}
 	exports._plot = _plot;
@@ -1002,7 +1001,6 @@
 	    if (!this._lastCoords.has(identifier))
 	        this._lastCoords.set(identifier, [x, y]);
 	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords.get(identifier), [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
-	    this._display(this.graphPixels);
 	}
 	exports._stroke = _stroke;
 	});
