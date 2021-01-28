@@ -1000,7 +1000,22 @@
 	function _stroke(x, y, identifier) {
 	    if (!this._lastCoords.has(identifier))
 	        this._lastCoords.set(identifier, [x, y]);
-	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords.get(identifier), [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	    // this.graphPixels = <Texture>this._strokeKernel(
+	    //   this._cloneTexture(this.graphPixels),
+	    //   this._lastCoords.get(identifier),
+	    //   [x, y],
+	    //   this.mode === 'paint' ? this.brushSize : this.eraserSize,
+	    //   this.mode === 'paint' ? this.brushColor : this.bgColor
+	    // )
+	    var lastCoords = this._lastCoords.get(identifier);
+	    var cos = (x - lastCoords[0]) / Math.sqrt(Math.pow((x - lastCoords[0]), 2) + Math.pow((y - lastCoords[1]), 2));
+	    var sin = (y - lastCoords[1]) / Math.sqrt(Math.pow((x - lastCoords[0]), 2) + Math.pow((y - lastCoords[1]), 2));
+	    var distance = Math.sqrt(Math.pow((x - lastCoords[0]), 2) + Math.pow((y - lastCoords[1]), 2));
+	    for (var k = 0; k <= 1; k += 0.2) {
+	        var x1 = lastCoords[0] + cos * k * distance;
+	        var y1 = lastCoords[1] + sin * k * distance;
+	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), Math.floor(x1), Math.floor(y1), this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	    }
 	    this._display(this.graphPixels);
 	}
 	exports._stroke = _stroke;
