@@ -4,7 +4,7 @@ import { Color } from '../../types/RealRendererTypes';
 import { RealDrawBoardOptions, DrawMode } from '../../types/RealDrawBoardTypes';
 import { RealDrawBoardDefaults } from '../../constants/defaults/RealDrawBoardDefaults';
 
-import { IKernelRunShortcut } from 'gpu.js';
+import { IKernelRunShortcut, Texture } from 'gpu.js';
 
 export * as RealRendererTypes from '../../types/RealRendererTypes';
 export * as RealDrawBoardTypes from '../../types/RealDrawBoardTypes';
@@ -51,6 +51,7 @@ export class RealDrawBoard extends RealRenderer {
   }[] = [];
   _pathIndex: number = -1; // Index of path in _drawnPaths
   _plotKernel: IKernelRunShortcut;
+  _previewPlot: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
   /** key -> identifier, value -> coordinate
    *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
@@ -130,6 +131,20 @@ export class RealDrawBoard extends RealRenderer {
     const coords = this._getMouseCoords(e);
     this._doStroke(coords, 'mouse');
   }
+
+  _previewMouseMoveEventListener = (e: MouseEvent) => {
+    const coords = this._getMouseCoords(e);
+
+    this._display(
+      this._previewPlot(
+        this.graphPixels,
+        coords[0],
+        coords[1],
+        this.mode === 'paint' ? this.brushSize : this.eraserSize,
+        this.mode === 'erase' ? this.bgColor : this.brushColor
+      )
+    )
+  }
   // --- Mouse Events ---
 
   // --- Touch Events ---
@@ -168,7 +183,6 @@ export class RealDrawBoard extends RealRenderer {
   // --- Touch Events ---
 
   // --- DOM Event Listeners ---
-
   startRender() {
     this._addDOMEvents();
     this._isDrawing = true;

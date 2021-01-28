@@ -13,6 +13,15 @@ export function _initializeKernels(this: RealDrawBoard) {
     this.yOffset
   )
 
+  this._previewPlot = getPlotKernel(
+    this.gpu,
+    this.dimensions,
+    this.xScaleFactor,
+    this.yScaleFactor,
+    this.xOffset,
+    this.yOffset
+  )
+
   this._strokeKernel = getInterpolateKernel(
     this.gpu,
     this.dimensions,

@@ -983,6 +983,7 @@
 
 	function _initializeKernels() {
 	    this._plotKernel = plot.getPlotKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
+	    this._previewPlot = plot.getPlotKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
 	    this._strokeKernel = interpolate.getInterpolateKernel(this.gpu, this.dimensions, this.xScaleFactor, this.yScaleFactor, this.xOffset, this.yOffset);
 	}
 	exports._initializeKernels = _initializeKernels;
@@ -1108,6 +1109,7 @@
 	    this.canvas.addEventListener('mousedown', this._mouseDownEventListener);
 	    this.canvas.addEventListener('mouseup', this._mouseUpEventListener);
 	    this.canvas.addEventListener('mouseleave', this._mouseLeaveEventListener);
+	    this.canvas.addEventListener('mousemove', this._previewMouseMoveEventListener);
 	    this.canvas.addEventListener('touchstart', this._touchStartEventListener);
 	    this.canvas.addEventListener('touchmove', this._touchMoveEventListener);
 	    this.canvas.addEventListener('touchend', this._touchEndEventListener);
@@ -1117,6 +1119,7 @@
 	    this.canvas.removeEventListener('mousedown', this._mouseDownEventListener);
 	    this.canvas.removeEventListener('mouseup', this._mouseUpEventListener);
 	    this.canvas.removeEventListener('mouseexit', this._mouseLeaveEventListener);
+	    this.canvas.removeEventListener('mousemove', this._previewMouseMoveEventListener);
 	    this.canvas.removeEventListener('touchstart', this._touchStartEventListener);
 	    this.canvas.removeEventListener('touchmove', this._touchMoveEventListener);
 	    this.canvas.removeEventListener('touchend', this._touchEndEventListener);
@@ -1297,6 +1300,10 @@
 	        _this._mouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
 	            _this._doStroke(coords, 'mouse');
+	        };
+	        _this._previewMouseMoveEventListener = function (e) {
+	            var coords = _this._getMouseCoords(e);
+	            _this._display(_this._previewPlot(_this.graphPixels, coords[0], coords[1], _this.mode === 'paint' ? _this.brushSize : _this.eraserSize, _this.mode === 'erase' ? _this.bgColor : _this.brushColor));
 	        };
 	        // --- Mouse Events ---
 	        // --- Touch Events ---
