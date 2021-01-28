@@ -616,25 +616,30 @@
 	        var dist = Math.sqrt(xDist * xDist + yDist * yDist);
 	        var graphColor = graphPixels[this.thread.y][this.thread.x];
 	        if (dist <= brushSize + 1) {
-	            var intensity = 1;
+	            var r = 0, g = 0, b = 0;
 	            // The following code basically blurs the line by convolving a simple average kernel
 	            // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
-	            // for (let i = x - 1; i <= x + 1; i++) {
-	            //   for (let j = y - 1; j <= y + 1; j++) {
-	            //     const xDist = (i - x1);
-	            //     const yDist = (j - y1);
-	            //     const dist = Math.sqrt(xDist ** 2 + yDist ** 2);
-	            //     intensity += (1 / 9) * Math.min(
-	            //       1,
-	            //       Math.floor(brushSize / dist)
-	            //     )
-	            //   }
-	            // }
-	            return [
-	                brushColor[0] * intensity + graphColor[0] * (1 - intensity),
-	                brushColor[1] * intensity + graphColor[1] * (1 - intensity),
-	                brushColor[2] * intensity + graphColor[2] * (1 - intensity)
-	            ];
+	            for (var i = x - 1; i <= x + 1; i++) {
+	                for (var j = y - 1; j <= y + 1; j++) {
+	                    var xDist_1 = (i - x1);
+	                    var yDist_1 = (j - y1);
+	                    var distance = Math.sqrt(Math.pow(xDist_1, 2) + Math.pow(yDist_1, 2));
+	                    if (distance > brushSize) {
+	                        r += graphColor[0];
+	                        g += graphColor[1];
+	                        b += graphColor[2];
+	                    }
+	                    else {
+	                        r += brushColor[0];
+	                        g += brushColor[1];
+	                        b += brushColor[2];
+	                    }
+	                }
+	            }
+	            r /= 9;
+	            g /= 9;
+	            b /= 9;
+	            return [r, g, b];
 	        }
 	        else
 	            return graphColor;
