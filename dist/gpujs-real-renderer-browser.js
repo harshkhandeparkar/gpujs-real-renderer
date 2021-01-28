@@ -1019,7 +1019,6 @@
 	    var cos = (x - lastCoords[0]) / Math.sqrt(Math.pow((x - lastCoords[0]), 2) + Math.pow((y - lastCoords[1]), 2));
 	    var sin = (y - lastCoords[1]) / Math.sqrt(Math.pow((x - lastCoords[0]), 2) + Math.pow((y - lastCoords[1]), 2));
 	    var distance = Math.sqrt(Math.pow((x - lastCoords[0]), 2) + Math.pow((y - lastCoords[1]), 2));
-	    console.log(distance, 'k');
 	    for (var k = 0; k <= 1; k += 1 / distance) {
 	        var x1 = lastCoords[0] + cos * k * distance;
 	        var y1 = lastCoords[1] + sin * k * distance;
