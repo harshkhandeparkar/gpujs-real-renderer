@@ -42,8 +42,8 @@ export function _stroke(
 
     this.graphPixels = <Texture>this._plotKernel(
       this._cloneTexture(this.graphPixels),
-      Math.floor(x1),
-      Math.floor(y1),
+      Math.round(x1),
+      Math.round(y1),
       this.mode === 'paint' ? this.brushSize : this.eraserSize,
       this.mode === 'paint' ? this.brushColor : this.bgColor
     )

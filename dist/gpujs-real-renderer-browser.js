@@ -616,17 +616,20 @@
 	        var dist = Math.sqrt(xDist * xDist + yDist * yDist);
 	        var graphColor = graphPixels[this.thread.y][this.thread.x];
 	        if (dist <= brushSize + 1) {
-	            var intensity = 0;
+	            var intensity = 1;
 	            // The following code basically blurs the line by convolving a simple average kernel
 	            // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
-	            for (var i = x - 1; i <= x + 1; i++) {
-	                for (var j = y - 1; j <= y + 1; j++) {
-	                    var xDist_1 = (i - x1);
-	                    var yDist_1 = (j - y1);
-	                    var dist_1 = Math.sqrt(Math.pow(xDist_1, 2) + Math.pow(yDist_1, 2));
-	                    intensity += (1 / 9) * Math.min(1, Math.floor(brushSize / dist_1));
-	                }
-	            }
+	            // for (let i = x - 1; i <= x + 1; i++) {
+	            //   for (let j = y - 1; j <= y + 1; j++) {
+	            //     const xDist = (i - x1);
+	            //     const yDist = (j - y1);
+	            //     const dist = Math.sqrt(xDist ** 2 + yDist ** 2);
+	            //     intensity += (1 / 9) * Math.min(
+	            //       1,
+	            //       Math.floor(brushSize / dist)
+	            //     )
+	            //   }
+	            // }
 	            return [
 	                brushColor[0] * intensity + graphColor[0] * (1 - intensity),
 	                brushColor[1] * intensity + graphColor[1] * (1 - intensity),
@@ -1014,7 +1017,7 @@
 	    for (var k = 0; k <= 1; k += 0.2) {
 	        var x1 = lastCoords[0] + cos * k * distance;
 	        var y1 = lastCoords[1] + sin * k * distance;
-	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), Math.floor(x1), Math.floor(y1), this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	        this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), Math.round(x1), Math.round(y1), this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
 	    }
 	    this._display(this.graphPixels);
 	}
