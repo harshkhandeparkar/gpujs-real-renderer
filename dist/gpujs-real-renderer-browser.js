@@ -1052,35 +1052,15 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.redo = exports.undo = void 0;
 	function undo(numUndo) {
-	    var _this = this;
 	    if (numUndo === void 0) { numUndo = 1; }
-	    if (this._pathIndex >= numUndo - 1 && this._pathIndex - numUndo < this._drawnPaths.length) {
-	        this.graphPixels = this._blankGraph(); // Start with a blank graph
-	        var originalMode = this.mode, originalBrushColor = this.brushColor, originalBrushSize = this.brushSize, originalEraserSize = this.eraserSize;
-	        this._removeDOMEvents();
-	        this._drawnPaths.slice(0, this._pathIndex - numUndo + 1).forEach(function (path) {
-	            _this.mode = path.mode;
-	            _this.brushColor = path.color;
-	            _this.brushSize = path.brushSize;
-	            _this.eraserSize = path.eraserSize;
-	            _this._lastCoords.delete('temp');
-	            path.pathCoords.forEach(function (coord) {
-	                if (coord[2] === false) {
-	                    _this._stroke(coord[0], coord[1], 'temp'); // Replay all strokes
-	                    _this._lastCoords.set('temp', [coord[0], coord[1]]);
-	                }
-	                else
-	                    _this._plot(coord[0], coord[1]);
-	            });
-	        });
-	        this.mode = originalMode;
-	        this.brushColor = originalBrushColor;
-	        this.brushSize = originalBrushSize;
-	        this.eraserSize = originalEraserSize;
-	        this._pathIndex -= numUndo;
-	        this._lastCoords.delete('temp');
+	    if (this._currentSnapshotIndex - numUndo >= 0 &&
+	        this._currentSnapshotIndex - numUndo < this._snapshots.length) {
+	        var wasDrawing = this._isDrawing;
+	        this.stopRender();
+	        this.graphPixels = this._loadData(this._snapshots[this._currentSnapshotIndex - numUndo]);
+	        this._currentSnapshotIndex -= numUndo;
 	        this._display(this.graphPixels);
-	        if (this._isDrawing)
+	        if (wasDrawing)
 	            this.startRender();
 	    }
 	    return this;
@@ -1118,10 +1098,11 @@
 	}
 	exports.changeMode = changeMode;
 	function clear() {
-	    this._drawnPaths = [];
-	    this._pathIndex = -1;
+	    this._snapshots = [];
+	    this._currentSnapshotIndex = 0;
 	    this._lastCoords.clear();
 	    this.graphPixels = this._blankGraph();
+	    this._snapshots[0] = this.getData();
 	    this._display(this.graphPixels);
 	    return this;
 	}
@@ -1135,8 +1116,8 @@
 	    this.eraserSize = this.options.eraserSize;
 	    this.mode = this.options.mode;
 	    this._isDrawing = false;
-	    this._drawnPaths = [];
-	    this._pathIndex = -1;
+	    this._currentSnapshotIndex = 0;
+	    this._snapshots = [this.getData()];
 	    this._lastCoords.clear();
 	    this.stopRender();
 	}
@@ -1169,42 +1150,23 @@
 	});
 
 	var stroke = createCommonjsModule(function (module, exports) {
-	var __spreadArrays = (commonjsGlobal && commonjsGlobal.__spreadArrays) || function () {
-	    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-	    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-	        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-	            r[k] = a[j];
-	    return r;
-	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports._doStroke = exports._endStroke = exports._startStroke = void 0;
 	function _startStroke(coords, identifier) {
-	    this._drawnPaths[this._pathIndex + 1] = {
-	        pathCoords: [],
-	        color: this.brushColor.map(function (x) { return x; }),
-	        mode: this.mode,
-	        brushSize: this.brushSize,
-	        eraserSize: this.eraserSize
-	    };
-	    this._plot.apply(this, coords);
+	    if (this._currentSnapshotIndex < this._snapshots.length - 1)
+	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+	    this._plot.apply(// Delete all redo snapshots
+	    this, coords);
 	    this._lastCoords.set(identifier, coords);
 	}
 	exports._startStroke = _startStroke;
 	function _endStroke(endCoords, identifier) {
 	    this._plot.apply(this, endCoords);
-	    if (this._drawnPaths[this._pathIndex + 1])
-	        this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(endCoords, [true]));
 	    this._lastCoords.delete(identifier);
-	    if (this._drawnPaths[this._pathIndex + 1].pathCoords.length === 0)
-	        this._drawnPaths.splice(-1, 1);
-	    else {
-	        this._drawnPaths = this._drawnPaths.slice(0, this._pathIndex + 2); // Overwrite further paths to prevent wrong redos
-	        this._pathIndex++;
-	    }
+	    this._snapshots[++this._currentSnapshotIndex] = this.getData();
 	}
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
-	    this._drawnPaths[this._pathIndex + 1].pathCoords.push(__spreadArrays(coords, [false]));
 	    this._plot.apply(this, coords);
 	    this._stroke(coords[0], coords[1], identifier);
 	    this._lastCoords.set(identifier, coords);
@@ -1293,8 +1255,8 @@
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
 	        _this._isDrawing = false;
-	        _this._drawnPaths = [];
-	        _this._pathIndex = -1; // Index of path in _drawnPaths
+	        _this._snapshots = []; // Undo snapshots
+	        _this._currentSnapshotIndex = 0; // Current snapshot
 	        /** key -> identifier, value -> coordinate
 	         *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
 	         */
@@ -1375,6 +1337,7 @@
 	        _this.mode = options.mode;
 	        // *****DEFAULTS*****
 	        _this._initializeKernels();
+	        _this._snapshots[0] = _this.getData();
 	        return _this;
 	    }
 	    // --- Touch Events ---

@@ -42,14 +42,8 @@ export class RealDrawBoard extends RealRenderer {
   eraserSize: number;
   mode: DrawMode;
   _isDrawing: boolean = false;
-  _drawnPaths: {
-    pathCoords: [number, number, boolean][], // [x, y, isAPoint][]
-    color: Color,
-    mode: DrawMode,
-    brushSize: number,
-    eraserSize: number
-  }[] = [];
-  _pathIndex: number = -1; // Index of path in _drawnPaths
+  _snapshots: number[][] = []; // Undo snapshots
+  _currentSnapshotIndex = 0; // Current snapshot
   _plotKernel: IKernelRunShortcut;
   _previewPlot: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
@@ -98,6 +92,7 @@ export class RealDrawBoard extends RealRenderer {
     // *****DEFAULTS*****
 
     this._initializeKernels();
+    this._snapshots[0] = this.getData();
   }
   // --- DOM Event Listeners ---
 
