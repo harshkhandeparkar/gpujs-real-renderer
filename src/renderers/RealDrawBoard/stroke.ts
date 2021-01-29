@@ -21,6 +21,10 @@ export function _endStroke(
   this._lastCoords.delete(identifier);
 
   this._snapshots[++this._currentSnapshotIndex] = this.getData();
+  if (this._snapshots.length > this._maxSnapshots) {
+    this._snapshots.shift();
+    this._currentSnapshotIndex--;
+  }
 }
 
 export function _doStroke(

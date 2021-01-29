@@ -4,7 +4,7 @@ import { Color } from '../../types/RealRendererTypes';
 import { RealDrawBoardOptions, DrawMode } from '../../types/RealDrawBoardTypes';
 import { RealDrawBoardDefaults } from '../../constants/defaults/RealDrawBoardDefaults';
 
-import { IKernelRunShortcut, Texture } from 'gpu.js';
+import { IKernelRunShortcut } from 'gpu.js';
 
 export * as RealRendererTypes from '../../types/RealRendererTypes';
 export * as RealDrawBoardTypes from '../../types/RealDrawBoardTypes';
@@ -44,6 +44,7 @@ export class RealDrawBoard extends RealRenderer {
   _isDrawing: boolean = false;
   _snapshots: number[][] = []; // Undo snapshots
   _currentSnapshotIndex = 0; // Current snapshot
+  _maxSnapshots: number;
   _plotKernel: IKernelRunShortcut;
   _previewPlot: IKernelRunShortcut;
   _strokeKernel: IKernelRunShortcut;
@@ -87,6 +88,7 @@ export class RealDrawBoard extends RealRenderer {
     this.brushColor = options.brushColor;
 
     this.eraserSize = options.eraserSize;
+    this._maxSnapshots = Math.max(options.maxUndos, 1);
 
     this.mode = options.mode;
     // *****DEFAULTS*****

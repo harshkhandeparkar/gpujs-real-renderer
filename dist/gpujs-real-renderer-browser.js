@@ -1011,6 +1011,7 @@
 	    brushSize: 1,
 	    eraserSize: 2,
 	    brushColor: [1, 1, 1],
+	    maxUndos: 15,
 	    mode: 'paint'
 	};
 	});
@@ -1164,6 +1165,10 @@
 	    this._plot.apply(this, endCoords);
 	    this._lastCoords.delete(identifier);
 	    this._snapshots[++this._currentSnapshotIndex] = this.getData();
+	    if (this._snapshots.length > this._maxSnapshots) {
+	        this._snapshots.shift();
+	        this._currentSnapshotIndex--;
+	    }
 	}
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
@@ -1334,6 +1339,7 @@
 	        _this.brushSize = options.brushSize;
 	        _this.brushColor = options.brushColor;
 	        _this.eraserSize = options.eraserSize;
+	        _this._maxSnapshots = Math.max(options.maxUndos, 1);
 	        _this.mode = options.mode;
 	        // *****DEFAULTS*****
 	        _this._initializeKernels();

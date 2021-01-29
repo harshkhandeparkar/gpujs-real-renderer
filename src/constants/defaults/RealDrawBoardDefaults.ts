@@ -4,5 +4,6 @@ export const RealDrawBoardDefaults: RealDrawBoardOptions = {
   brushSize: 1,
   eraserSize: 2,
   brushColor: [1, 1, 1],
+  maxUndos: 15,
   mode: 'paint'
 }
