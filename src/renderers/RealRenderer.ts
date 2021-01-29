@@ -1,6 +1,7 @@
 import { getDisplayKernel } from '../kernels/display';
 import { getBlankGraphKernel } from '../kernels/blankGraph';
 import { getCloneTextureKernel } from '../kernels/cloneTexture';
+import { getLoadDataKernel } from '../kernels/loadData';
 
 import { GraphDimensions, Color, RealRendererOptions } from '../types/RealRendererTypes';
 export * as RealRendererTypes from '../types/RealRendererTypes';
@@ -28,6 +29,7 @@ export class RealRenderer {
   graphPixels: Texture;
   _blankGraph: IKernelRunShortcut;
   _cloneTexture: IKernelRunShortcut;
+  _loadData: IKernelRunShortcut;
   _display: IKernelRunShortcut;
   _doRender: boolean;
 
@@ -80,6 +82,8 @@ export class RealRenderer {
     this._cloneTexture = getCloneTextureKernel(this.gpu, this.dimensions);
 
     this.graphPixels = this._blankGraph() as Texture;
+
+    this._loadData = getLoadDataKernel(this.gpu, this.dimensions);
 
     this._display = getDisplayKernel(this.gpu, this.dimensions);
 
@@ -139,6 +143,26 @@ export class RealRenderer {
   resetTime() {
     this.time = 0;
     return this;
+  }
+
+  getData() {
+    let returnedArray: number[][][] = <number[][][]>this.graphPixels.toArray();
+    let outArr: number[] = [];
+
+    for (let i = 0; i < returnedArray.length; i++) {
+      for (let j = 0; j < returnedArray[0].length; j++) {
+        for (let k = 0; k < returnedArray[0][0].length; k++) {
+          outArr[i * returnedArray[0].length * returnedArray[0][0].length + j * returnedArray[0][0].length + k] = returnedArray[i][j][k];
+        }
+      }
+    }
+
+    return outArr;
+  }
+
+  loadData(pixels: number[]) {
+    this.graphPixels = <Texture>this._loadData(pixels);
+    this._display(this.graphPixels);
   }
 
   reset() {

@@ -103,6 +103,31 @@
 	exports.getCloneTextureKernel = getCloneTextureKernel;
 	});
 
+	var loadData = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.getLoadDataKernel = void 0;
+	/**
+	 * @param gpu GPU.js Instance
+	 * @param dimensions Dimensions of the Output Graph
+	 */
+	function getLoadDataKernel(gpu, dimensions) {
+	    return gpu.createKernel(function (graphPixels) {
+	        return [
+	            graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 0],
+	            graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 1],
+	            graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 2]
+	        ];
+	    }, {
+	        argumentTypes: {
+	            graphPixels: 'Array'
+	        },
+	        output: dimensions,
+	        pipeline: true
+	    });
+	}
+	exports.getLoadDataKernel = getLoadDataKernel;
+	});
+
 	var RealRendererTypes = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	});
@@ -153,6 +178,7 @@
 
 
 
+
 	exports.RealRendererTypes = RealRendererTypes;
 
 	__exportStar(RealRendererDefaults, exports);
@@ -186,6 +212,7 @@
 	        this._blankGraph = blankGraph.getBlankGraphKernel(this.gpu, this.dimensions, this.xOffset, this.yOffset, this.bgColor, this.axesColor, this.drawAxes);
 	        this._cloneTexture = cloneTexture.getCloneTextureKernel(this.gpu, this.dimensions);
 	        this.graphPixels = this._blankGraph();
+	        this._loadData = loadData.getLoadDataKernel(this.gpu, this.dimensions);
 	        this._display = display.getDisplayKernel(this.gpu, this.dimensions);
 	        this._doRender = false;
 	    }
@@ -234,6 +261,22 @@
 	    RealRenderer.prototype.resetTime = function () {
 	        this.time = 0;
 	        return this;
+	    };
+	    RealRenderer.prototype.getData = function () {
+	        var returnedArray = this.graphPixels.toArray();
+	        var outArr = [];
+	        for (var i = 0; i < returnedArray.length; i++) {
+	            for (var j = 0; j < returnedArray[0].length; j++) {
+	                for (var k = 0; k < returnedArray[0][0].length; k++) {
+	                    outArr[i * returnedArray[0].length * returnedArray[0][0].length + j * returnedArray[0][0].length + k] = returnedArray[i][j][k];
+	                }
+	            }
+	        }
+	        return outArr;
+	    };
+	    RealRenderer.prototype.loadData = function (pixels) {
+	        this.graphPixels = this._loadData(pixels);
+	        this._display(this.graphPixels);
 	    };
 	    RealRenderer.prototype.reset = function () {
 	        this.graphPixels = this._blankGraph();
