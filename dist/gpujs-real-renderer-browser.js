@@ -1322,6 +1322,7 @@
 	            for (var i = 0; i < e.touches.length; i++) {
 	                _this._doStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
 	            }
+	            _this._display(_this.graphPixels);
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;

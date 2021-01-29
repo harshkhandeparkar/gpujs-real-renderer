@@ -179,6 +179,8 @@ export class RealDrawBoard extends RealRenderer {
         e.touches.item(i).identifier.toString()
       )
     }
+
+    this._display(this.graphPixels);
   }
   // --- Touch Events ---
 
