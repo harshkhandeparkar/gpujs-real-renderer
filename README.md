@@ -219,7 +219,7 @@ This Real Renderer extends the `RealRenderer` class and can be used as a general
 Click and drag on the canvas to draw, change modes to erase. The brush color and eraser/brush sized can be changed.
 See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 
-##### Properties (Readl-Only)
+##### Properties (Read-Only)
 - `brushSize` (*number*): The radius of the drawing brush. The size is measured in the board's
  arbitrary coordinate system.
 - `brushColor` (*array*): The color of the brush in the corm `[red, green, blue]` where each of
@@ -236,6 +236,8 @@ Apart from those, the following are additional options that can be passed on to 
 - `brushColor`(*Array*) (Default: `[1, 1, 1]`): The color of the brush, i.e. the plotted points.
 
 - `eraserSize`(*Number*) (Default: `2`): Determines the size of the eraser.
+
+- `maxUndos`(*Number*) (Default: `15`): Determines the maximum possible undos. (Use a smaller number on devices with less RAM)
 
 - `mode` (*'paint' | 'draw'*) (Default: `'paint'`): Determines whether the board paints or erases on mouse drag.
 
