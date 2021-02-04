@@ -5,7 +5,7 @@ export function _startStroke(
   coords: [number, number],
   identifier: string
 ) {
-  if (this._currentSnapshotIndex < this._snapshots.length - 1) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+  if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
   this._plot(...coords);
 
   this._lastCoords.set(identifier, coords);
@@ -20,7 +20,7 @@ export function _endStroke(
 
   this._lastCoords.delete(identifier);
 
-  this._snapshots[++this._currentSnapshotIndex] = this.getData();
+  if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData();
   if (this._snapshots.length > this._maxSnapshots) {
     this._snapshots.shift();
     this._currentSnapshotIndex--;
