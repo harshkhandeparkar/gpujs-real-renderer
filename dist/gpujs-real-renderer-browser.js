@@ -1011,7 +1011,8 @@
 	    brushSize: 1,
 	    eraserSize: 2,
 	    brushColor: [1, 1, 1],
-	    maxUndos: 15,
+	    allowUndo: false,
+	    maxUndos: 10,
 	    mode: 'paint'
 	};
 	});
@@ -1154,7 +1155,7 @@
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports._doStroke = exports._endStroke = exports._startStroke = void 0;
 	function _startStroke(coords, identifier) {
-	    if (this._currentSnapshotIndex < this._snapshots.length - 1)
+	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
 	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	    this._plot.apply(// Delete all redo snapshots
 	    this, coords);
@@ -1164,7 +1165,8 @@
 	function _endStroke(endCoords, identifier) {
 	    this._plot.apply(this, endCoords);
 	    this._lastCoords.delete(identifier);
-	    this._snapshots[++this._currentSnapshotIndex] = this.getData();
+	    if (this._maxSnapshots > 0)
+	        this._snapshots[++this._currentSnapshotIndex] = this.getData();
 	    if (this._snapshots.length > this._maxSnapshots) {
 	        this._snapshots.shift();
 	        this._currentSnapshotIndex--;
@@ -1339,7 +1341,7 @@
 	        _this.brushSize = options.brushSize;
 	        _this.brushColor = options.brushColor;
 	        _this.eraserSize = options.eraserSize;
-	        _this._maxSnapshots = Math.max(options.maxUndos, 1);
+	        _this._maxSnapshots = options.allowUndo ? Math.max(options.maxUndos + 1, 0) : 0;
 	        _this.mode = options.mode;
 	        // *****DEFAULTS*****
 	        _this._initializeKernels();
