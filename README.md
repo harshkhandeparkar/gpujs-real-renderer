@@ -237,6 +237,8 @@ Apart from those, the following are additional options that can be passed on to 
 
 - `eraserSize`(*Number*) (Default: `2`): Determines the size of the eraser.
 
+- `allowUndo`(*Boolean*) (Default: `false`): Determines the maximum possible undos. (Use a smaller number on devices with less RAM)
+
 - `maxUndos`(*Number*) (Default: `15`): Determines the maximum possible undos. (Use a smaller number on devices with less RAM)
 
 - `mode` (*'paint' | 'draw'*) (Default: `'paint'`): Determines whether the board paints or erases on mouse drag.
