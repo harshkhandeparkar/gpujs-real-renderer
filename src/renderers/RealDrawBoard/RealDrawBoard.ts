@@ -88,7 +88,7 @@ export class RealDrawBoard extends RealRenderer {
     this.brushColor = options.brushColor;
 
     this.eraserSize = options.eraserSize;
-    this._maxSnapshots = Math.max(options.maxUndos, 1);
+    this._maxSnapshots = options.allowUndo ? Math.max(options.maxUndos + 1, 0) : 0;
 
     this.mode = options.mode;
     // *****DEFAULTS*****

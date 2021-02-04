@@ -6,6 +6,7 @@ export interface RealDrawBoardOptions extends RealRendererOptions {
   brushSize?: number,
   brushColor?: Color,
   eraserSize?: number,
+  allowUndo?: boolean,
   maxUndos?: number,
   mode?: 'paint' | 'erase'
 }
