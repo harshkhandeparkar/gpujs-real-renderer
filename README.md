@@ -225,7 +225,7 @@ See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 - `brushColor` (*array*): The color of the brush in the corm `[red, green, blue]` where each of
 `red`, `green` and `blue` are between 0 and 1.
 - `eraserSize` (*number*): Size of the eraser.
-- `tool` ('brush' | 'erase'): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
+- `tool` ('brush' | 'eraser'): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
 
 ##### Options
 Since this is a child class of `RealRenderer`, all the options of `RealRender` are applicable here as well.
