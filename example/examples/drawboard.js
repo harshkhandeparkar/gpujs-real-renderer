@@ -37,10 +37,10 @@ colorWheel.on('input:change', color => {
   ])
 })
 
-const drawModeSelector = document.querySelector('#draw-mode');
-drawModeSelector.addEventListener('change', e => {
+const toolSelector = document.querySelector('#draw-tool');
+toolSelector.addEventListener('change', e => {
   e.preventDefault();
-  DrawBoard.changeMode(drawModeSelector.value);
+  DrawBoard.changeTool(toolSelector.value);
 })
 
 const brushSizeRange = document.querySelector('#brush-size');
