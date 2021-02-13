@@ -1,4 +1,7 @@
-import { RealDrawBoard } from './RealDrawBoard';
+import { RealDrawBoard } from '../RealDrawBoard';
+import { Texture } from 'gpu.js';
+
+export const name = 'brush';
 
 export function _startStroke(
   this: RealDrawBoard,
@@ -6,7 +9,7 @@ export function _startStroke(
   identifier: string
 ) {
   if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
-  this._plot(...coords);
+  this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
 
   this._lastCoords.set(identifier, coords);
 }
@@ -16,7 +19,7 @@ export function _endStroke(
   endCoords: [number, number],
   identifier: string
 ) {
-  this._plot(...endCoords);
+  this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
 
   this._lastCoords.delete(identifier);
 
@@ -32,8 +35,21 @@ export function _doStroke(
   coords: [number, number],
   identifier: string
 ) {
-  this._plot(...coords);
-  this._stroke(coords[0], coords[1], identifier);
+  this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
+  this._stroke(coords[0], coords[1], this.brushSize, this.brushColor, identifier);
 
   this._lastCoords.set(identifier, coords);
+}
+
+export function _toolPreview(
+  this: RealDrawBoard,
+  coords: [number, number]
+): Texture {
+  return <Texture>this._previewPlot(
+    this.graphPixels,
+    coords[0],
+    coords[1],
+    this.brushSize,
+    this.brushColor
+  )
 }

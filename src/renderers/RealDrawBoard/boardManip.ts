@@ -1,7 +1,7 @@
 import { RealDrawBoard } from './RealDrawBoard';
 import { Color } from '../../types/RealRendererTypes';
-import { DrawMode } from '../../types/RealDrawBoardTypes';
 import { Texture } from 'gpu.js';
+import { Tool, tools } from './tools/tools';
 
 export function changeBrushColor(this: RealDrawBoard, color: Color) {
   this.brushColor = color;
@@ -18,8 +18,12 @@ export function changeEraserSize(this: RealDrawBoard, newSize: number) {
   return this;
 }
 
-export function changeMode(this: RealDrawBoard, newMode: DrawMode) {
-  this.mode = newMode;
+export function changeTool(this: RealDrawBoard, newTool: Tool) {
+  this.tool = newTool;
+  this._startStroke = tools[this.tool]._startStroke;
+  this._doStroke = tools[this.tool]._doStroke;
+  this._endStroke = tools[this.tool]._endStroke;
+  this._toolPreview = tools[this.tool]._toolPreview;
   return this;
 }
 
@@ -42,7 +46,7 @@ export function _resetBoard(this: RealDrawBoard) {
   this.brushSize = this.options.brushSize;
   this.bgColor = this.options.bgColor;
   this.eraserSize = this.options.eraserSize;
-  this.mode = this.options.mode;
+  this.tool = this.options.tool;
 
   this._isDrawing = false;
   this._currentSnapshotIndex = 0;

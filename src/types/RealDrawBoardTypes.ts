@@ -1,6 +1,5 @@
 import { RealRendererOptions, Color } from './RealRendererTypes';
-
-export type DrawMode = 'paint' | 'erase';
+import { Tool } from '../renderers/RealDrawBoard/tools/tools';
 
 export interface RealDrawBoardOptions extends RealRendererOptions {
   brushSize?: number,
@@ -8,5 +7,5 @@ export interface RealDrawBoardOptions extends RealRendererOptions {
   eraserSize?: number,
   allowUndo?: boolean,
   maxUndos?: number,
-  mode?: 'paint' | 'erase'
+  tool?: Tool
 }

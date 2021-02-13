@@ -1,7 +1,7 @@
 import { RealRenderer } from '../RealRenderer';
 
 import { Color } from '../../types/RealRendererTypes';
-import { RealDrawBoardOptions, DrawMode } from '../../types/RealDrawBoardTypes';
+import { RealDrawBoardOptions } from '../../types/RealDrawBoardTypes';
 import { RealDrawBoardDefaults } from '../../constants/defaults/RealDrawBoardDefaults';
 
 import { IKernelRunShortcut } from 'gpu.js';
@@ -17,7 +17,7 @@ import {
   changeBrushColor,
   changeBrushSize,
   changeEraserSize,
-  changeMode,
+  changeTool,
   clear,
   _resetBoard
 } from './boardManip';
@@ -26,21 +26,18 @@ import {
   _removeDOMEvents
 } from './_DOMEvents';
 import {
-  _startStroke,
-  _endStroke,
-  _doStroke
-} from './stroke';
-import {
   _getMouseCoords,
   _getTouchCoords
 } from './_coords';
+
+import { tools, Tool } from './tools/tools';
 
 export class RealDrawBoard extends RealRenderer {
   options: RealDrawBoardOptions;
   brushSize: number;
   brushColor: Color;
   eraserSize: number;
-  mode: DrawMode;
+  tool: Tool = RealDrawBoardDefaults.tool;
   _isDrawing: boolean = false;
   _snapshots: number[][] = []; // Undo snapshots
   _currentSnapshotIndex = 0; // Current snapshot
@@ -59,9 +56,10 @@ export class RealDrawBoard extends RealRenderer {
   protected _resetBoard = _resetBoard;
   protected _addDOMEvents = _addDOMEvents;
   protected _removeDOMEvents = _removeDOMEvents;
-  protected _startStroke = _startStroke;
-  protected _endStroke = _endStroke;
-  protected _doStroke = _doStroke;
+  protected _startStroke = tools[RealDrawBoardDefaults.tool]._startStroke;
+  protected _endStroke = tools[RealDrawBoardDefaults.tool]._endStroke;
+  protected _doStroke = tools[RealDrawBoardDefaults.tool]._doStroke;
+  protected _toolPreview = tools[RealDrawBoardDefaults.tool]._toolPreview;
   protected _getMouseCoords = _getMouseCoords;
   protected _getTouchCoords = _getTouchCoords;
 
@@ -70,7 +68,7 @@ export class RealDrawBoard extends RealRenderer {
   public changeBrushColor = changeBrushColor;
   public changeBrushSize = changeBrushSize;
   public changeEraserSize = changeEraserSize;
-  public changeMode = changeMode;
+  public changeTool = changeTool;
   public clear = clear;
 
   constructor(options: RealDrawBoardOptions) {
@@ -90,7 +88,7 @@ export class RealDrawBoard extends RealRenderer {
     this.eraserSize = options.eraserSize;
     this._maxSnapshots = options.allowUndo ? Math.max(options.maxUndos + 1, 0) : 0;
 
-    this.mode = options.mode;
+    this.changeTool(options.tool);
     // *****DEFAULTS*****
 
     this._initializeKernels();
@@ -133,13 +131,7 @@ export class RealDrawBoard extends RealRenderer {
     const coords = this._getMouseCoords(e);
 
     this._display(
-      this._previewPlot(
-        this.graphPixels,
-        coords[0],
-        coords[1],
-        this.mode === 'paint' ? this.brushSize : this.eraserSize,
-        this.mode === 'erase' ? this.bgColor : this.brushColor
-      )
+      this._toolPreview(coords)
     )
   }
   // --- Mouse Events ---

@@ -1013,7 +1013,7 @@
 	    brushColor: [1, 1, 1],
 	    allowUndo: false,
 	    maxUndos: 10,
-	    mode: 'paint'
+	    tool: 'brush'
 	};
 	});
 
@@ -1037,15 +1037,15 @@
 	var _draw = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports._stroke = exports._plot = void 0;
-	function _plot(x, y) {
-	    this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	function _plot(x, y, size, color) {
+	    this.graphPixels = this._plotKernel(this._cloneTexture(this.graphPixels), x, y, size, color);
 	    return this;
 	}
 	exports._plot = _plot;
-	function _stroke(x, y, identifier) {
+	function _stroke(x, y, size, color, identifier) {
 	    if (!this._lastCoords.has(identifier))
 	        this._lastCoords.set(identifier, [x, y]);
-	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords.get(identifier), [x, y], this.mode === 'paint' ? this.brushSize : this.eraserSize, this.mode === 'paint' ? this.brushColor : this.bgColor);
+	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), this._lastCoords.get(identifier), [x, y], size, color);
 	}
 	exports._stroke = _stroke;
 	});
@@ -1076,9 +1076,89 @@
 	exports.redo = redo;
 	});
 
+	var brush = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
+	exports.name = 'brush';
+	function _startStroke(coords, identifier) {
+	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
+	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
+	    this._lastCoords.set(identifier, coords);
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords, identifier) {
+	    this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
+	    this._lastCoords.delete(identifier);
+	    if (this._maxSnapshots > 0)
+	        this._snapshots[++this._currentSnapshotIndex] = this.getData();
+	    if (this._snapshots.length > this._maxSnapshots) {
+	        this._snapshots.shift();
+	        this._currentSnapshotIndex--;
+	    }
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords, identifier) {
+	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
+	    this._stroke(coords[0], coords[1], this.brushSize, this.brushColor, identifier);
+	    this._lastCoords.set(identifier, coords);
+	}
+	exports._doStroke = _doStroke;
+	function _toolPreview(coords) {
+	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.brushSize, this.brushColor);
+	}
+	exports._toolPreview = _toolPreview;
+	});
+
+	var eraser = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
+	exports.name = 'eraser';
+	function _startStroke(coords, identifier) {
+	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
+	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
+	    this._lastCoords.set(identifier, coords);
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords, identifier) {
+	    this._plot(endCoords[0], endCoords[1], this.eraserSize, this.bgColor);
+	    this._lastCoords.delete(identifier);
+	    if (this._maxSnapshots > 0)
+	        this._snapshots[++this._currentSnapshotIndex] = this.getData();
+	    if (this._snapshots.length > this._maxSnapshots) {
+	        this._snapshots.shift();
+	        this._currentSnapshotIndex--;
+	    }
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords, identifier) {
+	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
+	    this._stroke(coords[0], coords[1], this.eraserSize, this.bgColor, identifier);
+	    this._lastCoords.set(identifier, coords);
+	}
+	exports._doStroke = _doStroke;
+	function _toolPreview(coords) {
+	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.eraserSize, this.bgColor);
+	}
+	exports._toolPreview = _toolPreview;
+	});
+
+	var tools = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.tools = void 0;
+
+
+	exports.tools = {
+	    brush: brush,
+	    eraser: eraser
+	};
+	});
+
 	var boardManip = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._resetBoard = exports.clear = exports.changeMode = exports.changeEraserSize = exports.changeBrushSize = exports.changeBrushColor = void 0;
+	exports._resetBoard = exports.clear = exports.changeTool = exports.changeEraserSize = exports.changeBrushSize = exports.changeBrushColor = void 0;
+
 	function changeBrushColor(color) {
 	    this.brushColor = color;
 	    return this;
@@ -1094,11 +1174,15 @@
 	    return this;
 	}
 	exports.changeEraserSize = changeEraserSize;
-	function changeMode(newMode) {
-	    this.mode = newMode;
+	function changeTool(newTool) {
+	    this.tool = newTool;
+	    this._startStroke = tools.tools[this.tool]._startStroke;
+	    this._doStroke = tools.tools[this.tool]._doStroke;
+	    this._endStroke = tools.tools[this.tool]._endStroke;
+	    this._toolPreview = tools.tools[this.tool]._toolPreview;
 	    return this;
 	}
-	exports.changeMode = changeMode;
+	exports.changeTool = changeTool;
 	function clear() {
 	    this._snapshots = [];
 	    this._currentSnapshotIndex = 0;
@@ -1116,7 +1200,7 @@
 	    this.brushSize = this.options.brushSize;
 	    this.bgColor = this.options.bgColor;
 	    this.eraserSize = this.options.eraserSize;
-	    this.mode = this.options.mode;
+	    this.tool = this.options.tool;
 	    this._isDrawing = false;
 	    this._currentSnapshotIndex = 0;
 	    this._snapshots = [this.getData()];
@@ -1149,36 +1233,6 @@
 	    this.canvas.removeEventListener('touchend', this._touchEndEventListener);
 	}
 	exports._removeDOMEvents = _removeDOMEvents;
-	});
-
-	var stroke = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._doStroke = exports._endStroke = exports._startStroke = void 0;
-	function _startStroke(coords, identifier) {
-	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
-	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
-	    this._plot.apply(// Delete all redo snapshots
-	    this, coords);
-	    this._lastCoords.set(identifier, coords);
-	}
-	exports._startStroke = _startStroke;
-	function _endStroke(endCoords, identifier) {
-	    this._plot.apply(this, endCoords);
-	    this._lastCoords.delete(identifier);
-	    if (this._maxSnapshots > 0)
-	        this._snapshots[++this._currentSnapshotIndex] = this.getData();
-	    if (this._snapshots.length > this._maxSnapshots) {
-	        this._snapshots.shift();
-	        this._currentSnapshotIndex--;
-	    }
-	}
-	exports._endStroke = _endStroke;
-	function _doStroke(coords, identifier) {
-	    this._plot.apply(this, coords);
-	    this._stroke(coords[0], coords[1], identifier);
-	    this._lastCoords.set(identifier, coords);
-	}
-	exports._doStroke = _doStroke;
 	});
 
 	var _coords = createCommonjsModule(function (module, exports) {
@@ -1261,6 +1315,7 @@
 	        var _this = 
 	        // *****DEFAULTS*****
 	        _super.call(this, options) || this;
+	        _this.tool = RealDrawBoardDefaults.RealDrawBoardDefaults.tool;
 	        _this._isDrawing = false;
 	        _this._snapshots = []; // Undo snapshots
 	        _this._currentSnapshotIndex = 0; // Current snapshot
@@ -1274,9 +1329,10 @@
 	        _this._resetBoard = boardManip._resetBoard;
 	        _this._addDOMEvents = _DOMEvents._addDOMEvents;
 	        _this._removeDOMEvents = _DOMEvents._removeDOMEvents;
-	        _this._startStroke = stroke._startStroke;
-	        _this._endStroke = stroke._endStroke;
-	        _this._doStroke = stroke._doStroke;
+	        _this._startStroke = tools.tools[RealDrawBoardDefaults.RealDrawBoardDefaults.tool]._startStroke;
+	        _this._endStroke = tools.tools[RealDrawBoardDefaults.RealDrawBoardDefaults.tool]._endStroke;
+	        _this._doStroke = tools.tools[RealDrawBoardDefaults.RealDrawBoardDefaults.tool]._doStroke;
+	        _this._toolPreview = tools.tools[RealDrawBoardDefaults.RealDrawBoardDefaults.tool]._toolPreview;
 	        _this._getMouseCoords = _coords._getMouseCoords;
 	        _this._getTouchCoords = _coords._getTouchCoords;
 	        _this.undo = undo_1.undo;
@@ -1284,7 +1340,7 @@
 	        _this.changeBrushColor = boardManip.changeBrushColor;
 	        _this.changeBrushSize = boardManip.changeBrushSize;
 	        _this.changeEraserSize = boardManip.changeEraserSize;
-	        _this.changeMode = boardManip.changeMode;
+	        _this.changeTool = boardManip.changeTool;
 	        _this.clear = boardManip.clear;
 	        // --- DOM Event Listeners ---
 	        // --- Mouse Events ---
@@ -1313,7 +1369,7 @@
 	        };
 	        _this._previewMouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
-	            _this._display(_this._previewPlot(_this.graphPixels, coords[0], coords[1], _this.mode === 'paint' ? _this.brushSize : _this.eraserSize, _this.mode === 'erase' ? _this.bgColor : _this.brushColor));
+	            _this._display(_this._toolPreview(coords));
 	        };
 	        // --- Mouse Events ---
 	        // --- Touch Events ---
@@ -1342,7 +1398,7 @@
 	        _this.brushColor = options.brushColor;
 	        _this.eraserSize = options.eraserSize;
 	        _this._maxSnapshots = options.allowUndo ? Math.max(options.maxUndos + 1, 0) : 0;
-	        _this.mode = options.mode;
+	        _this.changeTool(options.tool);
 	        // *****DEFAULTS*****
 	        _this._initializeKernels();
 	        _this._snapshots[0] = _this.getData();
