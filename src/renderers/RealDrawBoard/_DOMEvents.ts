@@ -9,6 +9,7 @@ export function _addDOMEvents(this: RealDrawBoard) {
   this.canvas.addEventListener('touchstart', this._touchStartEventListener);
   this.canvas.addEventListener('touchmove', this._touchMoveEventListener);
   this.canvas.addEventListener('touchend', this._touchEndEventListener);
+  this.canvas.addEventListener('touchmove', this._previewTouchMoveEventListener);
 }
 
 export function _removeDOMEvents(this: RealDrawBoard) {
@@ -20,4 +21,5 @@ export function _removeDOMEvents(this: RealDrawBoard) {
   this.canvas.removeEventListener('touchstart', this._touchStartEventListener);
   this.canvas.removeEventListener('touchmove', this._touchMoveEventListener);
   this.canvas.removeEventListener('touchend', this._touchEndEventListener);
+  this.canvas.removeEventListener('touchmove', this._previewTouchMoveEventListener);
 }

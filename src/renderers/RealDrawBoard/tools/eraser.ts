@@ -43,7 +43,8 @@ export function _doStroke(
 
 export function _toolPreview(
   this: RealDrawBoard,
-  coords: [number, number]
+  coords: [number, number],
+  identifier: string
 ): Texture {
   return <Texture>this._previewPlot(
     this.graphPixels,

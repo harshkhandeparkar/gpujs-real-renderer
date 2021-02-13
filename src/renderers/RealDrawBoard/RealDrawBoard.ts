@@ -131,7 +131,7 @@ export class RealDrawBoard extends RealRenderer {
     const coords = this._getMouseCoords(e);
 
     this._display(
-      this._toolPreview(coords)
+      this._toolPreview(coords, 'mouse')
     )
   }
   // --- Mouse Events ---
@@ -160,6 +160,18 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _touchMoveEventListener = (e: TouchEvent) => {
+    e.preventDefault();
+
+    for (let i = 0; i < e.touches.length; i++) {
+      this._display(
+        this._toolPreview(this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString())
+      )
+    }
+
+    this._display(this.graphPixels);
+  }
+
+  _previewTouchMoveEventListener = (e: TouchEvent) => {
     e.preventDefault();
 
     for (let i = 0; i < e.touches.length; i++) {

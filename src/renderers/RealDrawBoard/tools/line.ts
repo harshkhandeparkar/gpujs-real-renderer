@@ -1,7 +1,12 @@
 import { RealDrawBoard } from '../RealDrawBoard';
 import { Texture } from 'gpu.js';
 
-export const name = 'brush';
+export const name = 'line';
+
+/** key -> identifier, value -> coordinate
+   *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
+   */
+const _startCoords: Map<string, [number, number]> = new Map(); /* key -> identifier, value -> coordinate*/
 
 export function _startStroke(
   this: RealDrawBoard,
@@ -12,6 +17,7 @@ export function _startStroke(
   this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
 
   this._lastCoords.set(identifier, coords);
+  _startCoords.set(identifier, coords);
 }
 
 export function _endStroke(
@@ -19,15 +25,17 @@ export function _endStroke(
   endCoords: [number, number],
   identifier: string
 ) {
+  this.graphPixels = <Texture>this._strokeKernel(
+    this._cloneTexture(this.graphPixels),
+    _startCoords.get(identifier),
+    endCoords,
+    this.brushSize,
+    this.brushColor
+  )
   this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
 
   this._lastCoords.delete(identifier);
-
-  if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData();
-  if (this._snapshots.length > this._maxSnapshots) {
-    this._snapshots.shift();
-    this._currentSnapshotIndex--;
-  }
+  _startCoords.delete(identifier);
 }
 
 export function _doStroke(
@@ -35,9 +43,6 @@ export function _doStroke(
   coords: [number, number],
   identifier: string
 ) {
-  this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-  this._stroke(coords[0], coords[1], this.brushSize, this.brushColor, identifier);
-
   this._lastCoords.set(identifier, coords);
 }
 
@@ -46,11 +51,14 @@ export function _toolPreview(
   coords: [number, number],
   identifier: string
 ): Texture {
-  return <Texture>this._previewPlot(
-    this.graphPixels,
-    coords[0],
-    coords[1],
-    this.brushSize,
-    this.brushColor
-  )
+  if (_startCoords.has(identifier)) {
+    return <Texture>this._strokeKernel(
+      this._cloneTexture(this.graphPixels),
+      _startCoords.get(identifier),
+      coords,
+      this.brushSize,
+      this.brushColor
+    )
+  }
+  else return this.graphPixels;
 }

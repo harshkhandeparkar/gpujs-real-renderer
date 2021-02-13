@@ -1104,7 +1104,7 @@
 	    this._lastCoords.set(identifier, coords);
 	}
 	exports._doStroke = _doStroke;
-	function _toolPreview(coords) {
+	function _toolPreview(coords, identifier) {
 	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.brushSize, this.brushColor);
 	}
 	exports._toolPreview = _toolPreview;
@@ -1138,8 +1138,45 @@
 	    this._lastCoords.set(identifier, coords);
 	}
 	exports._doStroke = _doStroke;
-	function _toolPreview(coords) {
+	function _toolPreview(coords, identifier) {
 	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.eraserSize, this.bgColor);
+	}
+	exports._toolPreview = _toolPreview;
+	});
+
+	var line = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
+	exports.name = 'line';
+	/** key -> identifier, value -> coordinate
+	   *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
+	   */
+	var _startCoords = new Map(); /* key -> identifier, value -> coordinate*/
+	function _startStroke(coords, identifier) {
+	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
+	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
+	    this._lastCoords.set(identifier, coords);
+	    _startCoords.set(identifier, coords);
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords, identifier) {
+	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), endCoords, this.brushSize, this.brushColor);
+	    this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
+	    this._lastCoords.delete(identifier);
+	    _startCoords.delete(identifier);
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords, identifier) {
+	    this._lastCoords.set(identifier, coords);
+	}
+	exports._doStroke = _doStroke;
+	function _toolPreview(coords, identifier) {
+	    if (_startCoords.has(identifier)) {
+	        return this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), coords, this.brushSize, this.brushColor);
+	    }
+	    else
+	        return this.graphPixels;
 	}
 	exports._toolPreview = _toolPreview;
 	});
@@ -1149,9 +1186,11 @@
 	exports.tools = void 0;
 
 
+
 	exports.tools = {
 	    brush: brush,
-	    eraser: eraser
+	    eraser: eraser,
+	    line: line
 	};
 	});
 
@@ -1221,6 +1260,7 @@
 	    this.canvas.addEventListener('touchstart', this._touchStartEventListener);
 	    this.canvas.addEventListener('touchmove', this._touchMoveEventListener);
 	    this.canvas.addEventListener('touchend', this._touchEndEventListener);
+	    this.canvas.addEventListener('touchmove', this._previewTouchMoveEventListener);
 	}
 	exports._addDOMEvents = _addDOMEvents;
 	function _removeDOMEvents() {
@@ -1231,6 +1271,7 @@
 	    this.canvas.removeEventListener('touchstart', this._touchStartEventListener);
 	    this.canvas.removeEventListener('touchmove', this._touchMoveEventListener);
 	    this.canvas.removeEventListener('touchend', this._touchEndEventListener);
+	    this.canvas.removeEventListener('touchmove', this._previewTouchMoveEventListener);
 	}
 	exports._removeDOMEvents = _removeDOMEvents;
 	});
@@ -1369,7 +1410,7 @@
 	        };
 	        _this._previewMouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
-	            _this._display(_this._toolPreview(coords));
+	            _this._display(_this._toolPreview(coords, 'mouse'));
 	        };
 	        // --- Mouse Events ---
 	        // --- Touch Events ---
@@ -1386,6 +1427,13 @@
 	            }
 	        };
 	        _this._touchMoveEventListener = function (e) {
+	            e.preventDefault();
+	            for (var i = 0; i < e.touches.length; i++) {
+	                _this._display(_this._toolPreview(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString()));
+	            }
+	            _this._display(_this.graphPixels);
+	        };
+	        _this._previewTouchMoveEventListener = function (e) {
 	            e.preventDefault();
 	            for (var i = 0; i < e.touches.length; i++) {
 	                _this._doStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
