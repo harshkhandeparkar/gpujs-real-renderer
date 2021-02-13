@@ -225,7 +225,7 @@ See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 - `brushColor` (*array*): The color of the brush in the corm `[red, green, blue]` where each of
 `red`, `green` and `blue` are between 0 and 1.
 - `eraserSize` (*number*): Size of the eraser.
-- `mode` ('paint' | 'erase'): The current mode of the board. This mode can be set in the options or using the `changeMode` method.
+- `tool` ('brush' | 'erase'): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
 
 ##### Options
 Since this is a child class of `RealRenderer`, all the options of `RealRender` are applicable here as well.
@@ -241,7 +241,7 @@ Apart from those, the following are additional options that can be passed on to 
 
 - `maxUndos`(*Number*) (Default: `15`): Determines the maximum possible undos. (Use a smaller number on devices with less RAM)
 
-- `mode` (*'paint' | 'draw'*) (Default: `'paint'`): Determines whether the board paints or erases on mouse drag.
+- `tool` (*'brush' | 'draw'*) (Default: `'brush'`): Determines which tool to use.
 
 ##### Methods
 Since this is a child class of `RealRenderer`, all the methods of `RealRender` are available here as well.
@@ -252,7 +252,7 @@ Apart from these methods, the following new methods are also available and are c
 - `changeBrushColor(newColor)`: Change the brush color.
 - `changeBrushSize(newSize)`: Change the brush size.
 - `changeEraserSize(newSize)`: Change the eraser size.
-- `changeMode(newMode)`: Change the mode.
+- `changeTool(newTool)`: Change the tool.
 - `undo(numUndos = 1)`: Undoes the specified number of brush strokes. (Defualt: undoes one stroke)
 - `redo(numUndos = 1)`: Redoes the specified number of brush strokes. (Defualt: redoes one stroke)
 - `clear()`: Clears the board.
