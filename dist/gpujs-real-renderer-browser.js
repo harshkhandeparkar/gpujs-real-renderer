@@ -1173,10 +1173,10 @@
 	exports._doStroke = _doStroke;
 	function _toolPreview(coords, identifier) {
 	    if (_startCoords.has(identifier)) {
-	        return this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), coords, this.brushSize, this.brushColor);
+	        return this._previewPlot(this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), coords, this.brushSize, this.brushColor), coords[0], coords[1], this.brushSize, this.brushColor);
 	    }
 	    else
-	        return this.graphPixels;
+	        return this._previewPlot(this.graphPixels, coords[0], coords[1], this.brushSize, this.brushColor);
 	}
 	exports._toolPreview = _toolPreview;
 	});

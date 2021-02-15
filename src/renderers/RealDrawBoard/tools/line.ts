@@ -52,13 +52,25 @@ export function _toolPreview(
   identifier: string
 ): Texture {
   if (_startCoords.has(identifier)) {
-    return <Texture>this._strokeKernel(
-      this._cloneTexture(this.graphPixels),
-      _startCoords.get(identifier),
-      coords,
+    return <Texture>this._previewPlot(
+      this._strokeKernel(
+        this._cloneTexture(this.graphPixels),
+        _startCoords.get(identifier),
+        coords,
+        this.brushSize,
+        this.brushColor
+      ),
+      coords[0],
+      coords[1],
       this.brushSize,
       this.brushColor
     )
   }
-  else return this.graphPixels;
+  else return <Texture>this._previewPlot(
+    this.graphPixels,
+    coords[0],
+    coords[1],
+    this.brushSize,
+    this.brushColor
+  )
 }
