@@ -50,29 +50,25 @@ export function getPlotKernel(
 
       const graphColor = graphPixels[this.thread.y][this.thread.x];
 
-       if (dist <= brushSize + 1) {
-        let intensity = 0;
-
-        // The following code basically blurs the line by convolving a simple average kernel
-        // Very crude implementation of https://developer.nvidia.com/gpugems/gpugems2/part-iii-high-quality-rendering/chapter-22-fast-prefiltered-lines
-        for (let i = x - 1; i <= x + 1; i++) {
-          for (let j = y - 1; j <= y + 1; j++) {
-            const xDist = (i - x1);
-            const yDist = (j - y1);
-
-            const dist = Math.sqrt(xDist ** 2 + yDist ** 2);
-
-            intensity += (1 / 9) * Math.min(
-              1,
-              Math.floor(brushSize / dist)
-            )
-          }
-        }
+      if (
+        dist >= brushSize &&
+        dist <= brushSize + 1
+      ) {
+        let intensity = Math.max(0, 1 - (dist - brushSize));
 
         return [
           brushColor[0] * intensity + graphColor[0] * (1 - intensity),
           brushColor[1] * intensity + graphColor[1] * (1 - intensity),
           brushColor[2] * intensity + graphColor[2] * (1 - intensity)
+        ]
+      }
+      else if (
+        dist < brushSize
+      ) {
+        return [
+          brushColor[0],
+          brushColor[1],
+          brushColor[2]
         ]
       }
       else return graphColor;
