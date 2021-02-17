@@ -130,6 +130,7 @@ export class RealDrawBoard extends RealRenderer {
   _mouseLeaveEventListener = (e: MouseEvent) => {
     this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     this._isStroking = false;
+    this._display(this.graphPixels);
 
     if(this._lastCoords.has('mouse')) this._endStroke(this._getMouseCoords(e), 'mouse');
   }
