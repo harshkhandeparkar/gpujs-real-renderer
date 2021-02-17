@@ -4,7 +4,7 @@ import { Color } from '../../types/RealRendererTypes';
 import { RealDrawBoardOptions } from '../../types/RealDrawBoardTypes';
 import { RealDrawBoardDefaults } from '../../constants/defaults/RealDrawBoardDefaults';
 
-import { IKernelRunShortcut } from 'gpu.js';
+import { IKernelRunShortcut, Texture } from 'gpu.js';
 
 export * as RealRendererTypes from '../../types/RealRendererTypes';
 export * as RealDrawBoardTypes from '../../types/RealDrawBoardTypes';
@@ -50,7 +50,7 @@ export class RealDrawBoard extends RealRenderer {
    *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
    */
   _lastCoords: Map<string, [number, number]> = new Map(); /* key -> identifier, value -> coordinate*/
-  _frameHandler: () => void; // requestAnimationFrame handler
+  _doPreview: boolean = true; // If a preview should be drawn
 
   protected _initializeKernels = _initializeKernels;
   protected _stroke = _stroke;
@@ -95,13 +95,6 @@ export class RealDrawBoard extends RealRenderer {
 
     this._initializeKernels();
     if (this._maxSnapshots > 0) this._snapshots[0] = this.getData();
-
-    this._frameHandler = () => {
-      if (this._isDrawing) {
-        if (this._isStroking) this._display(this.graphPixels);
-        window.requestAnimationFrame(this._frameHandler);
-      }
-    }
   }
   // --- DOM Event Listeners ---
 
@@ -122,9 +115,9 @@ export class RealDrawBoard extends RealRenderer {
     if (e.button === 0 /* Left Click */) {
       const endCoords = this._getMouseCoords(e);
       if(this._lastCoords.has('mouse')) this._endStroke(endCoords, 'mouse');
-      this._display(this.graphPixels);
-
       this._isStroking = false;
+
+      this._display(this.graphPixels);
       this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     }
   }
@@ -132,8 +125,8 @@ export class RealDrawBoard extends RealRenderer {
   _mouseLeaveEventListener = (e: MouseEvent) => {
     this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     this._isStroking = false;
-    this._display(this.graphPixels);
 
+    this._display(this.graphPixels);
     if(this._lastCoords.has('mouse')) this._endStroke(this._getMouseCoords(e), 'mouse');
   }
 
@@ -145,15 +138,10 @@ export class RealDrawBoard extends RealRenderer {
   _previewMouseMoveEventListener = (e: MouseEvent) => {
     const coords = this._getMouseCoords(e);
 
-    // if (!this._isStroking) {
-    //   this._display(
-    //     this._toolPreview(coords, 'mouse')
-    //   )
-    // }
-    // else {
-    //   this._display(this.graphPixels);
-    //   console.log('not previewing')
-    // }
+    if (this._doPreview) {
+      this._display(this._toolPreview(coords, 'mouse'));
+    }
+    else this._display(this.graphPixels);
   }
   // --- Mouse Events ---
 
@@ -193,12 +181,10 @@ export class RealDrawBoard extends RealRenderer {
 
   _previewTouchMoveEventListener = (e: TouchEvent) => {
     for (let i = 0; i < e.touches.length; i++) {
-      // if (!this._isStroking) {
-      //   this._display(
-      //     this._toolPreview(this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString())
-      //   )
-      // }
-      // else this._display(this.graphPixels);
+      if (!this._doPreview) {
+        this._display(this._toolPreview(this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString()));
+      }
+      else this._display(this.graphPixels);
     }
   }
   // --- Touch Events ---
@@ -207,7 +193,6 @@ export class RealDrawBoard extends RealRenderer {
   startRender() {
     this._addDOMEvents();
     this._isDrawing = true;
-    window.requestAnimationFrame(this._frameHandler);
 
     return this;
   }

@@ -1079,6 +1079,7 @@
 	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
 	exports.name = 'brush';
 	function _startStroke(coords, identifier) {
+	    this._doPreview = false;
 	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
 	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
@@ -1094,6 +1095,7 @@
 	        this._snapshots.shift();
 	        this._currentSnapshotIndex--;
 	    }
+	    this._doPreview = true;
 	}
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
@@ -1113,6 +1115,7 @@
 	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
 	exports.name = 'eraser';
 	function _startStroke(coords, identifier) {
+	    this._doPreview = false;
 	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
 	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
@@ -1120,6 +1123,7 @@
 	}
 	exports._startStroke = _startStroke;
 	function _endStroke(endCoords, identifier) {
+	    this._doPreview = true;
 	    this._plot(endCoords[0], endCoords[1], this.eraserSize, this.bgColor);
 	    this._lastCoords.delete(identifier);
 	    if (this._maxSnapshots > 0)
@@ -1365,6 +1369,7 @@
 	         *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
 	         */
 	        _this._lastCoords = new Map(); /* key -> identifier, value -> coordinate*/
+	        _this._doPreview = true; // If a preview should be drawn
 	        _this._initializeKernels = _initializeKernels_1._initializeKernels;
 	        _this._stroke = _draw._stroke;
 	        _this._plot = _draw._plot;
@@ -1399,12 +1404,14 @@
 	                if (_this._lastCoords.has('mouse'))
 	                    _this._endStroke(endCoords, 'mouse');
 	                _this._isStroking = false;
+	                _this._display(_this.graphPixels);
 	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	            }
 	        };
 	        _this._mouseLeaveEventListener = function (e) {
 	            _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	            _this._isStroking = false;
+	            _this._display(_this.graphPixels);
 	            if (_this._lastCoords.has('mouse'))
 	                _this._endStroke(_this._getMouseCoords(e), 'mouse');
 	        };
@@ -1414,15 +1421,11 @@
 	        };
 	        _this._previewMouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
-	            // if (!this._isStroking) {
-	            //   this._display(
-	            //     this._toolPreview(coords, 'mouse')
-	            //   )
-	            // }
-	            // else {
-	            //   this._display(this.graphPixels);
-	            //   console.log('not previewing')
-	            // }
+	            if (_this._doPreview) {
+	                _this._display(_this._toolPreview(coords, 'mouse'));
+	            }
+	            else
+	                _this._display(_this.graphPixels);
 	        };
 	        // --- Mouse Events ---
 	        // --- Touch Events ---
@@ -1434,27 +1437,23 @@
 	            }
 	        };
 	        _this._touchEndEventListener = function (e) {
-	            e.preventDefault();
 	            for (var i = 0; i < e.changedTouches.length; i++) {
 	                _this._endStroke(_this._getTouchCoords(e.changedTouches.item(i)), e.changedTouches.item(i).identifier.toString());
 	                _this._isStroking = false;
 	            }
 	        };
 	        _this._touchMoveEventListener = function (e) {
-	            e.preventDefault();
 	            for (var i = 0; i < e.touches.length; i++) {
 	                _this._doStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
 	            }
 	        };
 	        _this._previewTouchMoveEventListener = function (e) {
-	            e.preventDefault();
 	            for (var i = 0; i < e.touches.length; i++) {
-	                // if (!this._isStroking) {
-	                //   this._display(
-	                //     this._toolPreview(this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString())
-	                //   )
-	                // }
-	                // else this._display(this.graphPixels);
+	                if (!_this._doPreview) {
+	                    _this._display(_this._toolPreview(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString()));
+	                }
+	                else
+	                    _this._display(_this.graphPixels);
 	            }
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
@@ -1468,12 +1467,6 @@
 	        _this._initializeKernels();
 	        if (_this._maxSnapshots > 0)
 	            _this._snapshots[0] = _this.getData();
-	        var frameHandler = function () {
-	            if (_this._isStroking)
-	                _this._display(_this.graphPixels);
-	            window.requestAnimationFrame(frameHandler);
-	        };
-	        window.requestAnimationFrame(frameHandler);
 	        return _this;
 	    }
 	    // --- Touch Events ---
