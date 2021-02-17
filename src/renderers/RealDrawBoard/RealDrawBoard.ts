@@ -50,6 +50,7 @@ export class RealDrawBoard extends RealRenderer {
    *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
    */
   _lastCoords: Map<string, [number, number]> = new Map(); /* key -> identifier, value -> coordinate*/
+  _frameHandler: () => void; // requestAnimationFrame handler
 
   protected _initializeKernels = _initializeKernels;
   protected _stroke = _stroke;
@@ -95,12 +96,12 @@ export class RealDrawBoard extends RealRenderer {
     this._initializeKernels();
     if (this._maxSnapshots > 0) this._snapshots[0] = this.getData();
 
-    const frameHandler = () => {
-      if (this._isStroking) this._display(this.graphPixels);
-      window.requestAnimationFrame(frameHandler);
+    this._frameHandler = () => {
+      if (this._isDrawing) {
+        if (this._isStroking) this._display(this.graphPixels);
+        window.requestAnimationFrame(this._frameHandler);
+      }
     }
-
-    window.requestAnimationFrame(frameHandler);
   }
   // --- DOM Event Listeners ---
 
@@ -121,6 +122,7 @@ export class RealDrawBoard extends RealRenderer {
     if (e.button === 0 /* Left Click */) {
       const endCoords = this._getMouseCoords(e);
       if(this._lastCoords.has('mouse')) this._endStroke(endCoords, 'mouse');
+      this._display(this.graphPixels);
 
       this._isStroking = false;
       this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
@@ -170,8 +172,6 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _touchEndEventListener = (e: TouchEvent) => {
-    e.preventDefault();
-
     for (let i = 0; i < e.changedTouches.length; i++) {
       this._endStroke(
         this._getTouchCoords(e.changedTouches.item(i)),
@@ -183,8 +183,6 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _touchMoveEventListener = (e: TouchEvent) => {
-    e.preventDefault();
-
     for (let i = 0; i < e.touches.length; i++) {
       this._doStroke(
         this._getTouchCoords(e.touches.item(i)),
@@ -194,8 +192,6 @@ export class RealDrawBoard extends RealRenderer {
   }
 
   _previewTouchMoveEventListener = (e: TouchEvent) => {
-    e.preventDefault();
-
     for (let i = 0; i < e.touches.length; i++) {
       // if (!this._isStroking) {
       //   this._display(
@@ -211,6 +207,7 @@ export class RealDrawBoard extends RealRenderer {
   startRender() {
     this._addDOMEvents();
     this._isDrawing = true;
+    window.requestAnimationFrame(this._frameHandler);
 
     return this;
   }
