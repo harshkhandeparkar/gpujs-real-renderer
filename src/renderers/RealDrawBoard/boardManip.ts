@@ -33,7 +33,7 @@ export function clear(this: RealDrawBoard) {
   this._lastCoords.clear();
 
   this.graphPixels = <Texture>this._blankGraph();
-  this._snapshots[0] = this.getData();
+  if (this._maxSnapshots > 0) this._snapshots[0] = this.getData();
   this._display(this.graphPixels);
 
   return this;
@@ -50,7 +50,7 @@ export function _resetBoard(this: RealDrawBoard) {
 
   this._isDrawing = false;
   this._currentSnapshotIndex = 0;
-  this._snapshots = [this.getData()];
+  if (this._maxSnapshots > 0) this._snapshots = [this.getData()];
   this._lastCoords.clear();
 
   this.stopRender();

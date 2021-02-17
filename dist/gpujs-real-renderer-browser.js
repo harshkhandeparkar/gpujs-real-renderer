@@ -1225,7 +1225,8 @@
 	    this._currentSnapshotIndex = 0;
 	    this._lastCoords.clear();
 	    this.graphPixels = this._blankGraph();
-	    this._snapshots[0] = this.getData();
+	    if (this._maxSnapshots > 0)
+	        this._snapshots[0] = this.getData();
 	    this._display(this.graphPixels);
 	    return this;
 	}
@@ -1240,7 +1241,8 @@
 	    this.tool = this.options.tool;
 	    this._isDrawing = false;
 	    this._currentSnapshotIndex = 0;
-	    this._snapshots = [this.getData()];
+	    if (this._maxSnapshots > 0)
+	        this._snapshots = [this.getData()];
 	    this._lastCoords.clear();
 	    this.stopRender();
 	}
@@ -1356,6 +1358,7 @@
 	        _super.call(this, options) || this;
 	        _this.tool = RealDrawBoardDefaults.RealDrawBoardDefaults.tool;
 	        _this._isDrawing = false;
+	        _this._isStroking = false; // If a tool is drawing a stroke
 	        _this._snapshots = []; // Undo snapshots
 	        _this._currentSnapshotIndex = 0; // Current snapshot
 	        /** key -> identifier, value -> coordinate
@@ -1386,6 +1389,7 @@
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                _this.canvas.addEventListener('mousemove', _this._mouseMoveEventListener);
+	                _this._isStroking = true;
 	                _this._startStroke(_this._getMouseCoords(e), 'mouse');
 	            }
 	        };
@@ -1394,11 +1398,13 @@
 	                var endCoords = _this._getMouseCoords(e);
 	                if (_this._lastCoords.has('mouse'))
 	                    _this._endStroke(endCoords, 'mouse');
+	                _this._isStroking = false;
 	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	            }
 	        };
 	        _this._mouseLeaveEventListener = function (e) {
 	            _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
+	            _this._isStroking = false;
 	            if (_this._lastCoords.has('mouse'))
 	                _this._endStroke(_this._getMouseCoords(e), 'mouse');
 	        };
@@ -1408,13 +1414,22 @@
 	        };
 	        _this._previewMouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
-	            _this._display(_this._toolPreview(coords, 'mouse'));
+	            // if (!this._isStroking) {
+	            //   this._display(
+	            //     this._toolPreview(coords, 'mouse')
+	            //   )
+	            // }
+	            // else {
+	            //   this._display(this.graphPixels);
+	            //   console.log('not previewing')
+	            // }
 	        };
 	        // --- Mouse Events ---
 	        // --- Touch Events ---
 	        _this._touchStartEventListener = function (e) {
 	            e.preventDefault();
 	            for (var i = 0; i < e.touches.length; i++) {
+	                _this._isStroking = true;
 	                _this._startStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
 	            }
 	        };
@@ -1422,21 +1437,25 @@
 	            e.preventDefault();
 	            for (var i = 0; i < e.changedTouches.length; i++) {
 	                _this._endStroke(_this._getTouchCoords(e.changedTouches.item(i)), e.changedTouches.item(i).identifier.toString());
+	                _this._isStroking = false;
 	            }
 	        };
 	        _this._touchMoveEventListener = function (e) {
 	            e.preventDefault();
 	            for (var i = 0; i < e.touches.length; i++) {
-	                _this._display(_this._toolPreview(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString()));
+	                _this._doStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
 	            }
-	            _this._display(_this.graphPixels);
 	        };
 	        _this._previewTouchMoveEventListener = function (e) {
 	            e.preventDefault();
 	            for (var i = 0; i < e.touches.length; i++) {
-	                _this._doStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
+	                // if (!this._isStroking) {
+	                //   this._display(
+	                //     this._toolPreview(this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString())
+	                //   )
+	                // }
+	                // else this._display(this.graphPixels);
 	            }
-	            _this._display(_this.graphPixels);
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;
@@ -1447,7 +1466,14 @@
 	        _this.changeTool(options.tool);
 	        // *****DEFAULTS*****
 	        _this._initializeKernels();
-	        _this._snapshots[0] = _this.getData();
+	        if (_this._maxSnapshots > 0)
+	            _this._snapshots[0] = _this.getData();
+	        var frameHandler = function () {
+	            if (_this._isStroking)
+	                _this._display(_this.graphPixels);
+	            window.requestAnimationFrame(frameHandler);
+	        };
+	        window.requestAnimationFrame(frameHandler);
 	        return _this;
 	    }
 	    // --- Touch Events ---

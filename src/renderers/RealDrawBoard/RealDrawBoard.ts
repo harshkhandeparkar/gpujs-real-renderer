@@ -39,6 +39,7 @@ export class RealDrawBoard extends RealRenderer {
   eraserSize: number;
   tool: Tool = RealDrawBoardDefaults.tool;
   _isDrawing: boolean = false;
+  _isStroking: boolean = false; // If a tool is drawing a stroke
   _snapshots: number[][] = []; // Undo snapshots
   _currentSnapshotIndex = 0; // Current snapshot
   _maxSnapshots: number;
@@ -92,7 +93,14 @@ export class RealDrawBoard extends RealRenderer {
     // *****DEFAULTS*****
 
     this._initializeKernels();
-    this._snapshots[0] = this.getData();
+    if (this._maxSnapshots > 0) this._snapshots[0] = this.getData();
+
+    const frameHandler = () => {
+      if (this._isStroking) this._display(this.graphPixels);
+      window.requestAnimationFrame(frameHandler);
+    }
+
+    window.requestAnimationFrame(frameHandler);
   }
   // --- DOM Event Listeners ---
 
@@ -100,6 +108,7 @@ export class RealDrawBoard extends RealRenderer {
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
+      this._isStroking = true;
 
       this._startStroke(
         this._getMouseCoords(e),
@@ -113,12 +122,15 @@ export class RealDrawBoard extends RealRenderer {
       const endCoords = this._getMouseCoords(e);
       if(this._lastCoords.has('mouse')) this._endStroke(endCoords, 'mouse');
 
+      this._isStroking = false;
       this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
     }
   }
 
   _mouseLeaveEventListener = (e: MouseEvent) => {
     this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
+    this._isStroking = false;
+
     if(this._lastCoords.has('mouse')) this._endStroke(this._getMouseCoords(e), 'mouse');
   }
 
@@ -130,9 +142,15 @@ export class RealDrawBoard extends RealRenderer {
   _previewMouseMoveEventListener = (e: MouseEvent) => {
     const coords = this._getMouseCoords(e);
 
-    this._display(
-      this._toolPreview(coords, 'mouse')
-    )
+    // if (!this._isStroking) {
+    //   this._display(
+    //     this._toolPreview(coords, 'mouse')
+    //   )
+    // }
+    // else {
+    //   this._display(this.graphPixels);
+    //   console.log('not previewing')
+    // }
   }
   // --- Mouse Events ---
 
@@ -141,6 +159,8 @@ export class RealDrawBoard extends RealRenderer {
     e.preventDefault();
 
     for (let i = 0; i < e.touches.length; i++) {
+      this._isStroking = true;
+
       this._startStroke(
         this._getTouchCoords(e.touches.item(i)),
         e.touches.item(i).identifier.toString()
@@ -156,22 +176,12 @@ export class RealDrawBoard extends RealRenderer {
         this._getTouchCoords(e.changedTouches.item(i)),
         e.changedTouches.item(i).identifier.toString()
       )
+
+      this._isStroking = false;
     }
   }
 
   _touchMoveEventListener = (e: TouchEvent) => {
-    e.preventDefault();
-
-    for (let i = 0; i < e.touches.length; i++) {
-      this._display(
-        this._toolPreview(this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString())
-      )
-    }
-
-    this._display(this.graphPixels);
-  }
-
-  _previewTouchMoveEventListener = (e: TouchEvent) => {
     e.preventDefault();
 
     for (let i = 0; i < e.touches.length; i++) {
@@ -180,8 +190,19 @@ export class RealDrawBoard extends RealRenderer {
         e.touches.item(i).identifier.toString()
       )
     }
+  }
 
-    this._display(this.graphPixels);
+  _previewTouchMoveEventListener = (e: TouchEvent) => {
+    e.preventDefault();
+
+    for (let i = 0; i < e.touches.length; i++) {
+      // if (!this._isStroking) {
+      //   this._display(
+      //     this._toolPreview(this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString())
+      //   )
+      // }
+      // else this._display(this.graphPixels);
+    }
   }
   // --- Touch Events ---
 
