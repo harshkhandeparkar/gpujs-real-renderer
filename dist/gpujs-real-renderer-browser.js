@@ -1350,7 +1350,7 @@
 	        _super.call(this, options) || this;
 	        _this.tool = RealDrawBoardDefaults.RealDrawBoardDefaults.tool;
 	        _this._isDrawing = false;
-	        _this._isStroking = false; // If a tool is drawing a stroke
+	        _this._isStroking = false; // If a tool is drawing a strwoke
 	        _this._snapshots = []; // Undo snapshots
 	        _this._currentSnapshotIndex = 0; // Current snapshot
 	        /** key -> identifier, value -> coordinate
