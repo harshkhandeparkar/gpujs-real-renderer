@@ -13,7 +13,6 @@ export function _startStroke(
   coords: [number, number],
   identifier: string
 ) {
-  if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
   this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
 
   this._lastCoords.set(identifier, coords);

@@ -9,7 +9,6 @@ export function _startStroke(
   identifier: string
 ) {
   this._doPreview = false;
-  if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
   this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
 
   this._lastCoords.set(identifier, coords);
@@ -23,12 +22,6 @@ export function _endStroke(
   this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
 
   this._lastCoords.delete(identifier);
-
-  if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData();
-  if (this._snapshots.length > this._maxSnapshots) {
-    this._snapshots.shift();
-    this._currentSnapshotIndex--;
-  }
 
   this._doPreview = true;
 }

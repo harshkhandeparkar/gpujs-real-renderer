@@ -104,6 +104,8 @@ export class RealDrawBoard extends RealRenderer {
       this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
       this._isStroking = true;
 
+      if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+
       this._startStroke(
         this._getMouseCoords(e),
         'mouse'
@@ -118,7 +120,14 @@ export class RealDrawBoard extends RealRenderer {
       this._isStroking = false;
 
       this._display(this.graphPixels);
+
       this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
+
+      if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData(); // Take snapshot
+      if (this._snapshots.length > this._maxSnapshots) {
+        this._snapshots.shift();
+        this._currentSnapshotIndex--;
+      }
     }
   }
 
@@ -152,6 +161,8 @@ export class RealDrawBoard extends RealRenderer {
     for (let i = 0; i < e.touches.length; i++) {
       this._isStroking = true;
 
+      if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+
       this._startStroke(
         this._getTouchCoords(e.touches.item(i)),
         e.touches.item(i).identifier.toString()
@@ -167,6 +178,12 @@ export class RealDrawBoard extends RealRenderer {
       )
 
       this._isStroking = false;
+    }
+
+    if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData(); // Take snapshot
+    if (this._snapshots.length > this._maxSnapshots) {
+      this._snapshots.shift();
+      this._currentSnapshotIndex--;
     }
   }
 
