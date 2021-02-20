@@ -102,6 +102,10 @@ e.g.: `RealRenderer.draw().reset().startRender()`
 
 - `toggleRender()`: Toggles the rendering.
 
+- `getData()`: Returns a 3D array of the pixel values.
+
+- `loadData()`: Returns a 3D array of the pixels.
+
 - `resetTime()`: Resets the internal time value to `0`.
 
 - `reset()`: Resets the pixels on the graph to a blank graph with the coordinate axes.

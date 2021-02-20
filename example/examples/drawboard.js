@@ -1,7 +1,7 @@
 // Draw Board
 const drawBoardOptions = {
   canvas: document.getElementById('drawboard-canvas'),
-  dimensions: [420, 360],
+  dimensions: [1000, 1000],
 
   xScaleFactor: 1,
   yScaleFactor: 1,

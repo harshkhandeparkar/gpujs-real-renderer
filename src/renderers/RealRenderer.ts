@@ -146,21 +146,10 @@ export class RealRenderer {
   }
 
   getData() {
-    let returnedArray: number[][][] = <number[][][]>this.graphPixels.toArray();
-    let outArr: number[] = [];
-
-    for (let i = 0; i < returnedArray.length; i++) {
-      for (let j = 0; j < returnedArray[0].length; j++) {
-        for (let k = 0; k < returnedArray[0][0].length; k++) {
-          outArr[i * returnedArray[0].length * returnedArray[0][0].length + j * returnedArray[0][0].length + k] = returnedArray[i][j][k];
-        }
-      }
-    }
-
-    return outArr;
+    return <number[][][]>this.graphPixels.toArray();
   }
 
-  loadData(pixels: number[]) {
+  loadData(pixels: number[][][]) {
     this.graphPixels = <Texture>this._loadData(pixels);
     this._display(this.graphPixels);
   }

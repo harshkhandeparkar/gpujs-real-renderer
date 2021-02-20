@@ -113,14 +113,11 @@
 	function getLoadDataKernel(gpu, dimensions) {
 	    return gpu.createKernel(function (graphPixels) {
 	        return [
-	            graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 0],
-	            graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 1],
-	            graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 2]
+	            graphPixels[this.thread.y][this.thread.x][0],
+	            graphPixels[this.thread.y][this.thread.x][1],
+	            graphPixels[this.thread.y][this.thread.x][2]
 	        ];
 	    }, {
-	        argumentTypes: {
-	            graphPixels: 'Array'
-	        },
 	        output: dimensions,
 	        pipeline: true
 	    });
@@ -263,16 +260,7 @@
 	        return this;
 	    };
 	    RealRenderer.prototype.getData = function () {
-	        var returnedArray = this.graphPixels.toArray();
-	        var outArr = [];
-	        for (var i = 0; i < returnedArray.length; i++) {
-	            for (var j = 0; j < returnedArray[0].length; j++) {
-	                for (var k = 0; k < returnedArray[0][0].length; k++) {
-	                    outArr[i * returnedArray[0].length * returnedArray[0][0].length + j * returnedArray[0][0].length + k] = returnedArray[i][j][k];
-	                }
-	            }
-	        }
-	        return outArr;
+	        return this.graphPixels.toArray();
 	    };
 	    RealRenderer.prototype.loadData = function (pixels) {
 	        this.graphPixels = this._loadData(pixels);

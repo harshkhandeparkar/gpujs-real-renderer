@@ -12,15 +12,12 @@ export function getLoadDataKernel(
   return gpu.createKernel(
     function(graphPixels) {
       return [
-        graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 0],
-        graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 1],
-        graphPixels[this.thread.y * this.output.x * 3 + this.thread.x * 3 + 2]
+        graphPixels[this.thread.y][this.thread.x][0],
+        graphPixels[this.thread.y][this.thread.x][1],
+        graphPixels[this.thread.y][this.thread.x][2]
       ]
     },
     {
-      argumentTypes: {
-        graphPixels: 'Array'
-      },
       output: dimensions,
       pipeline: true
     }
