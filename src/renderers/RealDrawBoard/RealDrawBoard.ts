@@ -39,7 +39,7 @@ export class RealDrawBoard extends RealRenderer {
   eraserSize: number;
   tool: Tool = RealDrawBoardDefaults.tool;
   _isDrawing: boolean = false;
-  _isStroking: boolean = false; // If a tool is drawing a strwoke
+  _: boolean = false; // If a tool is drawing a strwoke
   _snapshots: (number[][][])[] = []; // Undo snapshots
   _currentSnapshotIndex = 0; // Current snapshot
   _maxSnapshots: number;
@@ -102,7 +102,6 @@ export class RealDrawBoard extends RealRenderer {
   _mouseDownEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
-      this._isStroking = true;
 
       if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 
@@ -116,27 +115,43 @@ export class RealDrawBoard extends RealRenderer {
   _mouseUpEventListener = (e: MouseEvent) => {
     if (e.button === 0 /* Left Click */) {
       const endCoords = this._getMouseCoords(e);
+      this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
+      this._removeDOMEvents();
+
       if(this._lastCoords.has('mouse')) this._endStroke(endCoords, 'mouse');
-      this._isStroking = false;
 
       this._display(this.graphPixels);
 
-      this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
+      setTimeout(() => {
+        if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData(); // Take snapshot
+        if (this._snapshots.length > this._maxSnapshots) {
+          this._snapshots.shift();
+          this._currentSnapshotIndex--;
+        }
 
-      if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData(); // Take snapshot
-      if (this._snapshots.length > this._maxSnapshots) {
-        this._snapshots.shift();
-        this._currentSnapshotIndex--;
-      }
+        this._addDOMEvents();
+      }, 20)
     }
   }
 
   _mouseLeaveEventListener = (e: MouseEvent) => {
     this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
-    this._isStroking = false;
 
-    this._display(this.graphPixels);
-    if(this._lastCoords.has('mouse')) this._endStroke(this._getMouseCoords(e), 'mouse');
+    if(this._lastCoords.has('mouse')) {
+      this._removeDOMEvents();
+      this._endStroke(this._getMouseCoords(e), 'mouse');
+      this._display(this.graphPixels);
+
+      setTimeout(() => { // Delay to let the canvas 'settle'
+        if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData(); // Take snapshot
+        if (this._snapshots.length > this._maxSnapshots) {
+          this._snapshots.shift();
+          this._currentSnapshotIndex--;
+        }
+
+        this._addDOMEvents();
+      }, 20)
+    }
   }
 
   _mouseMoveEventListener = (e: MouseEvent) => {
@@ -159,8 +174,6 @@ export class RealDrawBoard extends RealRenderer {
     e.preventDefault();
 
     for (let i = 0; i < e.touches.length; i++) {
-      this._isStroking = true;
-
       if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 
       this._startStroke(
@@ -176,15 +189,17 @@ export class RealDrawBoard extends RealRenderer {
         this._getTouchCoords(e.changedTouches.item(i)),
         e.changedTouches.item(i).identifier.toString()
       )
-
-      this._isStroking = false;
     }
 
-    if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData(); // Take snapshot
-    if (this._snapshots.length > this._maxSnapshots) {
-      this._snapshots.shift();
-      this._currentSnapshotIndex--;
-    }
+    setTimeout(() => {
+      if (this._maxSnapshots > 0) this._snapshots[++this._currentSnapshotIndex] = this.getData(); // Take snapshot
+      if (this._snapshots.length > this._maxSnapshots) {
+        this._snapshots.shift();
+        this._currentSnapshotIndex--;
+      }
+
+      this._addDOMEvents();
+    }, 20)
   }
 
   _touchMoveEventListener = (e: TouchEvent) => {

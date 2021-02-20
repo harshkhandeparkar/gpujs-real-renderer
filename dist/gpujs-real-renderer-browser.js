@@ -1068,8 +1068,6 @@
 	exports.name = 'brush';
 	function _startStroke(coords, identifier) {
 	    this._doPreview = false;
-	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
-	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
 	    this._lastCoords.set(identifier, coords);
 	}
@@ -1077,12 +1075,6 @@
 	function _endStroke(endCoords, identifier) {
 	    this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
 	    this._lastCoords.delete(identifier);
-	    if (this._maxSnapshots > 0)
-	        this._snapshots[++this._currentSnapshotIndex] = this.getData();
-	    if (this._snapshots.length > this._maxSnapshots) {
-	        this._snapshots.shift();
-	        this._currentSnapshotIndex--;
-	    }
 	    this._doPreview = true;
 	}
 	exports._endStroke = _endStroke;
@@ -1104,8 +1096,6 @@
 	exports.name = 'eraser';
 	function _startStroke(coords, identifier) {
 	    this._doPreview = false;
-	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
-	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
 	    this._lastCoords.set(identifier, coords);
 	}
@@ -1114,12 +1104,6 @@
 	    this._doPreview = true;
 	    this._plot(endCoords[0], endCoords[1], this.eraserSize, this.bgColor);
 	    this._lastCoords.delete(identifier);
-	    if (this._maxSnapshots > 0)
-	        this._snapshots[++this._currentSnapshotIndex] = this.getData();
-	    if (this._snapshots.length > this._maxSnapshots) {
-	        this._snapshots.shift();
-	        this._currentSnapshotIndex--;
-	    }
 	}
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
@@ -1143,8 +1127,6 @@
 	   */
 	var _startCoords = new Map(); /* key -> identifier, value -> coordinate*/
 	function _startStroke(coords, identifier) {
-	    if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0)
-	        this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
 	    this._lastCoords.set(identifier, coords);
 	    _startCoords.set(identifier, coords);
@@ -1350,7 +1332,7 @@
 	        _super.call(this, options) || this;
 	        _this.tool = RealDrawBoardDefaults.RealDrawBoardDefaults.tool;
 	        _this._isDrawing = false;
-	        _this._isStroking = false; // If a tool is drawing a strwoke
+	        _this._ = false; // If a tool is drawing a strwoke
 	        _this._snapshots = []; // Undo snapshots
 	        _this._currentSnapshotIndex = 0; // Current snapshot
 	        /** key -> identifier, value -> coordinate
@@ -1382,26 +1364,46 @@
 	        _this._mouseDownEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                _this.canvas.addEventListener('mousemove', _this._mouseMoveEventListener);
-	                _this._isStroking = true;
+	                if (_this._currentSnapshotIndex < _this._snapshots.length - 1 && _this._maxSnapshots > 0)
+	                    _this._snapshots.splice(_this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	                _this._startStroke(_this._getMouseCoords(e), 'mouse');
 	            }
 	        };
 	        _this._mouseUpEventListener = function (e) {
 	            if (e.button === 0 /* Left Click */) {
 	                var endCoords = _this._getMouseCoords(e);
+	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
+	                _this._removeDOMEvents();
 	                if (_this._lastCoords.has('mouse'))
 	                    _this._endStroke(endCoords, 'mouse');
-	                _this._isStroking = false;
 	                _this._display(_this.graphPixels);
-	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
+	                setTimeout(function () {
+	                    if (_this._maxSnapshots > 0)
+	                        _this._snapshots[++_this._currentSnapshotIndex] = _this.getData(); // Take snapshot
+	                    if (_this._snapshots.length > _this._maxSnapshots) {
+	                        _this._snapshots.shift();
+	                        _this._currentSnapshotIndex--;
+	                    }
+	                    _this._addDOMEvents();
+	                }, 20);
 	            }
 	        };
 	        _this._mouseLeaveEventListener = function (e) {
 	            _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
-	            _this._isStroking = false;
-	            _this._display(_this.graphPixels);
-	            if (_this._lastCoords.has('mouse'))
+	            if (_this._lastCoords.has('mouse')) {
+	                _this._removeDOMEvents();
 	                _this._endStroke(_this._getMouseCoords(e), 'mouse');
+	                _this._display(_this.graphPixels);
+	                setTimeout(function () {
+	                    if (_this._maxSnapshots > 0)
+	                        _this._snapshots[++_this._currentSnapshotIndex] = _this.getData(); // Take snapshot
+	                    if (_this._snapshots.length > _this._maxSnapshots) {
+	                        _this._snapshots.shift();
+	                        _this._currentSnapshotIndex--;
+	                    }
+	                    _this._addDOMEvents();
+	                }, 20);
+	            }
 	        };
 	        _this._mouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
@@ -1420,15 +1422,24 @@
 	        _this._touchStartEventListener = function (e) {
 	            e.preventDefault();
 	            for (var i = 0; i < e.touches.length; i++) {
-	                _this._isStroking = true;
+	                if (_this._currentSnapshotIndex < _this._snapshots.length - 1 && _this._maxSnapshots > 0)
+	                    _this._snapshots.splice(_this._currentSnapshotIndex + 1); // Delete all redo snapshots
 	                _this._startStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
 	            }
 	        };
 	        _this._touchEndEventListener = function (e) {
 	            for (var i = 0; i < e.changedTouches.length; i++) {
 	                _this._endStroke(_this._getTouchCoords(e.changedTouches.item(i)), e.changedTouches.item(i).identifier.toString());
-	                _this._isStroking = false;
 	            }
+	            setTimeout(function () {
+	                if (_this._maxSnapshots > 0)
+	                    _this._snapshots[++_this._currentSnapshotIndex] = _this.getData(); // Take snapshot
+	                if (_this._snapshots.length > _this._maxSnapshots) {
+	                    _this._snapshots.shift();
+	                    _this._currentSnapshotIndex--;
+	                }
+	                _this._addDOMEvents();
+	            }, 20);
 	        };
 	        _this._touchMoveEventListener = function (e) {
 	            for (var i = 0; i < e.touches.length; i++) {
