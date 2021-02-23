@@ -39,7 +39,7 @@ export class RealDrawBoard extends RealRenderer {
   eraserSize: number;
   tool: Tool = RealDrawBoardDefaults.tool;
   _isDrawing: boolean = false;
-  _: boolean = false; // If a tool is drawing a strwoke
+  _: boolean = false; // If a tool is drawing a stroke
   _snapshots: (number[][][])[] = []; // Undo snapshots
   _currentSnapshotIndex = 0; // Current snapshot
   _maxSnapshots: number;
