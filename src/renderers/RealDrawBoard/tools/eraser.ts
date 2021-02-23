@@ -10,8 +10,6 @@ export function _startStroke(
 ) {
   this._doPreview = false;
   this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
-
-  this._lastCoords.set(identifier, coords);
 }
 
 export function _endStroke(
@@ -21,8 +19,6 @@ export function _endStroke(
 ) {
   this._doPreview = true;
   this._plot(endCoords[0], endCoords[1], this.eraserSize, this.bgColor);
-
-  this._lastCoords.delete(identifier);
 }
 
 export function _doStroke(
@@ -32,8 +28,6 @@ export function _doStroke(
 ) {
   this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
   this._stroke(coords[0], coords[1], this.eraserSize, this.bgColor, identifier);
-
-  this._lastCoords.set(identifier, coords);
 }
 
 export function _toolPreview(

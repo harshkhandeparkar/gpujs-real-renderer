@@ -104,11 +104,13 @@ export class RealDrawBoard extends RealRenderer {
       this.canvas.addEventListener('mousemove', this._mouseMoveEventListener);
 
       if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
+      const coords = this._getMouseCoords(e);
 
       this._startStroke(
-        this._getMouseCoords(e),
+        coords,
         'mouse'
       )
+      this._lastCoords.set('mouse', coords);
     }
   }
 
@@ -118,7 +120,10 @@ export class RealDrawBoard extends RealRenderer {
       this.canvas.removeEventListener('mousemove', this._mouseMoveEventListener);
       this._removeDOMEvents();
 
-      if(this._lastCoords.has('mouse')) this._endStroke(endCoords, 'mouse');
+      if(this._lastCoords.has('mouse')) {
+        this._endStroke(endCoords, 'mouse');
+        this._lastCoords.delete('mouse');
+      }
 
       this._display(this.graphPixels);
 
@@ -140,6 +145,7 @@ export class RealDrawBoard extends RealRenderer {
     if(this._lastCoords.has('mouse')) {
       this._removeDOMEvents();
       this._endStroke(this._getMouseCoords(e), 'mouse');
+      this._lastCoords.delete('mouse');
       this._display(this.graphPixels);
 
       setTimeout(() => { // Delay to let the canvas 'settle'
@@ -157,6 +163,7 @@ export class RealDrawBoard extends RealRenderer {
   _mouseMoveEventListener = (e: MouseEvent) => {
     const coords = this._getMouseCoords(e);
     this._doStroke(coords, 'mouse');
+    this._lastCoords.set('mouse', coords);
   }
 
   _previewMouseMoveEventListener = (e: MouseEvent) => {
@@ -176,17 +183,26 @@ export class RealDrawBoard extends RealRenderer {
     for (let i = 0; i < e.touches.length; i++) {
       if (this._currentSnapshotIndex < this._snapshots.length - 1 && this._maxSnapshots > 0) this._snapshots.splice(this._currentSnapshotIndex + 1); // Delete all redo snapshots
 
+      const coords = this._getTouchCoords(e.touches.item(i));
       this._startStroke(
-        this._getTouchCoords(e.touches.item(i)),
+        coords,
         e.touches.item(i).identifier.toString()
+      )
+      this._lastCoords.set(
+        e.touches.item(i).identifier.toString(),
+        coords
       )
     }
   }
 
   _touchEndEventListener = (e: TouchEvent) => {
     for (let i = 0; i < e.changedTouches.length; i++) {
+      const coords = this._getTouchCoords(e.changedTouches.item(i));
       this._endStroke(
-        this._getTouchCoords(e.changedTouches.item(i)),
+        coords,
+        e.changedTouches.item(i).identifier.toString()
+      )
+      this._lastCoords.delete(
         e.changedTouches.item(i).identifier.toString()
       )
     }
@@ -204,9 +220,14 @@ export class RealDrawBoard extends RealRenderer {
 
   _touchMoveEventListener = (e: TouchEvent) => {
     for (let i = 0; i < e.touches.length; i++) {
+      const coords = this._getTouchCoords(e.touches.item(i));
       this._doStroke(
-        this._getTouchCoords(e.touches.item(i)),
+        coords,
         e.touches.item(i).identifier.toString()
+      )
+      this._lastCoords.set(
+        e.touches.item(i).identifier.toString(),
+        coords
       )
     }
   }

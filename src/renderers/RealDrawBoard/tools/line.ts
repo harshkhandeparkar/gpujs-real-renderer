@@ -14,8 +14,6 @@ export function _startStroke(
   identifier: string
 ) {
   this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-
-  this._lastCoords.set(identifier, coords);
   _startCoords.set(identifier, coords);
 }
 
@@ -32,8 +30,6 @@ export function _endStroke(
     this.brushColor
   )
   this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
-
-  this._lastCoords.delete(identifier);
   _startCoords.delete(identifier);
 }
 
@@ -42,7 +38,6 @@ export function _doStroke(
   coords: [number, number],
   identifier: string
 ) {
-  this._lastCoords.set(identifier, coords);
 }
 
 export function _toolPreview(
