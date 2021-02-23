@@ -55,9 +55,9 @@ export function convertHSLToRGB(h: number, s: number, l: number) :[ number ,numb
         r = c; g = 0; b = x;
     }
     
-    r = Math.round((r + m) * 255);
-    g = Math.round((g + m) * 255);
-    b = Math.round((b + m) * 255);
+    r = Math.round((r + m));
+    g = Math.round((g + m));
+    b = Math.round((b + m));
 
     return [ r ,g ,b ];
 }
