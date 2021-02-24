@@ -1069,19 +1069,16 @@
 	function _startStroke(coords, identifier) {
 	    this._doPreview = false;
 	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-	    this._lastCoords.set(identifier, coords);
 	}
 	exports._startStroke = _startStroke;
 	function _endStroke(endCoords, identifier) {
 	    this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
-	    this._lastCoords.delete(identifier);
 	    this._doPreview = true;
 	}
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
 	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
 	    this._stroke(coords[0], coords[1], this.brushSize, this.brushColor, identifier);
-	    this._lastCoords.set(identifier, coords);
 	}
 	exports._doStroke = _doStroke;
 	function _toolPreview(coords, identifier) {
@@ -1097,19 +1094,16 @@
 	function _startStroke(coords, identifier) {
 	    this._doPreview = false;
 	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
-	    this._lastCoords.set(identifier, coords);
 	}
 	exports._startStroke = _startStroke;
 	function _endStroke(endCoords, identifier) {
 	    this._doPreview = true;
 	    this._plot(endCoords[0], endCoords[1], this.eraserSize, this.bgColor);
-	    this._lastCoords.delete(identifier);
 	}
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
 	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
 	    this._stroke(coords[0], coords[1], this.eraserSize, this.bgColor, identifier);
-	    this._lastCoords.set(identifier, coords);
 	}
 	exports._doStroke = _doStroke;
 	function _toolPreview(coords, identifier) {
@@ -1128,19 +1122,16 @@
 	var _startCoords = new Map(); /* key -> identifier, value -> coordinate*/
 	function _startStroke(coords, identifier) {
 	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-	    this._lastCoords.set(identifier, coords);
 	    _startCoords.set(identifier, coords);
 	}
 	exports._startStroke = _startStroke;
 	function _endStroke(endCoords, identifier) {
 	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), endCoords, this.brushSize, this.brushColor);
 	    this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
-	    this._lastCoords.delete(identifier);
 	    _startCoords.delete(identifier);
 	}
 	exports._endStroke = _endStroke;
 	function _doStroke(coords, identifier) {
-	    this._lastCoords.set(identifier, coords);
 	}
 	exports._doStroke = _doStroke;
 	function _toolPreview(coords, identifier) {
@@ -1332,7 +1323,6 @@
 	        _super.call(this, options) || this;
 	        _this.tool = RealDrawBoardDefaults.RealDrawBoardDefaults.tool;
 	        _this._isDrawing = false;
-	        _this._ = false; // If a tool is drawing a strwoke
 	        _this._snapshots = []; // Undo snapshots
 	        _this._currentSnapshotIndex = 0; // Current snapshot
 	        /** key -> identifier, value -> coordinate
@@ -1366,7 +1356,9 @@
 	                _this.canvas.addEventListener('mousemove', _this._mouseMoveEventListener);
 	                if (_this._currentSnapshotIndex < _this._snapshots.length - 1 && _this._maxSnapshots > 0)
 	                    _this._snapshots.splice(_this._currentSnapshotIndex + 1); // Delete all redo snapshots
-	                _this._startStroke(_this._getMouseCoords(e), 'mouse');
+	                var coords = _this._getMouseCoords(e);
+	                _this._startStroke(coords, 'mouse');
+	                _this._lastCoords.set('mouse', coords);
 	            }
 	        };
 	        _this._mouseUpEventListener = function (e) {
@@ -1374,8 +1366,10 @@
 	                var endCoords = _this._getMouseCoords(e);
 	                _this.canvas.removeEventListener('mousemove', _this._mouseMoveEventListener);
 	                _this._removeDOMEvents();
-	                if (_this._lastCoords.has('mouse'))
+	                if (_this._lastCoords.has('mouse')) {
 	                    _this._endStroke(endCoords, 'mouse');
+	                    _this._lastCoords.delete('mouse');
+	                }
 	                _this._display(_this.graphPixels);
 	                setTimeout(function () {
 	                    if (_this._maxSnapshots > 0)
@@ -1393,6 +1387,7 @@
 	            if (_this._lastCoords.has('mouse')) {
 	                _this._removeDOMEvents();
 	                _this._endStroke(_this._getMouseCoords(e), 'mouse');
+	                _this._lastCoords.delete('mouse');
 	                _this._display(_this.graphPixels);
 	                setTimeout(function () {
 	                    if (_this._maxSnapshots > 0)
@@ -1408,6 +1403,7 @@
 	        _this._mouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
 	            _this._doStroke(coords, 'mouse');
+	            _this._lastCoords.set('mouse', coords);
 	        };
 	        _this._previewMouseMoveEventListener = function (e) {
 	            var coords = _this._getMouseCoords(e);
@@ -1424,12 +1420,16 @@
 	            for (var i = 0; i < e.touches.length; i++) {
 	                if (_this._currentSnapshotIndex < _this._snapshots.length - 1 && _this._maxSnapshots > 0)
 	                    _this._snapshots.splice(_this._currentSnapshotIndex + 1); // Delete all redo snapshots
-	                _this._startStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
+	                var coords = _this._getTouchCoords(e.touches.item(i));
+	                _this._startStroke(coords, e.touches.item(i).identifier.toString());
+	                _this._lastCoords.set(e.touches.item(i).identifier.toString(), coords);
 	            }
 	        };
 	        _this._touchEndEventListener = function (e) {
 	            for (var i = 0; i < e.changedTouches.length; i++) {
-	                _this._endStroke(_this._getTouchCoords(e.changedTouches.item(i)), e.changedTouches.item(i).identifier.toString());
+	                var coords = _this._getTouchCoords(e.changedTouches.item(i));
+	                _this._endStroke(coords, e.changedTouches.item(i).identifier.toString());
+	                _this._lastCoords.delete(e.changedTouches.item(i).identifier.toString());
 	            }
 	            setTimeout(function () {
 	                if (_this._maxSnapshots > 0)
@@ -1443,7 +1443,9 @@
 	        };
 	        _this._touchMoveEventListener = function (e) {
 	            for (var i = 0; i < e.touches.length; i++) {
-	                _this._doStroke(_this._getTouchCoords(e.touches.item(i)), e.touches.item(i).identifier.toString());
+	                var coords = _this._getTouchCoords(e.touches.item(i));
+	                _this._doStroke(coords, e.touches.item(i).identifier.toString());
+	                _this._lastCoords.set(e.touches.item(i).identifier.toString(), coords);
 	            }
 	        };
 	        _this._previewTouchMoveEventListener = function (e) {
