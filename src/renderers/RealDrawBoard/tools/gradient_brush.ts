@@ -1,12 +1,11 @@
 import { RealDrawBoard } from '../RealDrawBoard';
 import { Texture } from 'gpu.js';
-import { convertHSLToRGB } from '../../../util/convertForm';
-import { type } from 'os';
+import { convertHSLToRGB } from '../../../util/convertHSLToRGB';
 
-var hue: number = 0;
-var gradientColors: [number ,number ,number] = [ 1 ,1 ,1 ]; 
+let hue: number = 0;
+let gradientColors: [number ,number ,number] = [ 1 ,1 ,1 ]; 
 
-export const name = 'gradientBrush';
+export const name = 'gradient_brush';
 
 export function _startStroke(
   this: RealDrawBoard,

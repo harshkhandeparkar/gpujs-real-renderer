@@ -1,13 +1,13 @@
 import * as brush from './brush';
 import * as eraser from './eraser';
 import * as line from './line';
-import * as gradientBrush from './gradientBrush';
+import * as gradient_brush from './gradient_brush';
 
 export const tools = {
   brush,
-  gradientBrush,
+  gradient_brush,
   eraser,
   line
 }
 
-export type Tool = 'brush' | 'gradientBrush' | 'eraser' | 'line';
+export type Tool = 'brush' | 'gradient_brush' | 'eraser' | 'line';
