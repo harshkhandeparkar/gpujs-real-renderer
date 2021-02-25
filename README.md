@@ -245,7 +245,7 @@ Apart from those, the following are additional options that can be passed on to 
 
 - `maxUndos`(*Number*) (Default: `15`): Determines the maximum possible undos. (Use a smaller number on devices with less RAM)
 
-- `tool` (*'brush' | 'draw' | 'line'*) (Default: `'brush'`): Determines which tool to use.
+- `tool` (*'brush' | 'gradient_brush' | 'eraser' | 'line'*) (Default: `'brush'`): Determines which tool to use.
 
 ##### Methods
 Since this is a child class of `RealRenderer`, all the methods of `RealRender` are available here as well.
