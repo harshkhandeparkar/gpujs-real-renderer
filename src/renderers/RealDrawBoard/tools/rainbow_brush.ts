@@ -5,7 +5,7 @@ import { convertHSLToRGB } from '../../../util/convertHSLToRGB';
 let hue: number = 0;
 let gradientColors: [number, number, number] = [1, 1, 1]; 
 
-export const name = 'gradient_brush';
+export const name = 'rainbow_brush';
 
 export function _startStroke(
   this: RealDrawBoard,
@@ -34,6 +34,7 @@ export function _doStroke(
 ) {
   hue = (hue + 1) % 360;
   gradientColors = convertHSLToRGB(hue, 90, 40);
+  console.log('r,g,b => ',gradientColors);
   this._plot(coords[0], coords[1], this.brushSize, gradientColors);
   this._stroke(coords[0], coords[1], this.brushSize, gradientColors, identifier);
 }
