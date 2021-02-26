@@ -34,7 +34,6 @@ export function _doStroke(
 ) {
   hue = (hue + 1) % 360;
   gradientColors = convertHSLToRGB(hue, 90, 40);
-  console.log('r,g,b => ',gradientColors);
   this._plot(coords[0], coords[1], this.brushSize, gradientColors);
   this._stroke(coords[0], coords[1], this.brushSize, gradientColors, identifier);
 }
