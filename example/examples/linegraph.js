@@ -28,12 +28,16 @@ const lineGraphOptions = {
 
 const LineGraph = new GPUjsRealRenderer.RealLineGraph(lineGraphOptions);
 const progressModeSelector = document.querySelector('#progress-mode');
-// progressModeSelector.oninput = e => {
-//   e.preventDefault();
-//   lineGraphOptions.progressionMode = progressModeSelector.value;
-//   LineGraph.progressionMode = lineGraphOptions.progressionMode;
-//   LineGraph.reset();
-// }
+progressModeSelector.oninput = e => {
+  e.preventDefault();
+  lineGraphOptions.progressionMode = progressModeSelector.value;
+  LineGraph.progressionMode = lineGraphOptions.progressionMode;
+  LineGraph.stopRender();
+  LineGraph.reset();
+  LineGraph.draw();
+
+  if (LineGraph.progressionMode === 'continous') LineGraph.startRender();
+}
 
 LineGraph.draw(); // To draw the initial axes
 
