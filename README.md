@@ -229,7 +229,7 @@ See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 - `brushColor` (*array*): The color of the brush in the corm `[red, green, blue]` where each of
 `red`, `green` and `blue` are between 0 and 1.
 - `eraserSize` (*number*): Size of the eraser.
-- `tool` ('brush' | 'eraser' | 'line'): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
+- `tool` ('brush' | 'rainbow_brush' | 'eraser' | 'line'): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
 
 ##### Options
 Since this is a child class of `RealRenderer`, all the options of `RealRender` are applicable here as well.
@@ -245,7 +245,7 @@ Apart from those, the following are additional options that can be passed on to 
 
 - `maxUndos`(*Number*) (Default: `15`): Determines the maximum possible undos. (Use a smaller number on devices with less RAM)
 
-- `tool` (*'brush' | 'draw' | 'line'*) (Default: `'brush'`): Determines which tool to use.
+- `tool` (*'brush' | 'rainbow_brush' | 'eraser' | 'line'*) (Default: `'brush'`): Determines which tool to use.
 
 ##### Methods
 Since this is a child class of `RealRenderer`, all the methods of `RealRender` are available here as well.

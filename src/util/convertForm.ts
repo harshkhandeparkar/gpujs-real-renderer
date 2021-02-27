@@ -13,7 +13,7 @@ export function convertPolarCartesian(r: number, theta: number) {
 /**
  * Convert Cartesian to polar form.
  * @param x Real Part
- * @param theta Complex Part
+ * @param y Complex Part
  */
 export function convertCartesianPolar(x: number, y: number) {
   return [
