@@ -3,13 +3,21 @@ import { Texture } from 'gpu.js';
 
 export const name = 'eraser';
 
+export interface EraserSettings {
+  eraserSize: number
+}
+
+export const EraserDefaults: EraserSettings = {
+  eraserSize: 2
+}
+
 export function _startStroke(
   this: RealDrawBoard,
   coords: [number, number],
   identifier: string
 ) {
   this._doPreview = false;
-  this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
+  this._plot(coords[0], coords[1], this.toolSettings.eraserSize, this.bgColor);
 }
 
 export function _endStroke(
@@ -18,7 +26,7 @@ export function _endStroke(
   identifier: string
 ) {
   this._doPreview = true;
-  this._plot(endCoords[0], endCoords[1], this.eraserSize, this.bgColor);
+  this._plot(endCoords[0], endCoords[1], this.toolSettings.eraserSize, this.bgColor);
 }
 
 export function _doStroke(
@@ -26,8 +34,8 @@ export function _doStroke(
   coords: [number, number],
   identifier: string
 ) {
-  this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
-  this._stroke(coords[0], coords[1], this.eraserSize, this.bgColor, identifier);
+  this._plot(coords[0], coords[1], this.toolSettings.eraserSize, this.bgColor);
+  this._stroke(coords[0], coords[1], this.toolSettings.eraserSize, this.bgColor, identifier);
 }
 
 export function _toolPreview(
@@ -39,7 +47,7 @@ export function _toolPreview(
     this.graphPixels,
     coords[0],
     coords[1],
-    this.eraserSize,
+    this.toolSettings.eraserSize,
     this.bgColor
   )
 }

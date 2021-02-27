@@ -1,22 +1,6 @@
 import { RealDrawBoard } from './RealDrawBoard';
-import { Color } from '../../types/RealRendererTypes';
 import { Texture } from 'gpu.js';
-import { Tool, tools } from './tools/tools';
-
-export function changeBrushColor(this: RealDrawBoard, color: Color) {
-  this.brushColor = color;
-  return this;
-}
-
-export function changeBrushSize(this: RealDrawBoard, newSize: number) {
-  this.brushSize = newSize;
-  return this;
-}
-
-export function changeEraserSize(this: RealDrawBoard, newSize: number) {
-  this.eraserSize = newSize;
-  return this;
-}
+import { Tool, tools, ToolSettings } from './tools/tools';
 
 export function changeTool(this: RealDrawBoard, newTool: Tool) {
   this.tool = newTool;
@@ -24,6 +8,16 @@ export function changeTool(this: RealDrawBoard, newTool: Tool) {
   this._doStroke = tools[this.tool]._doStroke;
   this._endStroke = tools[this.tool]._endStroke;
   this._toolPreview = tools[this.tool]._toolPreview;
+  return this;
+}
+
+export function changeToolSetting(
+  this: RealDrawBoard,
+  settingName: keyof ToolSettings,
+  value: any
+) {
+  this.toolSettings[settingName] = value;
+
   return this;
 }
 
@@ -42,11 +36,9 @@ export function clear(this: RealDrawBoard) {
 export function _resetBoard(this: RealDrawBoard) {
   this.xScaleFactor = this.options.xScaleFactor;
   this.yScaleFactor = this.options.yScaleFactor;
-  this.brushColor = this.options.brushColor;
-  this.brushSize = this.options.brushSize;
   this.bgColor = this.options.bgColor;
-  this.eraserSize = this.options.eraserSize;
   this.tool = this.options.tool;
+  this.toolSettings = this.options.toolSettings;
 
   this._isDrawing = false;
   this._currentSnapshotIndex = 0;

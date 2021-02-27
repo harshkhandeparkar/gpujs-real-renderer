@@ -1,7 +1,18 @@
 import { RealDrawBoard } from '../RealDrawBoard';
 import { Texture } from 'gpu.js';
+import { Color } from '../../../types/RealRendererTypes';
 
 export const name = 'brush';
+
+export interface BrushSettings {
+  brushColor: Color,
+  brushSize: number
+}
+
+export const BrushDefaults: BrushSettings = {
+  brushColor: [1, 1, 1],
+  brushSize: 1
+}
 
 export function _startStroke(
   this: RealDrawBoard,
@@ -9,7 +20,7 @@ export function _startStroke(
   identifier: string
 ) {
   this._doPreview = false;
-  this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
+  this._plot(coords[0], coords[1], this.toolSettings.brushSize, this.toolSettings.brushColor);
 }
 
 export function _endStroke(
@@ -17,7 +28,7 @@ export function _endStroke(
   endCoords: [number, number],
   identifier: string
 ) {
-  this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
+  this._plot(endCoords[0], endCoords[1], this.toolSettings.brushSize, this.toolSettings.brushColor);
   this._doPreview = true;
 }
 
@@ -26,8 +37,8 @@ export function _doStroke(
   coords: [number, number],
   identifier: string
 ) {
-  this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-  this._stroke(coords[0], coords[1], this.brushSize, this.brushColor, identifier);
+  this._plot(coords[0], coords[1], this.toolSettings.brushSize, this.toolSettings.brushColor);
+  this._stroke(coords[0], coords[1], this.toolSettings.brushSize, this.toolSettings.brushColor, identifier);
 }
 
 export function _toolPreview(
@@ -39,7 +50,7 @@ export function _toolPreview(
     this.graphPixels,
     coords[0],
     coords[1],
-    this.brushSize,
-    this.brushColor
+    this.toolSettings.brushSize,
+    this.toolSettings.brushColor
   )
 }

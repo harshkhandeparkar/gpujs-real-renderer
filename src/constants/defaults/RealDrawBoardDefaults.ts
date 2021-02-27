@@ -1,9 +1,8 @@
 import { RealDrawBoardOptions } from '../../types/RealDrawBoardTypes';
+import { ToolDefaults } from '../../renderers/RealDrawBoard/tools/tools';
 
 export const RealDrawBoardDefaults: RealDrawBoardOptions = {
-  brushSize: 1,
-  eraserSize: 2,
-  brushColor: [1, 1, 1],
+  toolSettings: ToolDefaults,
   allowUndo: false,
   maxUndos: 10,
   tool: 'brush'

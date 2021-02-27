@@ -3,9 +3,19 @@ import { Texture } from 'gpu.js';
 import { convertHSLToRGB } from '../../../util/convertHSLToRGB';
 
 let hue: number = 0;
-let gradientColors: [number, number, number] = [1, 1, 1]; 
+let gradientColors: [number, number, number] = [1, 1, 1];
 
 export const name = 'rainbow_brush';
+
+export interface RainbowBrushSettings {
+  brushSize: number,
+  changeSpeed: number
+}
+
+export const RainbowBrushDefaults: RainbowBrushSettings = {
+  brushSize: 1,
+  changeSpeed: 1
+}
 
 export function _startStroke(
   this: RealDrawBoard,
@@ -14,7 +24,7 @@ export function _startStroke(
 ) {
   gradientColors = convertHSLToRGB(hue, 90, 40);
   this._doPreview = false;
-  this._plot(coords[0], coords[1], this.brushSize, gradientColors);
+  this._plot(coords[0], coords[1], this.toolSettings.brushSize, gradientColors);
 }
 
 export function _endStroke(
@@ -23,7 +33,7 @@ export function _endStroke(
   identifier: string
 ) {
   gradientColors = convertHSLToRGB(hue, 90, 40);
-  this._plot(endCoords[0], endCoords[1], this.brushSize, gradientColors);
+  this._plot(endCoords[0], endCoords[1], this.toolSettings.brushSize, gradientColors);
   this._doPreview = true;
 }
 
@@ -32,10 +42,10 @@ export function _doStroke(
   coords: [number, number],
   identifier: string
 ) {
-  hue = (hue + 1) % 360;
+  hue = (hue + this.toolSettings.changeSpeed  ) % 360;
   gradientColors = convertHSLToRGB(hue, 90, 40);
-  this._plot(coords[0], coords[1], this.brushSize, gradientColors);
-  this._stroke(coords[0], coords[1], this.brushSize, gradientColors, identifier);
+  this._plot(coords[0], coords[1], this.toolSettings.brushSize, gradientColors);
+  this._stroke(coords[0], coords[1], this.toolSettings.brushSize, gradientColors, identifier);
 }
 
 export function _toolPreview(
@@ -47,7 +57,7 @@ export function _toolPreview(
     this.graphPixels,
     coords[0],
     coords[1],
-    this.brushSize,
+    this.toolSettings.brushSize,
     gradientColors
   )
 }

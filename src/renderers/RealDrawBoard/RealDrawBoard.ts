@@ -4,7 +4,7 @@ import { Color } from '../../types/RealRendererTypes';
 import { RealDrawBoardOptions } from '../../types/RealDrawBoardTypes';
 import { RealDrawBoardDefaults } from '../../constants/defaults/RealDrawBoardDefaults';
 
-import { IKernelRunShortcut, Texture } from 'gpu.js';
+import { IKernelRunShortcut } from 'gpu.js';
 
 export * as RealRendererTypes from '../../types/RealRendererTypes';
 export * as RealDrawBoardTypes from '../../types/RealDrawBoardTypes';
@@ -14,10 +14,8 @@ import { _initializeKernels } from './_initializeKernels';
 import { _plot, _stroke } from './_draw';
 import { undo, redo } from './undo';
 import {
-  changeBrushColor,
-  changeBrushSize,
-  changeEraserSize,
   changeTool,
+  changeToolSetting,
   clear,
   _resetBoard
 } from './boardManip';
@@ -30,14 +28,12 @@ import {
   _getTouchCoords
 } from './_coords';
 
-import { tools, Tool } from './tools/tools';
+import { tools, Tool, ToolSettings } from './tools/tools';
 
 export class RealDrawBoard extends RealRenderer {
   options: RealDrawBoardOptions;
-  brushSize: number;
-  brushColor: Color;
-  eraserSize: number;
   tool: Tool = RealDrawBoardDefaults.tool;
+  toolSettings: ToolSettings;
   _isDrawing: boolean = false;
   _snapshots: (number[][][])[] = []; // Undo snapshots
   _currentSnapshotIndex = 0; // Current snapshot
@@ -66,9 +62,7 @@ export class RealDrawBoard extends RealRenderer {
 
   public undo = undo;
   public redo = redo;
-  public changeBrushColor = changeBrushColor;
-  public changeBrushSize = changeBrushSize;
-  public changeEraserSize = changeEraserSize;
+  public changeToolSetting = changeToolSetting;
   public changeTool = changeTool;
   public clear = clear;
 
@@ -83,10 +77,7 @@ export class RealDrawBoard extends RealRenderer {
 
     this.options = options;
 
-    this.brushSize = options.brushSize;
-    this.brushColor = options.brushColor;
-
-    this.eraserSize = options.eraserSize;
+    this.toolSettings = options.toolSettings;
     this._maxSnapshots = options.allowUndo ? Math.max(options.maxUndos + 1, 0) : 0;
 
     this.changeTool(options.tool);

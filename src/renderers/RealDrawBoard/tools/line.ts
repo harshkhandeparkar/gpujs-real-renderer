@@ -1,7 +1,18 @@
 import { RealDrawBoard } from '../RealDrawBoard';
 import { Texture } from 'gpu.js';
+import { Color } from '../../../types/RealRendererTypes';
 
 export const name = 'line';
+
+export interface LineSettings {
+  lineSize: number,
+  lineColor: Color
+}
+
+export const LineDefaults: LineSettings = {
+  lineSize: 1,
+  lineColor: [1, 1, 1]
+}
 
 /** key -> identifier, value -> coordinate
    *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
@@ -13,7 +24,7 @@ export function _startStroke(
   coords: [number, number],
   identifier: string
 ) {
-  this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
+  this._plot(coords[0], coords[1], this.toolSettings.lineSize, this.toolSettings.lineColor);
   _startCoords.set(identifier, coords);
 }
 
@@ -26,10 +37,10 @@ export function _endStroke(
     this._cloneTexture(this.graphPixels),
     _startCoords.get(identifier),
     endCoords,
-    this.brushSize,
-    this.brushColor
+    this.toolSettings.lineSize,
+    this.toolSettings.lineColor
   )
-  this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
+  this._plot(endCoords[0], endCoords[1], this.toolSettings.lineSize, this.toolSettings.lineColor);
   _startCoords.delete(identifier);
 }
 
@@ -51,20 +62,20 @@ export function _toolPreview(
         this._cloneTexture(this.graphPixels),
         _startCoords.get(identifier),
         coords,
-        this.brushSize,
-        this.brushColor
+        this.toolSettings.lineSize,
+        this.toolSettings.lineColor
       ),
       coords[0],
       coords[1],
-      this.brushSize,
-      this.brushColor
+      this.toolSettings.lineSize,
+      this.toolSettings.lineColor
     )
   }
   else return <Texture>this._previewPlot(
     this.graphPixels,
     coords[0],
     coords[1],
-    this.brushSize,
-    this.brushColor
+    this.toolSettings.lineSize,
+    this.toolSettings.lineColor
   )
 }

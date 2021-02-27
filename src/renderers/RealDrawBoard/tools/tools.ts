@@ -11,3 +11,11 @@ export const tools = {
 }
 
 export type Tool = 'brush' | 'rainbow_brush' | 'eraser' | 'line';
+
+export type ToolSettings = brush.BrushSettings & eraser.EraserSettings & line.LineSettings & rainbow_brush.RainbowBrushSettings;
+export const ToolDefaults: ToolSettings = {
+  ...brush.BrushDefaults,
+  ...line.LineDefaults,
+  ...eraser.EraserDefaults,
+  ...rainbow_brush.RainbowBrushDefaults
+}
