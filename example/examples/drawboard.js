@@ -20,7 +20,7 @@ const drawBoardOptions = {
     brushColor: [1, 1, 1], // Color of the brush
     lineColor: [1, 1, 1], // Color of the line
     lineSize: 5,
-    changeSpeed: 2,
+    changeRate: 3,
     eraserSize: 5
   },
 
@@ -63,7 +63,7 @@ const brushSizeRange = document.querySelector('#brush-size');
 brushSizeRange.addEventListener('input', e => {
   e.preventDefault();
   DrawBoard.changeToolSetting('brushSize', Number(brushSizeRange.value));
-  DrawBoard.changeToolSetting('lineSize', Number(brushSizeRange.value));
+  DrawBoard.changeToolSetting('lineThickness', Number(brushSizeRange.value));
 })
 
 const eraserSizeRange = document.querySelector('#eraser-size');
