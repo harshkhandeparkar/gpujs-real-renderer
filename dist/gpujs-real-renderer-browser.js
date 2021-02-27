@@ -990,13 +990,225 @@
 	exports.RealComplexSpace = RealComplexSpace;
 	});
 
+	var brush = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.BrushDefaults = exports.name = void 0;
+	exports.name = 'brush';
+	exports.BrushDefaults = {
+	    brushColor: [1, 1, 1],
+	    brushSize: 1
+	};
+	function _startStroke(coords, identifier) {
+	    this._doPreview = false;
+	    this._plot(coords[0], coords[1], this.toolSettings.brushSize, this.toolSettings.brushColor);
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords, identifier) {
+	    this._plot(endCoords[0], endCoords[1], this.toolSettings.brushSize, this.toolSettings.brushColor);
+	    this._doPreview = true;
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords, identifier) {
+	    this._plot(coords[0], coords[1], this.toolSettings.brushSize, this.toolSettings.brushColor);
+	    this._stroke(coords[0], coords[1], this.toolSettings.brushSize, this.toolSettings.brushColor, identifier);
+	}
+	exports._doStroke = _doStroke;
+	function _toolPreview(coords, identifier) {
+	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.toolSettings.brushSize, this.toolSettings.brushColor);
+	}
+	exports._toolPreview = _toolPreview;
+	});
+
+	var eraser = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.EraserDefaults = exports.name = void 0;
+	exports.name = 'eraser';
+	exports.EraserDefaults = {
+	    eraserSize: 2
+	};
+	function _startStroke(coords, identifier) {
+	    this._doPreview = false;
+	    this._plot(coords[0], coords[1], this.toolSettings.eraserSize, this.bgColor);
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords, identifier) {
+	    this._doPreview = true;
+	    this._plot(endCoords[0], endCoords[1], this.toolSettings.eraserSize, this.bgColor);
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords, identifier) {
+	    this._plot(coords[0], coords[1], this.toolSettings.eraserSize, this.bgColor);
+	    this._stroke(coords[0], coords[1], this.toolSettings.eraserSize, this.bgColor, identifier);
+	}
+	exports._doStroke = _doStroke;
+	function _toolPreview(coords, identifier) {
+	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.toolSettings.eraserSize, this.bgColor);
+	}
+	exports._toolPreview = _toolPreview;
+	});
+
+	var line = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.LineDefaults = exports.name = void 0;
+	exports.name = 'line';
+	exports.LineDefaults = {
+	    lineThickness: 1,
+	    lineColor: [1, 1, 1]
+	};
+	/** key -> identifier, value -> coordinate
+	   *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
+	   */
+	var _startCoords = new Map(); /* key -> identifier, value -> coordinate*/
+	function _startStroke(coords, identifier) {
+	    this._plot(coords[0], coords[1], this.toolSettings.lineThickness, this.toolSettings.lineColor);
+	    _startCoords.set(identifier, coords);
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords, identifier) {
+	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), endCoords, this.toolSettings.lineThickness, this.toolSettings.lineColor);
+	    this._plot(endCoords[0], endCoords[1], this.toolSettings.lineThickness, this.toolSettings.lineColor);
+	    _startCoords.delete(identifier);
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords, identifier) {
+	}
+	exports._doStroke = _doStroke;
+	function _toolPreview(coords, identifier) {
+	    if (_startCoords.has(identifier)) {
+	        return this._previewPlot(this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), coords, this.toolSettings.lineThickness, this.toolSettings.lineColor), coords[0], coords[1], this.toolSettings.lineThickness, this.toolSettings.lineColor);
+	    }
+	    else
+	        return this._previewPlot(this.graphPixels, coords[0], coords[1], this.toolSettings.lineThickness, this.toolSettings.lineColor);
+	}
+	exports._toolPreview = _toolPreview;
+	});
+
+	var convertHSLToRGB_1 = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.convertHSLToRGB = void 0;
+	/**
+	 * Convert hsl Color into RGB color.
+	 * @param h color value ranges from 0 to 360.
+	 * @param s saturation value.
+	 * @param l brightness level.
+	 * @return array containing r g and b value
+	 */
+	function convertHSLToRGB(h, s, l) {
+	    s /= 100;
+	    l /= 100;
+	    var c = (1 - Math.abs(2 * l - 1)) * s;
+	    var x = c * (1 - Math.abs((h / 60) % 2 - 1));
+	    var m = l - c / 2;
+	    var r = 0;
+	    var g = 0;
+	    var b = 0;
+	    if (0 <= h && h < 60) {
+	        r = c;
+	        g = x;
+	        b = 0;
+	    }
+	    else if (60 <= h && h < 120) {
+	        r = x;
+	        g = c;
+	        b = 0;
+	    }
+	    else if (120 <= h && h < 180) {
+	        r = 0;
+	        g = c;
+	        b = x;
+	    }
+	    else if (180 <= h && h < 240) {
+	        r = 0;
+	        g = x;
+	        b = c;
+	    }
+	    else if (240 <= h && h < 300) {
+	        r = x;
+	        g = 0;
+	        b = c;
+	    }
+	    else if (300 <= h && h < 360) {
+	        r = c;
+	        g = 0;
+	        b = x;
+	    }
+	    r = (r + m);
+	    g = (g + m);
+	    b = (b + m);
+	    return [r, g, b];
+	}
+	exports.convertHSLToRGB = convertHSLToRGB;
+	});
+
+	var rainbow_brush = createCommonjsModule(function (module, exports) {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.RainbowBrushDefaults = exports.name = void 0;
+
+	var hue = 0;
+	var gradientColors = [1, 1, 1];
+	exports.name = 'rainbow_brush';
+	exports.RainbowBrushDefaults = {
+	    brushSize: 1,
+	    changeRate: 1
+	};
+	function _startStroke(coords, identifier) {
+	    gradientColors = convertHSLToRGB_1.convertHSLToRGB(hue, 90, 40);
+	    this._doPreview = false;
+	    this._plot(coords[0], coords[1], this.toolSettings.brushSize, gradientColors);
+	}
+	exports._startStroke = _startStroke;
+	function _endStroke(endCoords, identifier) {
+	    gradientColors = convertHSLToRGB_1.convertHSLToRGB(hue, 90, 40);
+	    this._plot(endCoords[0], endCoords[1], this.toolSettings.brushSize, gradientColors);
+	    this._doPreview = true;
+	}
+	exports._endStroke = _endStroke;
+	function _doStroke(coords, identifier) {
+	    hue = (hue + this.toolSettings.changeRate) % 360;
+	    gradientColors = convertHSLToRGB_1.convertHSLToRGB(hue, 90, 40);
+	    this._plot(coords[0], coords[1], this.toolSettings.brushSize, gradientColors);
+	    this._stroke(coords[0], coords[1], this.toolSettings.brushSize, gradientColors, identifier);
+	}
+	exports._doStroke = _doStroke;
+	function _toolPreview(coords, identifier) {
+	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.toolSettings.brushSize, gradientColors);
+	}
+	exports._toolPreview = _toolPreview;
+	});
+
+	var tools = createCommonjsModule(function (module, exports) {
+	var __assign = (commonjsGlobal && commonjsGlobal.__assign) || function () {
+	    __assign = Object.assign || function(t) {
+	        for (var s, i = 1, n = arguments.length; i < n; i++) {
+	            s = arguments[i];
+	            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+	                t[p] = s[p];
+	        }
+	        return t;
+	    };
+	    return __assign.apply(this, arguments);
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.ToolDefaults = exports.tools = void 0;
+
+
+
+
+	exports.tools = {
+	    brush: brush,
+	    rainbow_brush: rainbow_brush,
+	    eraser: eraser,
+	    line: line
+	};
+	exports.ToolDefaults = __assign(__assign(__assign(__assign({}, brush.BrushDefaults), line.LineDefaults), eraser.EraserDefaults), rainbow_brush.RainbowBrushDefaults);
+	});
+
 	var RealDrawBoardDefaults = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.RealDrawBoardDefaults = void 0;
+
 	exports.RealDrawBoardDefaults = {
-	    brushSize: 1,
-	    eraserSize: 2,
-	    brushColor: [1, 1, 1],
+	    toolSettings: tools.ToolDefaults,
 	    allowUndo: false,
 	    maxUndos: 10,
 	    tool: 'brush'
@@ -1062,211 +1274,10 @@
 	exports.redo = redo;
 	});
 
-	var brush = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
-	exports.name = 'brush';
-	function _startStroke(coords, identifier) {
-	    this._doPreview = false;
-	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-	}
-	exports._startStroke = _startStroke;
-	function _endStroke(endCoords, identifier) {
-	    this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
-	    this._doPreview = true;
-	}
-	exports._endStroke = _endStroke;
-	function _doStroke(coords, identifier) {
-	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-	    this._stroke(coords[0], coords[1], this.brushSize, this.brushColor, identifier);
-	}
-	exports._doStroke = _doStroke;
-	function _toolPreview(coords, identifier) {
-	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.brushSize, this.brushColor);
-	}
-	exports._toolPreview = _toolPreview;
-	});
-
-	var eraser = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
-	exports.name = 'eraser';
-	function _startStroke(coords, identifier) {
-	    this._doPreview = false;
-	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
-	}
-	exports._startStroke = _startStroke;
-	function _endStroke(endCoords, identifier) {
-	    this._doPreview = true;
-	    this._plot(endCoords[0], endCoords[1], this.eraserSize, this.bgColor);
-	}
-	exports._endStroke = _endStroke;
-	function _doStroke(coords, identifier) {
-	    this._plot(coords[0], coords[1], this.eraserSize, this.bgColor);
-	    this._stroke(coords[0], coords[1], this.eraserSize, this.bgColor, identifier);
-	}
-	exports._doStroke = _doStroke;
-	function _toolPreview(coords, identifier) {
-	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.eraserSize, this.bgColor);
-	}
-	exports._toolPreview = _toolPreview;
-	});
-
-	var line = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
-	exports.name = 'line';
-	/** key -> identifier, value -> coordinate
-	   *  For mouse, the key is 'mouse', for touches, stringified identifier -> https://developer.mozilla.org/en-US/docs/Web/API/Touch/identifier
-	   */
-	var _startCoords = new Map(); /* key -> identifier, value -> coordinate*/
-	function _startStroke(coords, identifier) {
-	    this._plot(coords[0], coords[1], this.brushSize, this.brushColor);
-	    _startCoords.set(identifier, coords);
-	}
-	exports._startStroke = _startStroke;
-	function _endStroke(endCoords, identifier) {
-	    this.graphPixels = this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), endCoords, this.brushSize, this.brushColor);
-	    this._plot(endCoords[0], endCoords[1], this.brushSize, this.brushColor);
-	    _startCoords.delete(identifier);
-	}
-	exports._endStroke = _endStroke;
-	function _doStroke(coords, identifier) {
-	}
-	exports._doStroke = _doStroke;
-	function _toolPreview(coords, identifier) {
-	    if (_startCoords.has(identifier)) {
-	        return this._previewPlot(this._strokeKernel(this._cloneTexture(this.graphPixels), _startCoords.get(identifier), coords, this.brushSize, this.brushColor), coords[0], coords[1], this.brushSize, this.brushColor);
-	    }
-	    else
-	        return this._previewPlot(this.graphPixels, coords[0], coords[1], this.brushSize, this.brushColor);
-	}
-	exports._toolPreview = _toolPreview;
-	});
-
-	var convertHSLToRGB_1 = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.convertHSLToRGB = void 0;
-	/**
-	 * Convert hsl Color into RGB color.
-	 * @param h color value ranges from 0 to 360.
-	 * @param s saturation value.
-	 * @param l brightness level.
-	 * @return array containing r g and b value
-	 */
-	function convertHSLToRGB(h, s, l) {
-	    s /= 100;
-	    l /= 100;
-	    var c = (1 - Math.abs(2 * l - 1)) * s;
-	    var x = c * (1 - Math.abs((h / 60) % 2 - 1));
-	    var m = l - c / 2;
-	    var r = 0;
-	    var g = 0;
-	    var b = 0;
-	    if (0 <= h && h < 60) {
-	        r = c;
-	        g = x;
-	        b = 0;
-	    }
-	    else if (60 <= h && h < 120) {
-	        r = x;
-	        g = c;
-	        b = 0;
-	    }
-	    else if (120 <= h && h < 180) {
-	        r = 0;
-	        g = c;
-	        b = x;
-	    }
-	    else if (180 <= h && h < 240) {
-	        r = 0;
-	        g = x;
-	        b = c;
-	    }
-	    else if (240 <= h && h < 300) {
-	        r = x;
-	        g = 0;
-	        b = c;
-	    }
-	    else if (300 <= h && h < 360) {
-	        r = c;
-	        g = 0;
-	        b = x;
-	    }
-	    r = (r + m);
-	    g = (g + m);
-	    b = (b + m);
-	    return [r, g, b];
-	}
-	exports.convertHSLToRGB = convertHSLToRGB;
-	});
-
-	var rainbow_brush = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._toolPreview = exports._doStroke = exports._endStroke = exports._startStroke = exports.name = void 0;
-
-	var hue = 0;
-	var gradientColors = [1, 1, 1];
-	exports.name = 'rainbow_brush';
-	function _startStroke(coords, identifier) {
-	    gradientColors = convertHSLToRGB_1.convertHSLToRGB(hue, 90, 40);
-	    this._doPreview = false;
-	    this._plot(coords[0], coords[1], this.brushSize, gradientColors);
-	}
-	exports._startStroke = _startStroke;
-	function _endStroke(endCoords, identifier) {
-	    gradientColors = convertHSLToRGB_1.convertHSLToRGB(hue, 90, 40);
-	    this._plot(endCoords[0], endCoords[1], this.brushSize, gradientColors);
-	    this._doPreview = true;
-	}
-	exports._endStroke = _endStroke;
-	function _doStroke(coords, identifier) {
-	    hue = (hue + 1) % 360;
-	    gradientColors = convertHSLToRGB_1.convertHSLToRGB(hue, 90, 40);
-	    this._plot(coords[0], coords[1], this.brushSize, gradientColors);
-	    this._stroke(coords[0], coords[1], this.brushSize, gradientColors, identifier);
-	}
-	exports._doStroke = _doStroke;
-	function _toolPreview(coords, identifier) {
-	    return this._previewPlot(this.graphPixels, coords[0], coords[1], this.brushSize, gradientColors);
-	}
-	exports._toolPreview = _toolPreview;
-	});
-
-	var tools = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.tools = void 0;
-
-
-
-
-	exports.tools = {
-	    brush: brush,
-	    rainbow_brush: rainbow_brush,
-	    eraser: eraser,
-	    line: line
-	};
-	});
-
 	var boardManip = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports._resetBoard = exports.clear = exports.changeTool = exports.changeEraserSize = exports.changeBrushSize = exports.changeBrushColor = void 0;
+	exports._resetBoard = exports.clear = exports.changeToolSetting = exports.changeTool = void 0;
 
-	function changeBrushColor(color) {
-	    this.brushColor = color;
-	    return this;
-	}
-	exports.changeBrushColor = changeBrushColor;
-	function changeBrushSize(newSize) {
-	    this.brushSize = newSize;
-	    return this;
-	}
-	exports.changeBrushSize = changeBrushSize;
-	function changeEraserSize(newSize) {
-	    this.eraserSize = newSize;
-	    return this;
-	}
-	exports.changeEraserSize = changeEraserSize;
 	function changeTool(newTool) {
 	    this.tool = newTool;
 	    this._startStroke = tools.tools[this.tool]._startStroke;
@@ -1276,6 +1287,11 @@
 	    return this;
 	}
 	exports.changeTool = changeTool;
+	function changeToolSetting(settingName, value) {
+	    this.toolSettings[settingName] = value;
+	    return this;
+	}
+	exports.changeToolSetting = changeToolSetting;
 	function clear() {
 	    this._snapshots = [];
 	    this._currentSnapshotIndex = 0;
@@ -1290,11 +1306,9 @@
 	function _resetBoard() {
 	    this.xScaleFactor = this.options.xScaleFactor;
 	    this.yScaleFactor = this.options.yScaleFactor;
-	    this.brushColor = this.options.brushColor;
-	    this.brushSize = this.options.brushSize;
 	    this.bgColor = this.options.bgColor;
-	    this.eraserSize = this.options.eraserSize;
 	    this.tool = this.options.tool;
+	    this.toolSettings = this.options.toolSettings;
 	    this._isDrawing = false;
 	    this._currentSnapshotIndex = 0;
 	    if (this._maxSnapshots > 0)
@@ -1435,9 +1449,7 @@
 	        _this._getTouchCoords = _coords._getTouchCoords;
 	        _this.undo = undo_1.undo;
 	        _this.redo = undo_1.redo;
-	        _this.changeBrushColor = boardManip.changeBrushColor;
-	        _this.changeBrushSize = boardManip.changeBrushSize;
-	        _this.changeEraserSize = boardManip.changeEraserSize;
+	        _this.changeToolSetting = boardManip.changeToolSetting;
 	        _this.changeTool = boardManip.changeTool;
 	        _this.clear = boardManip.clear;
 	        // --- DOM Event Listeners ---
@@ -1550,9 +1562,7 @@
 	        };
 	        options = __assign(__assign({}, RealDrawBoardDefaults.RealDrawBoardDefaults), options);
 	        _this.options = options;
-	        _this.brushSize = options.brushSize;
-	        _this.brushColor = options.brushColor;
-	        _this.eraserSize = options.eraserSize;
+	        _this.toolSettings = options.toolSettings;
 	        _this._maxSnapshots = options.allowUndo ? Math.max(options.maxUndos + 1, 0) : 0;
 	        _this.changeTool(options.tool);
 	        // *****DEFAULTS*****
