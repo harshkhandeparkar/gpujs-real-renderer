@@ -15,8 +15,15 @@ const drawBoardOptions = {
   xOffset: 10, // 100%
   yOffset: 0, // 100%
 
-  brushSize: 5, // The radius of one point of data, in coordinate units
-  brushColor: [1, 1, 1], // Color of the brush
+  toolSettings: {
+    brushSize: 5, // The radius of one point of data, in coordinate units
+    brushColor: [1, 1, 1], // Color of the brush
+    lineColor: [1, 1, 1], // Color of the line
+    lineSize: 5,
+    changeSpeed: 2,
+    eraserSize: 5
+  },
+
   allowUndo: true
 }
 
@@ -30,7 +37,16 @@ const colorWheel = new iro.ColorPicker("#drawboard-colorwheel", {
 })
 
 colorWheel.on('input:change', color => {
-  DrawBoard.changeBrushColor([
+  DrawBoard.changeToolSetting(
+    'lineColor',
+    [
+    color.red / 255,
+    color.green / 255,
+    color.blue / 255
+  ])
+  DrawBoard.changeToolSetting(
+    'brushColor',
+    [
     color.red / 255,
     color.green / 255,
     color.blue / 255
@@ -46,13 +62,14 @@ toolSelector.addEventListener('change', e => {
 const brushSizeRange = document.querySelector('#brush-size');
 brushSizeRange.addEventListener('input', e => {
   e.preventDefault();
-  DrawBoard.changeBrushSize(Number(brushSizeRange.value))
+  DrawBoard.changeToolSetting('brushSize', Number(brushSizeRange.value));
+  DrawBoard.changeToolSetting('lineSize', Number(brushSizeRange.value));
 })
 
 const eraserSizeRange = document.querySelector('#eraser-size');
 eraserSizeRange.addEventListener('input', e => {
   e.preventDefault();
-  DrawBoard.changeEraserSize(Number(eraserSizeRange.value))
+  DrawBoard.changeToolSetting('eraserSize', Number(eraserSizeRange.value))
 })
 
 document.querySelector('#draw-undo').addEventListener('click', e => {
