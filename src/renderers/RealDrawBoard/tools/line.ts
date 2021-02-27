@@ -5,12 +5,12 @@ import { Color } from '../../../types/RealRendererTypes';
 export const name = 'line';
 
 export interface LineSettings {
-  lineSize: number,
+  lineThickness: number,
   lineColor: Color
 }
 
 export const LineDefaults: LineSettings = {
-  lineSize: 1,
+  lineThickness: 1,
   lineColor: [1, 1, 1]
 }
 
@@ -24,7 +24,7 @@ export function _startStroke(
   coords: [number, number],
   identifier: string
 ) {
-  this._plot(coords[0], coords[1], this.toolSettings.lineSize, this.toolSettings.lineColor);
+  this._plot(coords[0], coords[1], this.toolSettings.lineThickness, this.toolSettings.lineColor);
   _startCoords.set(identifier, coords);
 }
 
@@ -37,10 +37,10 @@ export function _endStroke(
     this._cloneTexture(this.graphPixels),
     _startCoords.get(identifier),
     endCoords,
-    this.toolSettings.lineSize,
+    this.toolSettings.lineThickness,
     this.toolSettings.lineColor
   )
-  this._plot(endCoords[0], endCoords[1], this.toolSettings.lineSize, this.toolSettings.lineColor);
+  this._plot(endCoords[0], endCoords[1], this.toolSettings.lineThickness, this.toolSettings.lineColor);
   _startCoords.delete(identifier);
 }
 
@@ -62,12 +62,12 @@ export function _toolPreview(
         this._cloneTexture(this.graphPixels),
         _startCoords.get(identifier),
         coords,
-        this.toolSettings.lineSize,
+        this.toolSettings.lineThickness,
         this.toolSettings.lineColor
       ),
       coords[0],
       coords[1],
-      this.toolSettings.lineSize,
+      this.toolSettings.lineThickness,
       this.toolSettings.lineColor
     )
   }
@@ -75,7 +75,7 @@ export function _toolPreview(
     this.graphPixels,
     coords[0],
     coords[1],
-    this.toolSettings.lineSize,
+    this.toolSettings.lineThickness,
     this.toolSettings.lineColor
   )
 }
