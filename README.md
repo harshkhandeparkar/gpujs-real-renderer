@@ -226,10 +226,14 @@ See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 ##### Properties (Read-Only)
 - `brushSize` (*number*): The radius of the drawing brush. The size is measured in the board's
  arbitrary coordinate system.
-- `brushColor` (*array*): The color of the brush in the corm `[red, green, blue]` where each of
+- `brushColor` (*array*): The color of the brush in the form `[red, green, blue]` where each of
 `red`, `green` and `blue` are between 0 and 1.
 - `eraserSize` (*number*): Size of the eraser.
 - `tool` ('brush' | 'rainbow_brush' | 'eraser' | 'line'): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
+  - `brush`: Normal brush which uses the `brushColor` property as the color.
+  - `rainbow_brush`: Brush with continuously changing color.
+  - `eraser`: Erases.
+  - `line`: Draws a line with `brushColor` property as the color.
 
 ##### Options
 Since this is a child class of `RealRenderer`, all the options of `RealRender` are applicable here as well.
