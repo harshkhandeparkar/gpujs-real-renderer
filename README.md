@@ -224,26 +224,23 @@ Click and drag on the canvas to draw, change modes to erase. The brush color and
 See [example](https://harshkhandeparkar.github.io/gpujs-real-renderer).
 
 ##### Properties (Read-Only)
-- `brushSize` (*number*): The radius of the drawing brush. The size is measured in the board's
- arbitrary coordinate system.
-- `brushColor` (*array*): The color of the brush in the form `[red, green, blue]` where each of
-`red`, `green` and `blue` are between 0 and 1.
-- `eraserSize` (*number*): Size of the eraser.
-- `tool` ('brush' | 'rainbow_brush' | 'eraser' | 'line'): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
+- `tool` (`'brush'` | `'rainbow_brush'` | `'eraser'` | `'line'`): The current tool used on the board. This tool can be set in the options or using the `changeTool` method.
   - `brush`: Normal brush which uses the `brushColor` property as the color.
   - `rainbow_brush`: Brush with continuously changing color.
   - `eraser`: Erases.
   - `line`: Draws a line with `brushColor` property as the color.
+- `toolSettings` (`Object`): Settings for all the different tools. It contains the following properties.
+  - `brushSize` (`number`): Size of the `brush` tool and `rainbow_brush` tool.
+  - `brushColor` (`[number, number, number]`): Color of the `brush` tool.
+  - `eraserSize` (`number`): Size of the `eraser` tool.
+  - `lineThickness` (`number`): Thickness of the `line` tool.
+  - `lineColor` (`[number, number, number]`): Color of the `line` tool.
+  - `changeRate` (`number`): Rate at which the `rainbow_brush` tool changes color.
 
 ##### Options
 Since this is a child class of `RealRenderer`, all the options of `RealRender` are applicable here as well.
 Apart from those, the following are additional options that can be passed on to the constructor.
-
-- `brushSize`(*Number*) (Default: `1`): Determines the size of the brush, i.e. the thickness of the stroke.
-
-- `brushColor`(*Array*) (Default: `[1, 1, 1]`): The color of the brush, i.e. the plotted points.
-
-- `eraserSize`(*Number*) (Default: `2`): Determines the size of the eraser.
+- `toolSettings` (`Object`): Settings for all the different tools. Same as described in the **properties** section above.
 
 - `allowUndo`(*Boolean*) (Default: `false`): Determines the maximum possible undos. (Use a smaller number on devices with less RAM)
 
@@ -256,11 +253,8 @@ Since this is a child class of `RealRenderer`, all the methods of `RealRender` a
 Apart from these methods, the following new methods are also available and are chainable too.
 
 - `startRender()` and `stopRender()`: Slightly different compared to `RealRenderer` but they don't draw continously.
-
-- `changeBrushColor(newColor)`: Change the brush color.
-- `changeBrushSize(newSize)`: Change the brush size.
-- `changeEraserSize(newSize)`: Change the eraser size.
 - `changeTool(newTool)`: Change the tool.
+- `changeToolSetting(settingName, value)`: Changes a specific setting in the `toolSettings` *property*. See **properties** section above.
 - `undo(numUndos = 1)`: Undoes the specified number of brush strokes. (Defualt: undoes one stroke)
 - `redo(numUndos = 1)`: Redoes the specified number of brush strokes. (Defualt: redoes one stroke)
 - `clear()`: Clears the board.
