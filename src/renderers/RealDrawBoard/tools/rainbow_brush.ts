@@ -9,12 +9,12 @@ export const name = 'rainbow_brush';
 
 export interface RainbowBrushSettings {
   brushSize: number,
-  changeSpeed: number
+  changeRate: number
 }
 
 export const RainbowBrushDefaults: RainbowBrushSettings = {
   brushSize: 1,
-  changeSpeed: 1
+  changeRate: 1
 }
 
 export function _startStroke(
@@ -42,7 +42,7 @@ export function _doStroke(
   coords: [number, number],
   identifier: string
 ) {
-  hue = (hue + this.toolSettings.changeSpeed  ) % 360;
+  hue = (hue + this.toolSettings.changeRate) % 360;
   gradientColors = convertHSLToRGB(hue, 90, 40);
   this._plot(coords[0], coords[1], this.toolSettings.brushSize, gradientColors);
   this._stroke(coords[0], coords[1], this.toolSettings.brushSize, gradientColors, identifier);
