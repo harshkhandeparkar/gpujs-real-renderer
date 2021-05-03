@@ -259,9 +259,3 @@ Apart from these methods, the following new methods are also available and are c
 - `redo(numUndos = 1)`: Redoes the specified number of brush strokes. (Defualt: redoes one stroke)
 - `clear()`: Clears the board.
 - `reset()`: Clears the whole board and resets all options to original values.
-
-****
-
-### Thank You!
-
-> Open Source by Harsh Khandeparkar
